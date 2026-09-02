@@ -217,7 +217,7 @@
           const e = t * t * (3 - 2 * t);            // smoothstep
           tilt = e * Math.PI / 2;
           const hr = home.getBoundingClientRect();
-          const to = roller(tr.top - ROLLH * 0.2);
+          const to = roller(tr.top + 8);
           apply({ left: lerpN(hr.left, to.left, e), top: lerpN(hr.top, to.top, e),
                   width: lerpN(hr.width, to.width, e), height: lerpN(hr.height, to.height, e) });
           hide();
@@ -225,8 +225,7 @@
           tilt = Math.PI / 2; clip = true;
           const p = clamp(-tr.top / dist, 0, 1);
           spin = p * Math.PI * 6;
-          const travel = stage.clientHeight + ROLLH * 1.1;
-          const y = -ROLLH * 0.2 + p * travel;
+          const y = 8 + p * stage.clientHeight;     // starts fully inside — no top cut
           apply(roller(y));
           const edge = y + ROLLH * 0.25 - ir.top - list.offsetTop;
           list.style.clipPath = 'inset(-60px -20px calc(100% - ' + Math.max(0, edge) + 'px) -20px)';

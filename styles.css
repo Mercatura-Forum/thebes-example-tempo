@@ -283,8 +283,8 @@ img, svg { display: block; }
    Ingredients tabs
    ============================================================ */
 .ingredients { padding: clamp(4rem, 8vw, 7rem) 0; }
-.ingredients__inner { display: grid; grid-template-columns: 280px .75fr 1.25fr; gap: 2.5rem; align-items: start; }
-.ing__canhome { grid-column: 1; grid-row: 1 / span 2; position: sticky; top: 90px; height: 480px; }
+.ingredients__inner { display: grid; grid-template-columns: .75fr 1.25fr 280px; gap: 2.5rem; align-items: start; }
+.ing__canhome { grid-column: 3; grid-row: 1 / span 2; position: sticky; top: 90px; height: 480px; }
 .ingredients__intro p { color: var(--ink-soft); margin-top: 1rem; }
 .ing { border: 1px solid var(--line); border-radius: var(--radius); overflow: hidden; background: var(--surface); }
 .ing__tabs { display: flex; flex-wrap: wrap; border-bottom: 1px solid var(--line); }
