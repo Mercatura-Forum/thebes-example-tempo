@@ -202,6 +202,7 @@ img, svg { display: block; }
 .marquee__track { display: inline-flex; gap: 1.6rem; padding: .7rem 0; white-space: nowrap; font-family: var(--font-display); letter-spacing: .12em; font-size: 1rem; animation: slide 22s linear infinite; }
 .marquee__track span { color: var(--paper); }
 .marquee__track span:nth-child(even) { color: var(--accent); transition: color .5s ease; }
+.marquee:hover .marquee__track { animation-play-state: paused; }
 @keyframes slide { to { transform: translateX(-50%); } }
 
 /* ============================================================
@@ -233,11 +234,17 @@ img, svg { display: block; }
 .fdiag__col { display: flex; flex-direction: column; justify-content: space-between; }
 .fdiag__col--l { align-items: flex-end; text-align: right; padding: 1.2rem 0 6.4rem; }
 .fdiag__col--r { justify-content: flex-end; gap: 2.4rem; padding-bottom: .8rem; }
-.fnote { position: relative; max-width: 30ch; }
-.fnote h3 { font-size: .78rem; letter-spacing: .12em; text-transform: uppercase; display: flex; align-items: center; gap: .5rem; margin-bottom: .35rem; }
+.fnote { position: relative; max-width: 30ch; cursor: default; transition: transform .3s ease; }
+.fdiag__col--l .fnote:hover { transform: translateX(6px); }
+.fdiag__col--r .fnote:hover { transform: translateX(-6px); }
+.fnote h3 { font-size: .78rem; letter-spacing: .12em; text-transform: uppercase; display: flex; align-items: baseline; gap: .55rem; margin-bottom: .35rem; }
 .fdiag__col--l .fnote h3 { flex-direction: row-reverse; }
-.fnote h3 svg { width: 18px; height: 18px; color: var(--accent); flex: none; }
+.fnote__num { font-family: var(--font-display); font-weight: 500; font-size: 1.35rem; line-height: 1; color: var(--accent); letter-spacing: 0; transition: color .4s; }
 .fnote p { font-size: .92rem; color: var(--ink-soft); }
+/* hovering a callout spotlights the label part it annotates */
+.fdiag__label > span { transition: opacity .35s ease, transform .35s ease; }
+.fdiag__label.dim > span { opacity: .25; }
+.fdiag__label.dim > span.lit { opacity: 1; transform: scale(1.07); }
 
 
 /* ============================================================
@@ -312,6 +319,10 @@ img, svg { display: block; }
 .press { padding: clamp(3rem, 6vw, 5rem) 0; background: var(--ink); color: var(--paper); }
 .press__grid { display: grid; grid-template-columns: repeat(3, 1fr); gap: 1.4rem; margin-top: 1.5rem; }
 .press__card { border: 1px solid #2a2d34; border-radius: var(--radius); padding: 1.6rem; background: #16181d; }
+.press__card::before {
+  content: '\201C'; display: block; font-family: var(--font-display); font-weight: 600;
+  font-size: 3.6rem; line-height: .6; height: .48em; color: var(--accent); transition: color .4s;
+}
 .press__card p { font-size: 1.08rem; line-height: 1.5; }
 .press__card cite { display: block; margin-top: 1rem; font-style: normal; font-weight: 700; color: var(--accent); font-size: .85rem; letter-spacing: .12em; text-transform: uppercase; transition: color .4s; }
 .press__disclaimer { text-align: center; margin-top: 2rem; color: #8a8f98; font-size: .82rem; }
@@ -325,7 +336,7 @@ img, svg { display: block; }
 .stockists__grid { display: grid; gap: 1rem; }
 .stockist { display: flex; align-items: center; gap: 1.2rem; padding: 1.2rem 1.4rem; border: 1px solid var(--line); border-radius: var(--radius); background: var(--surface); transition: border-color .2s, transform .2s; }
 .stockist:hover { border-color: var(--accent); transform: translateX(4px); }
-.stockist__pin { width: 42px; height: 42px; flex: 0 0 auto; display: grid; place-items: center; border-radius: 12px; background: var(--accent-tint); color: var(--accent-ink); transition: background .4s, color .4s; }
+.stockist__num { font-family: var(--font-display); font-weight: 500; font-size: 1.6rem; line-height: 1; color: var(--accent); flex: 0 0 auto; min-width: 2ch; transition: color .4s; }
 .stockist__city { font-family: var(--font-display); font-size: 1.2rem; }
 .stockist__meta { color: var(--ink-soft); font-size: .9rem; }
 .stockist__count { margin-left: auto; font-weight: 700; font-size: .74rem; letter-spacing: .08em; text-transform: uppercase; color: var(--accent-ink); border: 1px solid color-mix(in srgb, var(--accent) 35%, transparent); border-radius: 999px; padding: .35rem .75rem; white-space: nowrap; transition: color .4s, border-color .4s; }
@@ -602,7 +613,10 @@ html { scrollbar-width: thin; scrollbar-color: var(--accent) transparent; }
 /* dotted Egypt map (stockists) */
 .stockists__map { margin-top: 2.2rem; max-width: 300px; color: var(--ink); }
 .stockists__map .dot { fill: currentColor; opacity: .16; }
-.stockists__map .pin { fill: var(--accent); }
+.stockists__map .pin { fill: var(--accent); transform-origin: center; transform-box: fill-box; transition: opacity .3s ease, transform .3s ease; }
+.stockists__map svg.dim .dot { opacity: .07; }
+.stockists__map svg.dim .pin { opacity: .25; }
+.stockists__map svg.dim .pin.hot { opacity: 1; transform: scale(1.8); }
 .stockists__map .pin-ring {
   fill: none; stroke: var(--accent); stroke-width: 1.5; opacity: 0;
   transform-origin: center; transform-box: fill-box; animation: pin-pulse 2.4s ease-out infinite;

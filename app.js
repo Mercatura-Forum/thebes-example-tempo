@@ -27,12 +27,12 @@
   };
   const FLAVOR_ORDER = ['citrus', 'berry', 'lime'];
 
-  /* formula claims, each annotating the part of the label it is true of */
+  /* formula claims — each one annotates the part of the label it is true of */
   const FORMULA = [
-    { icon: 'bolt', h: 'Zero sugar', p: 'Ten calories, no crash. Sweet from nothing artificial.', side: 'l' },
-    { icon: 'drop', h: 'Fast uptake', p: 'The right osmolality moves water into you, not through you.', side: 'l' },
-    { icon: 'salt', h: 'Real sodium', p: 'A full gram per can — the dose endurance research points to, not a token pinch.', side: 'r' },
-    { icon: 'leaf', h: 'Nothing fake', p: 'No colours, no sucralose, no mystery blend. Every line is legible.', side: 'r' },
+    { n: '01', h: 'Zero sugar', p: 'Ten calories, no crash. Sweet from nothing artificial.', side: 'l', target: 'strip' },
+    { n: '02', h: 'Fast uptake', p: 'The right osmolality moves water into you, not through you.', side: 'l', target: 'osmo' },
+    { n: '03', h: 'Real sodium', p: 'A full gram per can — the dose endurance research points to, not a token pinch.', side: 'r', target: 'pill' },
+    { n: '04', h: 'Nothing fake', p: 'No colours, no sucralose, no mystery blend. Every line is legible.', side: 'r', target: 'micro' },
   ];
 
   const INGREDIENTS = [
@@ -69,17 +69,6 @@
     { h: '12-Case', desc: 'The training case. One flavour, twelve cans, best value per pour.', price: '540', unit: '/ 12 cans', tag: 'Most popular', featured: true },
     { h: 'Variety Case', desc: 'Four of each — Citrus Strike, Arctic Berry, Lime Charge. Meet all three.', price: '560', unit: '/ 12 cans', tag: '', featured: false },
   ];
-
-  /* Tabler Icons (MIT) — see NOTICE.md */
-  const ICONS = {
-    salt: '<path d="M12 13v.01"/><path d="M10 16v.01"/><path d="M14 16v.01"/><path d="M7.5 8h9l-.281 -2.248a2 2 0 0 0 -1.985 -1.752h-4.468a2 2 0 0 0 -1.986 1.752l-.28 2.248z"/><path d="M7.5 8l-1.612 9.671a2 2 0 0 0 1.973 2.329h8.278a2 2 0 0 0 1.973 -2.329l-1.612 -9.671"/>',
-    drop: '<path d="M7.502 19.423c2.602 2.105 6.395 2.105 8.996 0c2.602 -2.105 3.262 -5.708 1.566 -8.546l-4.89 -7.26c-.42 -.625 -1.287 -.803 -1.936 -.397a1.376 1.376 0 0 0 -.41 .397l-4.893 7.26c-1.695 2.838 -1.035 6.441 1.567 8.546z"/><path d="M5 14h14"/>',
-    leaf: '<path d="M5 21c.5 -4.5 2.5 -8 7 -10"/><path d="M9 18c6.218 0 10.5 -3.288 11 -12v-2h-4.014c-9 0 -11.986 4 -12 9c0 1 0 3 2 5h3z"/>',
-    bolt: '<path d="M13 3l0 7l6 0l-8 11l0 -7l-6 0l8 -11"/>',
-    pin: '<path d="M9 11a3 3 0 1 0 6 0a3 3 0 0 0 -6 0"/><path d="M17.657 16.657l-4.243 4.243a2 2 0 0 1 -2.827 0l-4.244 -4.243a8 8 0 1 1 11.314 0z"/>',
-  };
-  const svg = (inner, cls) =>
-    `<svg class="${cls || ''}" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="1.7" stroke-linecap="round" stroke-linejoin="round" aria-hidden="true">${inner}</svg>`;
 
   const $ = (s, r) => (r || document).querySelector(s);
   const $$ = (s, r) => Array.from((r || document).querySelectorAll(s));
@@ -128,7 +117,8 @@
   /* ── Renderers ── */
   function renderFormula() {
     // label teardown: a flat CSS label in the middle, claims as spec callouts
-    const note = (c) => '<div class="fnote reveal"><h3>' + svg(ICONS[c.icon]) + c.h + '</h3><p>' + c.p + '</p></div>';
+    const note = (c) => '<div class="fnote reveal" data-target="' + c.target + '"><h3>' +
+      '<span class="fnote__num">' + c.n + '</span>' + c.h + '</h3><p>' + c.p + '</p></div>';
     const col = (s) => FORMULA.filter((c) => c.side === s).map(note).join('');
     $('#formulaDiagram').innerHTML =
       '<div class="fdiag__col fdiag__col--l">' + col('l') + '</div>' +
@@ -142,6 +132,12 @@
         '<span class="fdiag__micro">Carbonated water &middot; coconut water (12%) &middot; Red Sea salt &middot; potassium citrate &middot; magnesium glycinate &middot; natural citrus &middot; vitamin C &middot; zinc &mdash; that\'s the whole list.</span>' +
       '</div>' +
       '<div class="fdiag__col fdiag__col--r">' + col('r') + '</div>';
+    const label = $('#formulaDiagram .fdiag__label');
+    $$('#formulaDiagram .fnote').forEach((n) => {
+      const t = $('.fdiag__' + n.dataset.target, label);
+      n.addEventListener('mouseenter', () => { label.classList.add('dim'); t.classList.add('lit'); });
+      n.addEventListener('mouseleave', () => { label.classList.remove('dim'); t.classList.remove('lit'); });
+    });
   }
   function renderDots() {
     $('#flDots').innerHTML = FLAVOR_ORDER.map((k) =>
@@ -176,13 +172,25 @@
   }
   function renderPress() {
     $('#pressGrid').innerHTML = PRESS.map((p) =>
-      '<blockquote class="press__card"><p>“' + p.q + '”</p><cite>' + p.by + '</cite></blockquote>').join('');
+      '<blockquote class="press__card"><p>' + p.q + '</p><cite>' + p.by + '</cite></blockquote>').join('');
   }
   function renderStockists() {
-    $('#stockistGrid').innerHTML = STOCKISTS.map((s) =>
-      '<div class="stockist"><span class="stockist__pin">' + svg(ICONS.pin) + '</span>' +
+    $('#stockistGrid').innerHTML = STOCKISTS.map((s, i) =>
+      '<div class="stockist" data-pin="' + i + '"><span class="stockist__num">0' + (i + 1) + '</span>' +
       '<div><div class="stockist__city">' + s.city + '</div><div class="stockist__meta">' + s.meta + '</div></div>' +
       '<span class="stockist__count">' + s.count + '</span></div>').join('');
+    $$('#stockistGrid .stockist').forEach((row) => {
+      row.addEventListener('mouseenter', () => {
+        const map = $('#egyptMap svg'); if (!map) return;
+        map.classList.add('dim');
+        const pin = $('.pin.p-' + row.dataset.pin, map); if (pin) pin.classList.add('hot');
+      });
+      row.addEventListener('mouseleave', () => {
+        const map = $('#egyptMap svg'); if (!map) return;
+        map.classList.remove('dim');
+        $$('.pin', map).forEach((p) => p.classList.remove('hot'));
+      });
+    });
   }
   function renderShop() {
     $('#shopGrid').innerHTML = SKUS.map((s, i) => {
@@ -373,7 +381,7 @@
         if (inside(x, y)) s += '<circle class="dot" cx="' + x + '" cy="' + y + '" r="1.7"/>';
     CITIES.forEach(([lon, lat], i) => {
       s += '<circle class="pin-ring" cx="' + X(lon) + '" cy="' + Y(lat) + '" r="7" style="animation-delay:' + i * 0.8 + 's"/>' +
-           '<circle class="pin" cx="' + X(lon) + '" cy="' + Y(lat) + '" r="4"/>';
+           '<circle class="pin p-' + i + '" cx="' + X(lon) + '" cy="' + Y(lat) + '" r="4"/>';
     });
     box.innerHTML = '<svg viewBox="0 0 300 240" role="img" aria-label="Map of Egypt with our three cities">' + s + '</svg>';
   }

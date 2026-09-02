@@ -22,7 +22,7 @@ meshes were decimated and rescaled onto the TEMPO can's frame
 (`src-model/tools/build_splash.py`), and materials are replaced at runtime.
 
 **Icons.** The UI icons are from [Tabler Icons](https://tabler.io/icons)
-(MIT), inlined in `app.js` and `index.html`.
+(MIT), inlined in `index.html`.
 
 **TEMPO** is a sample brand created solely for this demo. It is not a real
 product, company, or endorsement.
