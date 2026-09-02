@@ -214,6 +214,38 @@ img, svg { display: block; }
 .card h3 { font-size: 1.1rem; margin-bottom: .4rem; }
 .card p { font-size: .95rem; color: var(--ink-soft); }
 
+/* Jumbotron ring: on wide screens the four cards ride a slow carousel — big
+   and sharp up front, shrinking and fading as they swing round the back.
+   Every card runs the same orbit keyframe a quarter-period apart. 2D
+   transforms + opacity ONLY: any CSS perspective/3D here makes the browser
+   composite the fixed WebGL canvas as an opaque black layer. The wrapper is
+   display:contents by default so the flat grid still works on small screens
+   and under reduced motion. */
+.cards__ring { display: contents; }
+@media (min-width: 941px) and (prefers-reduced-motion: no-preference) {
+  .cards { display: block; position: relative; height: 350px; }
+  .cards__ring { display: block; position: absolute; inset: 0; }
+  .cards__ring .card, .cards__ring .card:hover {
+    position: absolute; left: 50%; top: 50%; width: 300px;
+    animation: card-orbit 28s linear infinite;
+    animation-delay: calc(var(--i) * -7s);
+  }
+  .cards:hover .cards__ring .card { animation-play-state: paused; }
+  .cards__ring .card:hover { box-shadow: none; }
+}
+/* one lap of the ring: x = sin, size/opacity = depth (cos) */
+@keyframes card-orbit {
+  0%    { transform: translate(-50%, -50%) translateX(0)       scale(1);    opacity: 1;   }
+  12.5% { transform: translate(-50%, -50%) translateX(240px)   scale(.94);  opacity: .87; }
+  25%   { transform: translate(-50%, -50%) translateX(340px)   scale(.8);   opacity: .55; }
+  37.5% { transform: translate(-50%, -50%) translateX(240px)   scale(.66);  opacity: .23; }
+  50%   { transform: translate(-50%, -50%) translateX(0)       scale(.6);   opacity: 0;   }
+  62.5% { transform: translate(-50%, -50%) translateX(-240px)  scale(.66);  opacity: .23; }
+  75%   { transform: translate(-50%, -50%) translateX(-340px)  scale(.8);   opacity: .55; }
+  87.5% { transform: translate(-50%, -50%) translateX(-240px)  scale(.94);  opacity: .87; }
+  100%  { transform: translate(-50%, -50%) translateX(0)       scale(1);    opacity: 1;   }
+}
+
 /* ============================================================
    Flavours
    ============================================================ */

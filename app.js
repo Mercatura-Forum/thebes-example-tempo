@@ -123,9 +123,11 @@
 
   /* ── Renderers ── */
   function renderFormula() {
-    $('#formulaCards').innerHTML = FORMULA.map((c) =>
-      '<article class="card">' + svg(ICONS[c.icon], 'card__icon') +
-      '<h3>' + c.h + '</h3><p>' + c.p + '</p></article>').join('');
+    // --i places each card on the rotating ring (wide screens only); the ring
+    // div is display:contents in the flat grid, so small screens see no change
+    $('#formulaCards').innerHTML = '<div class="cards__ring">' + FORMULA.map((c, i) =>
+      '<article class="card" style="--i:' + i + '">' + svg(ICONS[c.icon], 'card__icon') +
+      '<h3>' + c.h + '</h3><p>' + c.p + '</p></article>').join('') + '</div>';
   }
   function renderDots() {
     $('#flDots').innerHTML = FLAVOR_ORDER.map((k) =>
