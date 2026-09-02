@@ -207,6 +207,8 @@ function boot() {
       else if (s.role === 'hero') { ry = idle * 0.8 + tiltY * 0.4; rx = tiltX * 0.25; }
       else { ry = idle * 0.9 + s.phase; }
       group.rotation.set(rx * 0.6, ry, 0);
+      // hero: lift the can so it sits centered in the swirl (splash stays put)
+      group.position.y = s.role === 'hero' ? -0.7 : -1;
       rig.rotation.z = s.role === 'hero' ? -0.45 : 0;   // ~26 deg lean, can + splash as one
 
       if (splash) {
