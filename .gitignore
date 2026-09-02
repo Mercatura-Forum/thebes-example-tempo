@@ -3,7 +3,10 @@ dist/
 asset_canister.wasm
 
 # third-party raw model source (re-textured GLB lives in assets/)
-src-model/
+# — but our original rework pipeline under src-model/tools/ IS tracked
+src-model/*
+!src-model/tools/
+src-model/tools/out/
 *.rar
 
 node_modules/

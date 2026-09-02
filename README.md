@@ -43,11 +43,26 @@ Three.js and the fonts load from public CDNs at runtime.
 | `app.js` | Content + interaction layer (scrub, cursor, cart, etc.) |
 | `can3d.js` | Three.js — loads the GLB and renders it into every slot |
 | `assets/` | The can model (GLB), generated labels, static fallback renders |
+| `src-model/tools/` | Scripted pipeline that produces the GLB, labels and fallback renders (see its README; the third-party donor mesh itself is not redistributed — see NOTICE.md) |
 
 ## Deploy
 
-The site is a folder of static assets. Point a Thebes asset canister at it
-(`thebes.toml` is included; set `cid = "auto"` for a fresh canister) and deploy
-with `thebes-deploy`.
+The site is a folder of static assets deployed with `thebes-deploy`.
+
+`thebes.toml` pins the live canister (`cid = 59257520488477`), so a deploy
+updates the site **in place** — content-addressed, only changed files upload:
+
+```sh
+thebes-deploy deploy --skip-install --no-facts
+```
+
+Only set `cid = "auto"` when forking this demo to mint your own fresh canister;
+never for updating an existing one.
+
+**Asset caching:** the boundary serves `assets/*` and `*.js` with
+`max-age=3600` (only `index.html` is `no-cache`). Asset URLs therefore carry a
+version query (`?v=N`, referenced in `index.html`, `app.js`, `can3d.js`) —
+bump it in the same commit whenever the model, labels, or renders change, or
+returning visitors keep the old assets for up to an hour.
 
 See [NOTICE.md](NOTICE.md) for asset provenance and [LICENSE](LICENSE).
