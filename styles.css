@@ -184,7 +184,7 @@ img, svg { display: block; }
 .hero__stats b { font-family: var(--font-display); font-weight: 400; font-size: 2rem; display: block; }
 .hero__stats span { font-size: .82rem; color: var(--ink-soft); text-transform: uppercase; letter-spacing: .1em; }
 
-.hero__art { position: relative; display: grid; place-items: center; min-height: 420px; }
+.hero__art { position: relative; display: grid; place-items: center; min-height: 540px; }
 .hero__glow {
   position: absolute; width: 380px; height: 380px; border-radius: 50%;
   background: radial-gradient(circle, color-mix(in srgb, var(--accent) 55%, transparent), transparent 68%);
@@ -380,7 +380,7 @@ img, svg { display: block; }
   .hamburger { display: flex; }
   .nav__cta { display: none; }
   .hero__inner { grid-template-columns: 1fr; text-align: left; }
-  .hero__art { grid-row: 1; min-height: 300px; }
+  .hero__art { grid-row: 1; min-height: 380px; }
   .cards { grid-template-columns: repeat(2, 1fr); }
   .flavors__grid { grid-template-columns: 1fr; }
   .flavor-stage { min-height: 320px; }
@@ -508,13 +508,13 @@ body.has-cursor, body.has-cursor a, body.has-cursor button, body.has-cursor [dat
 .can-fallback { width: 100%; height: 100%; object-fit: contain; display: block; }
 body.webgl .can-fallback { visibility: hidden; }   /* the canvas draws over the slot box */
 
-.can-slot--hero { width: 100%; height: 440px; }
+.can-slot--hero { width: 100%; height: 540px; }
 .can-slot--stage {                                  /* right side — keeps the copy clear */
   position: absolute; top: 0; bottom: 0; right: 0; width: 56%;
 }
 .sku__art.can-slot { height: 172px; }
 
 @media (max-width: 940px) {
-  .can-slot--hero { height: 340px; }
+  .can-slot--hero { height: 420px; }
   .can-slot--stage { width: 100%; height: 58%; top: 0; bottom: auto; }
 }

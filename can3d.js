@@ -79,20 +79,25 @@ function boot() {
     c.getHSL(hsl);
     // lighten but KEEP saturation — lerping to white desaturates, and
     // desaturated orange reads as mud, desaturated anything as smoke
-    c.setHSL(hsl.h, hsl.s, Math.min(0.72, hsl.l + 0.18));
+    c.setHSL(hsl.h, hsl.s, Math.min(0.78, hsl.l + 0.24));
+    // self-lit lift: sheets facing away from the key light otherwise pick up
+    // the hemisphere's dark ground color and turn muddy
+    splashMat.emissive.copy(c).multiplyScalar(0.35);
   }
 
   // Frozen fluid splash, hero slot only ("Water Splash" by Asfandyar Hesami,
   // CC-BY-4.0 — see NOTICE.md). The hero just shows the bare can if it fails.
   new GLTFLoader().load('assets/splash.glb?v=4', (g) => {
     splashMat = new THREE.MeshPhysicalMaterial({
-      transparent: true, opacity: 0.55, roughness: 0.2, metalness: 0,
+      transparent: true, opacity: 0.5, roughness: 0.2, metalness: 0,
       envMapIntensity: 0.9, specularIntensity: 0.35, ior: 1.15,
       depthWrite: false, side: THREE.DoubleSide,
     });
     g.scene.traverse((o) => { if (o.isMesh) o.material = splashMat; });
     splash = g.scene;
     splash.visible = false;
+    splash.scale.setScalar(1.22);      // reads bigger than the can
+    splash.rotation.z = -0.45;         // ~26 deg diagonal tilt
     group.add(splash);
     tintSplash(current);
   }, undefined, () => { if (window.console) console.warn('[can3d] splash unavailable'); });
@@ -153,7 +158,7 @@ function boot() {
       renderer.setViewport(left, bottom, w, h);
       renderer.setScissor(left, bottom, w, h);
 
-      const dist = s.role === 'hero' ? 4.8 : s.role === 'stage' ? 5.0 : 5.6;
+      const dist = s.role === 'hero' ? 5.8 : s.role === 'stage' ? 5.0 : 5.6;
       camera.aspect = w / h;
       camera.position.set(0, 1, dist);
       camera.updateProjectionMatrix();
@@ -168,7 +173,10 @@ function boot() {
       if (splash) {
         splash.visible = s.role === 'hero';
         if (splash.visible && !reduced) {
-          splash.rotation.y = 1.1 - idle * 0.6;             // counter-orbit; base offset keeps the wordmark clear at load
+          // oscillate around the vetted pose instead of a full orbit — a
+          // continuous turn drags every thick tail through the slot edge
+          // where the scissor slices it into a hard straight cut
+          splash.rotation.y = 1.1 + Math.sin(time * 0.00035) * 0.25;
           splash.position.y = Math.sin(time * 0.0011) * 0.05;
           for (let i = 0; i < splash.children.length; i++)
             splash.children[i].rotation.y = Math.sin(time * 0.0007 + i * 2.1) * 0.06;
