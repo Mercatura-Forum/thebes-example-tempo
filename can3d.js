@@ -207,10 +207,13 @@ function boot() {
       // hero: camera rides higher so the composition sits low in the slot —
       // the splash tails must END inside the frame (top included), never get
       // sliced by the scissor edge into a hard straight cut
-      // journey camera dollies to fit the can's projected height at the current
-      // tilt — the 45° diagonal is LONGER than either endpoint, so this must
-      // track the real extent (can: 2.05 long, 0.72 wide; fov 24 → tan 12°)
-      const jFit = (2.05 * Math.cos(jTilt) + 0.72 * Math.sin(jTilt)) / (2 * Math.tan(Math.PI / 15)) * 1.3;
+      // journey camera dollies to fit the can's projected extent at the current
+      // tilt on BOTH axes (can: 2.05 long, 0.72 wide; fov 24 → tan 12°). The
+      // vertical need alone cropped the lying can's ends on narrower windows,
+      // where the slot aspect shrinks and width binds before height does.
+      const jExtV = 2.05 * Math.cos(jTilt) + 0.72 * Math.sin(jTilt);
+      const jExtH = 0.72 * Math.cos(jTilt) + 2.05 * Math.sin(jTilt);
+      const jFit = Math.max(jExtV * 1.3, (jExtH * 1.4) / (w / h)) / (2 * Math.tan(Math.PI / 15));
       const dist = s.role === 'hero' ? 6.3 : s.role === 'stage' ? 5.0 : s.role === 'journey' ? jFit : 5.6;
       const cy = s.role === 'hero' ? 1.35 : 1;
       const cx = s.role === 'hero' ? 0.2 : 0;    // leaned mass sits up-right; recenter in the slot
