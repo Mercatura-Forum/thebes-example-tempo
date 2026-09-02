@@ -321,12 +321,11 @@
   function initParallax() {
     if (prefersReduced || !window.matchMedia('(pointer:fine)').matches) return;
     const art = $('.hero__art'); if (!art) return;
-    const glow = $('.hero__glow'), slot = $('.can-slot--hero'), ring = $('.hero__ring');
+    const glow = $('.hero__glow'), slot = $('.can-slot--hero');
     window.addEventListener('mousemove', (e) => {
       const dx = (e.clientX / innerWidth - 0.5), dy = (e.clientY / innerHeight - 0.5);
       if (slot) slot.style.transform = 'translate(' + dx * 20 + 'px,' + dy * 16 + 'px)';  // the 3D can tracks its slot
       if (glow) glow.style.transform = 'translate(' + dx * -30 + 'px,' + dy * -24 + 'px)';
-      if (ring) ring.style.transform = 'translate(' + dx * 16 + 'px,' + dy * 12 + 'px)';
     });
   }
 

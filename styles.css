@@ -190,14 +190,8 @@ img, svg { display: block; }
   background: radial-gradient(circle, color-mix(in srgb, var(--accent) 55%, transparent), transparent 68%);
   filter: blur(10px); transition: background .5s ease; animation: float 7s ease-in-out infinite;
 }
-.hero__ring {
-  position: absolute; width: 300px; height: 300px; border-radius: 50%;
-  border: 2px dashed color-mix(in srgb, var(--accent) 50%, transparent);
-  animation: spin 26s linear infinite;
-}
 .can--hero { position: relative; z-index: 2; animation: float 7s ease-in-out infinite; }
 @keyframes float { 0%,100% { transform: translateY(0); } 50% { transform: translateY(-14px); } }
-@keyframes spin { to { transform: rotate(360deg); } }
 
 .marquee { border-block: 1px solid var(--ink); background: var(--ink); color: var(--paper); overflow: hidden; }
 .marquee__track { display: inline-flex; gap: 1.6rem; padding: .7rem 0; white-space: nowrap; font-family: var(--font-display); letter-spacing: .12em; font-size: 1rem; animation: slide 22s linear infinite; }
