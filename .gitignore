@@ -1,0 +1,10 @@
+# build / deploy artifacts
+dist/
+asset_canister.wasm
+
+# third-party raw model source (re-textured GLB lives in assets/)
+src-model/
+*.rar
+
+node_modules/
+.DS_Store

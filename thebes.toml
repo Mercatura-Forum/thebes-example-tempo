@@ -1,0 +1,21 @@
+[project]
+name = "tempo"
+default_network = "wan"
+chain_id = 2026
+
+[networks.wan]
+validators = [
+    "https://memphis.mercaturaforum.com/deploy-api/v0",
+    "https://memphis.mercaturaforum.com/deploy-api/v1",
+    "https://memphis.mercaturaforum.com/deploy-api/v2",
+    "https://memphis.mercaturaforum.com/deploy-api/v3",
+]
+boundary = "https://memphis.mercaturaforum.com"
+routing = "smart"
+
+[canisters.web]
+type = "frontend"
+cid = "auto"
+wasm = "asset_canister.wasm"
+bundle = "dist"
+health_check_url = "/index.html"

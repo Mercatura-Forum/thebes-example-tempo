@@ -1,0 +1,257 @@
+<!doctype html>
+<html lang="en" data-flavor="citrus">
+<head>
+  <meta charset="UTF-8" />
+  <meta name="viewport" content="width=device-width, initial-scale=1.0" />
+  <title>TEMPO — Rapid electrolyte hydration</title>
+  <meta name="description" content="TEMPO is a rapid-hydration electrolyte sports drink: five electrolytes, zero sugar, real salt. Built for the last rep and the final kilometre." />
+  <link rel="icon" href="favicon.svg" type="image/svg+xml" />
+  <link rel="preconnect" href="https://api.fontshare.com" />
+  <link rel="preconnect" href="https://cdn.fontshare.com" crossorigin />
+  <link href="https://api.fontshare.com/v2/css?f[]=clash-display@500,600,700&f[]=switzer@400,500,600,700&display=swap" rel="stylesheet" />
+  <link rel="stylesheet" href="styles.css" />
+</head>
+<body>
+  <a class="skip-link" href="#main">Skip to content</a>
+
+  <!-- scroll progress + custom "scope" cursor (hidden on touch) -->
+  <div class="scroll-progress" id="scrollProgress" aria-hidden="true"></div>
+  <div class="cursor" id="cursor" aria-hidden="true">
+    <span class="cursor__dot"></span>
+    <span class="cursor__ring"><span class="cursor__label"></span></span>
+  </div>
+
+  <!-- ── Header ── -->
+  <header class="nav" id="top">
+    <div class="wrap nav__inner">
+      <a class="brand" href="#top" aria-label="TEMPO home">
+        <span class="brand__mark" aria-hidden="true"></span>
+        <span class="brand__word">TEMPO</span>
+      </a>
+
+      <nav class="nav__links" aria-label="Primary">
+        <a href="#flavors">Flavours</a>
+        <a href="#formula">Formula</a>
+        <a href="#story">Story</a>
+        <a href="#stockists">Stockists</a>
+        <a href="#shop">Shop</a>
+      </nav>
+
+      <div class="nav__actions">
+        <button class="cart" id="cartBtn" aria-label="Cart">
+          <svg viewBox="0 0 24 24" width="20" height="20" fill="none" stroke="currentColor" stroke-width="1.8" stroke-linecap="round" stroke-linejoin="round" aria-hidden="true">
+            <path d="M4 5h2l1.2 10.5a1.5 1.5 0 0 0 1.5 1.3h8.1a1.5 1.5 0 0 0 1.5-1.2L20.5 8H7" />
+            <circle cx="10" cy="20" r="1" /><circle cx="18" cy="20" r="1" />
+          </svg>
+          <span class="cart__count" id="cartCount" data-count="0">0</span>
+        </button>
+        <a class="btn btn--solid nav__cta" href="#shop">Shop</a>
+        <button class="hamburger" id="hamburger" aria-label="Menu" aria-expanded="false" aria-controls="mobileNav">
+          <span></span><span></span><span></span>
+        </button>
+      </div>
+    </div>
+
+    <div class="mobile-nav" id="mobileNav" hidden>
+      <a href="#flavors">Flavours</a>
+      <a href="#formula">Formula</a>
+      <a href="#story">Story</a>
+      <a href="#stockists">Stockists</a>
+      <a href="#shop">Shop</a>
+    </div>
+  </header>
+
+  <main id="main">
+    <!-- ── Hero ── -->
+    <section class="hero">
+      <div class="wrap hero__inner">
+        <div class="hero__copy">
+          <p class="eyebrow reveal">Rapid electrolyte hydration</p>
+          <h1 class="hero__title reveal">Keep your<br /><span class="hl">tempo.</span></h1>
+          <p class="hero__lede reveal">Five electrolytes, zero sugar, and enough salt to actually matter. Built for the last rep, the final kilometre, the second half.</p>
+          <div class="hero__cta reveal">
+            <a class="btn btn--solid" href="#shop" data-magnetic data-cursor="shop">Shop flavours</a>
+            <a class="btn btn--ghost" href="#stockists" data-magnetic data-cursor="find">Find a stockist</a>
+          </div>
+          <ul class="hero__stats reveal" aria-label="At a glance">
+            <li><b data-countup="1000">0</b><span>mg sodium</span></li>
+            <li><b data-countup="0">0</b><span>g sugar</span></li>
+            <li><b data-countup="5">0</b><span>electrolytes</span></li>
+          </ul>
+        </div>
+        <div class="hero__art">
+          <div class="hero__glow" aria-hidden="true"></div>
+          <div class="hero__ring" aria-hidden="true"></div>
+          <div class="can-slot can-slot--hero" data-can3d data-role="hero">
+            <img class="can-fallback" alt="A can of TEMPO" />
+          </div>
+        </div>
+      </div>
+      <div class="marquee" aria-hidden="true">
+        <div class="marquee__track">
+          <span>NO SUGAR</span><span>•</span><span>REAL SALT</span><span>•</span><span>FAST ABSORPTION</span><span>•</span><span>NOTHING ARTIFICIAL</span><span>•</span>
+          <span>NO SUGAR</span><span>•</span><span>REAL SALT</span><span>•</span><span>FAST ABSORPTION</span><span>•</span><span>NOTHING ARTIFICIAL</span><span>•</span>
+        </div>
+      </div>
+    </section>
+
+    <!-- ── Formula ── -->
+    <section class="formula" id="formula">
+      <div class="wrap formula__inner">
+        <p class="eyebrow reveal">The formula</p>
+        <h2 class="section-title reveal">Sweat is salt water. So we made a drink that reads the same.</h2>
+        <p class="formula__lede reveal">Most of what you lose in a hard session is sodium — grams of it, not milligrams. TEMPO puts it back at the concentration your body actually pulls water across, then rounds it out with four more electrolytes and a clean citrus base. No sugar to slow it down.</p>
+        <div class="cards" id="formulaCards"></div>
+      </div>
+    </section>
+
+    <!-- ── Flavors: pinned, scroll-scrubbed 3D showcase ── -->
+    <section class="flavors" id="flavors" data-flavors>
+      <div class="flavors__track" id="flavorTrack">
+        <div class="flavors__stage">
+          <div class="flavors__viz">
+            <div class="flavors__glow" aria-hidden="true"></div>
+            <div class="can-slot can-slot--stage" data-can3d data-role="stage">
+              <img class="can-fallback" alt="A can of TEMPO" />
+            </div>
+          </div>
+
+          <div class="wrap flavors__ui">
+            <div class="flavors__copy" aria-live="polite">
+              <p class="eyebrow" id="flHead">Three ways to run</p>
+              <h2 class="flavors__name" id="flName">Citrus Strike</h2>
+              <p class="flavors__blurb" id="flBlurb"></p>
+              <ul class="flavor-spec" id="flSpec"></ul>
+              <a class="btn btn--solid" href="#shop" data-magnetic data-cursor="add">Add to cart</a>
+            </div>
+
+            <div class="flavors__dots" id="flDots" role="tablist" aria-label="Flavours"></div>
+          </div>
+
+          <p class="flavors__scrollhint" id="flHint">Scroll to pour through the range ↓</p>
+        </div>
+      </div>
+    </section>
+
+    <!-- ── Ingredients ── -->
+    <section class="ingredients" id="ingredients">
+      <div class="wrap ingredients__inner">
+        <div class="ingredients__intro">
+          <p class="eyebrow reveal">What's inside</p>
+          <h2 class="section-title reveal">Every gram earns its place.</h2>
+          <p class="reveal">Six functional ingredients, each here for a reason you can feel. No fillers, no mystery "proprietary blend".</p>
+        </div>
+        <div class="ing">
+          <div class="ing__tabs" role="tablist" aria-label="Ingredients" id="ingTabs"></div>
+          <div class="ing__body" id="ingBody"></div>
+        </div>
+      </div>
+    </section>
+
+    <!-- ── Story timeline ── -->
+    <section class="story" id="story">
+      <div class="wrap">
+        <p class="eyebrow reveal">How we got here</p>
+        <h2 class="section-title reveal">Four years, one obsession: hydration that keeps up.</h2>
+        <ol class="timeline" id="timeline"></ol>
+      </div>
+    </section>
+
+    <!-- ── Press ── -->
+    <section class="press">
+      <div class="wrap">
+        <p class="eyebrow eyebrow--center reveal">Word on the course</p>
+        <div class="press__grid" id="pressGrid"></div>
+        <p class="press__disclaimer">Quotes are illustrative — TEMPO is a fictional brand built for a design demo.</p>
+      </div>
+    </section>
+
+    <!-- ── Stockists ── -->
+    <section class="stockists" id="stockists">
+      <div class="wrap stockists__inner">
+        <div class="stockists__head">
+          <p class="eyebrow reveal">Find us cold</p>
+          <h2 class="section-title reveal">On the shelf near you.</h2>
+          <p class="reveal">Three cities to start. More every season — the newsletter gets the map first.</p>
+        </div>
+        <div class="stockists__grid" id="stockistGrid"></div>
+      </div>
+    </section>
+
+    <!-- ── Shop ── -->
+    <section class="shop" id="shop">
+      <div class="wrap">
+        <div class="shop__head">
+          <p class="eyebrow reveal">Stock up</p>
+          <h2 class="section-title reveal">Cases, packs, and a standing order.</h2>
+        </div>
+        <div class="shop__grid" id="shopGrid"></div>
+        <p class="shop__fineprint">Prices in NZD. This is a demo storefront — checkout is simulated and nothing is charged.</p>
+      </div>
+    </section>
+
+    <!-- ── Newsletter ── -->
+    <section class="news">
+      <div class="wrap news__inner">
+        <div class="news__copy">
+          <h2 class="section-title reveal">Get the drop.</h2>
+          <p class="reveal">New flavours, new cities, the occasional pre-race discount. No noise.</p>
+        </div>
+        <form class="news__form reveal" id="newsForm" novalidate>
+          <label class="sr-only" for="newsEmail">Email address</label>
+          <input id="newsEmail" name="email" type="email" placeholder="you@pace.run" autocomplete="email" required />
+          <button class="btn btn--solid" type="submit">Notify me</button>
+          <p class="news__msg" id="newsMsg" role="status" aria-live="polite"></p>
+        </form>
+      </div>
+    </section>
+  </main>
+
+  <!-- ── Footer ── -->
+  <footer class="footer">
+    <div class="wrap footer__inner">
+      <div class="footer__brand">
+        <span class="brand__word">TEMPO</span>
+        <p>Rapid electrolyte hydration.<br />Drink the pace.</p>
+      </div>
+      <nav class="footer__cols" aria-label="Footer">
+        <div>
+          <h3>Shop</h3>
+          <a href="#flavors">Flavours</a>
+          <a href="#shop">Cases &amp; packs</a>
+          <a href="#shop">Subscribe</a>
+        </div>
+        <div>
+          <h3>Company</h3>
+          <a href="#story">Our story</a>
+          <a href="#stockists">Stockists</a>
+          <a href="#formula">The formula</a>
+        </div>
+        <div>
+          <h3>Follow</h3>
+          <a href="#" data-noop>Instagram</a>
+          <a href="#" data-noop>Strava club</a>
+          <a href="#" data-noop>TikTok</a>
+        </div>
+      </nav>
+    </div>
+    <div class="wrap footer__legal">
+      <p>© <span id="year"></span> TEMPO Hydration Co. All rights reserved.</p>
+      <p><a href="#" data-noop>Privacy</a> · <a href="#" data-noop>Terms</a> · <a href="#top">Back to top ↑</a></p>
+    </div>
+  </footer>
+
+  <div class="toast" id="toast" role="status" aria-live="polite" hidden></div>
+
+  <script src="app.js"></script>
+  <script type="importmap">
+  {
+    "imports": {
+      "three": "https://cdn.jsdelivr.net/npm/three@0.169.0/build/three.module.js",
+      "three/addons/": "https://cdn.jsdelivr.net/npm/three@0.169.0/examples/jsm/"
+    }
+  }
+  </script>
+  <script type="module" src="can3d.js"></script>
+</body>
+</html>
