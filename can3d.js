@@ -75,7 +75,7 @@ function boot() {
   const texLoader = new THREE.TextureLoader();
   const textures = {};
   ['citrus', 'berry', 'lime'].forEach((k) => {
-    const t = texLoader.load('assets/label_' + k + '.png?v=4');
+    const t = texLoader.load('assets/label_' + k + '.png?v=5');
     t.colorSpace = THREE.SRGBColorSpace; t.flipY = false; t.anisotropy = 8;
     t.wrapS = THREE.RepeatWrapping;   // UV wraps the full circumference; keep the seam clean
     textures[k] = t;
