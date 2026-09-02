@@ -61,7 +61,7 @@ function boot() {
   const texLoader = new THREE.TextureLoader();
   const textures = {};
   ['citrus', 'berry', 'lime'].forEach((k) => {
-    const t = texLoader.load('assets/label_' + k + '.png?v=3');
+    const t = texLoader.load('assets/label_' + k + '.png?v=4');
     t.colorSpace = THREE.SRGBColorSpace; t.flipY = false; t.anisotropy = 8;
     t.wrapS = THREE.RepeatWrapping;   // UV wraps the full circumference; keep the seam clean
     textures[k] = t;
@@ -69,8 +69,35 @@ function boot() {
 
   let labelMat = null, current = 'citrus', ready = false;
   let targetSpin = 0, spin = 0, targetTiltX = 0, targetTiltY = 0, tiltX = 0, tiltY = 0;
+  let splash = null, splashMat = null;
 
-  new GLTFLoader().load('assets/tempo-can.glb?v=3', (gltf) => {
+  function tintSplash(k) {
+    if (!splashMat) return;
+    const f = window.TEMPO && window.TEMPO.flavors && window.TEMPO.flavors[k];
+    const c = splashMat.color.set(f ? f.color : '#ff7a1a');
+    const hsl = {};
+    c.getHSL(hsl);
+    // lighten but KEEP saturation — lerping to white desaturates, and
+    // desaturated orange reads as mud, desaturated anything as smoke
+    c.setHSL(hsl.h, hsl.s, Math.min(0.72, hsl.l + 0.18));
+  }
+
+  // Frozen fluid splash, hero slot only ("Water Splash" by Asfandyar Hesami,
+  // CC-BY-4.0 — see NOTICE.md). The hero just shows the bare can if it fails.
+  new GLTFLoader().load('assets/splash.glb?v=4', (g) => {
+    splashMat = new THREE.MeshPhysicalMaterial({
+      transparent: true, opacity: 0.55, roughness: 0.2, metalness: 0,
+      envMapIntensity: 0.9, specularIntensity: 0.35, ior: 1.15,
+      depthWrite: false, side: THREE.DoubleSide,
+    });
+    g.scene.traverse((o) => { if (o.isMesh) o.material = splashMat; });
+    splash = g.scene;
+    splash.visible = false;
+    group.add(splash);
+    tintSplash(current);
+  }, undefined, () => { if (window.console) console.warn('[can3d] splash unavailable'); });
+
+  new GLTFLoader().load('assets/tempo-can.glb?v=4', (gltf) => {
     gltf.scene.traverse((o) => {
       if (!o.isMesh || !o.material) return;
       const m = o.material;
@@ -89,7 +116,7 @@ function boot() {
   function register() {
     window.TEMPO = window.TEMPO || {};
     window.TEMPO.can = {
-      setFlavor(k) { if (textures[k]) current = k; },     // hero + stage follow the page
+      setFlavor(k) { if (textures[k]) { current = k; tintSplash(k); } },  // hero + stage follow the page
       setSpin(p) { targetSpin = p * Math.PI * 4; },        // two turns across the scrub
     };
     if (window.TEMPO.__pendingFlavor) current = window.TEMPO.__pendingFlavor;
@@ -137,6 +164,16 @@ function boot() {
       else if (s.role === 'hero') { ry = idle * 0.8 + tiltY * 0.4; rx = tiltX * 0.25; }
       else { ry = idle * 0.9 + s.phase; }
       group.rotation.set(rx * 0.6, ry, 0);
+
+      if (splash) {
+        splash.visible = s.role === 'hero';
+        if (splash.visible && !reduced) {
+          splash.rotation.y = 1.1 - idle * 0.6;             // counter-orbit; base offset keeps the wordmark clear at load
+          splash.position.y = Math.sin(time * 0.0011) * 0.05;
+          for (let i = 0; i < splash.children.length; i++)
+            splash.children[i].rotation.y = Math.sin(time * 0.0007 + i * 2.1) * 0.06;
+        }
+      }
 
       const flavKey = s.flavor || current;
       if (labelMat && textures[flavKey]) { labelMat.map = textures[flavKey]; }

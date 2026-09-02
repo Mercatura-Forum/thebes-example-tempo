@@ -13,6 +13,14 @@ were reassigned to a bare metal material. The underlying mesh geometry is a
 common commodity shape and is included here only to run the demonstration; it
 carries no third-party branding.
 
+**Splash.** The frozen-fluid splash in `assets/splash.glb` is derived from
+["Water Splash"](https://sketchfab.com/3d-models/water-splash-b203c05bf0c44817ab85187237fefd53)
+by [Asfandyar Hesami](https://sketchfab.com/allkhanan1), licensed under
+[CC-BY-4.0](http://creativecommons.org/licenses/by/4.0/). Modifications: the
+simulation's stand-in body and baked textures were removed, the three splash
+meshes were decimated and rescaled onto the TEMPO can's frame
+(`src-model/tools/build_splash.py`), and materials are replaced at runtime.
+
 **TEMPO** is a sample brand created solely for this demo. It is not a real
 product, company, or endorsement.
 

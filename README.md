@@ -13,7 +13,9 @@ hosted assets on-chain.
 
 - **One 3D can, everywhere.** A single shared WebGL canvas (Three.js) renders the
   can model into every slot on the page — the hero, a pinned scroll-scrubbed
-  flavour showcase, and each shop card — via per-slot scissor rectangles.
+  flavour showcase, and each shop card — via per-slot scissor rectangles. In the
+  hero, a frozen fluid splash (CC-BY, see NOTICE.md) wraps the can, tinted live
+  to the active flavour and animated with a slow counter-orbit.
 - **Scroll-driven design.** The flavour section pins and, as you scroll, the can
   spins and its label crossfades Citrus → Berry → Lime while the whole page
   re-themes. Plus a custom "scope" cursor, magnetic buttons, and mouse parallax.
