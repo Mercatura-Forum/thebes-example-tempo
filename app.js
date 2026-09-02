@@ -27,11 +27,12 @@
   };
   const FLAVOR_ORDER = ['citrus', 'berry', 'lime'];
 
+  /* formula claims, each annotating the part of the label it is true of */
   const FORMULA = [
-    { icon: 'salt', h: 'Real sodium', p: 'A full gram per can — the dose endurance research actually points to, not a token pinch.' },
-    { icon: 'drop', h: 'Fast uptake', p: 'A light glucose escort and the right osmolality move water into you, not through you.' },
-    { icon: 'leaf', h: 'Nothing fake', p: 'No artificial colours, no sucralose, no mystery blend. You can read every line on the can.' },
-    { icon: 'bolt', h: 'Zero sugar', p: 'Ten calories, no sugar crash — hydration that works whether you are racing or recovering.' },
+    { icon: 'bolt', h: 'Zero sugar', p: 'Ten calories, no crash. Sweet from nothing artificial.', side: 'l' },
+    { icon: 'drop', h: 'Fast uptake', p: 'The right osmolality moves water into you, not through you.', side: 'l' },
+    { icon: 'salt', h: 'Real sodium', p: 'A full gram per can — the dose endurance research points to, not a token pinch.', side: 'r' },
+    { icon: 'leaf', h: 'Nothing fake', p: 'No colours, no sucralose, no mystery blend. Every line is legible.', side: 'r' },
   ];
 
   const INGREDIENTS = [
@@ -117,6 +118,7 @@
     if ($('#flHead')) $('#flHead').textContent = f.head;
     if ($('#flName')) $('#flName').textContent = f.name;
     if ($('#flWord')) $('#flWord').textContent = f.name;
+    if ($('#fdFlav')) $('#fdFlav').textContent = f.name;
     if ($('#flBlurb')) $('#flBlurb').textContent = f.blurb;
     if ($('#flSpec')) $('#flSpec').innerHTML =
       f.spec.map((s) => '<li><span>' + s[0] + '</span><b>' + s[1] + '</b></li>').join('');
@@ -125,11 +127,21 @@
 
   /* ── Renderers ── */
   function renderFormula() {
-    // --i places each card on the rotating ring (wide screens only); the ring
-    // div is display:contents in the flat grid, so small screens see no change
-    $('#formulaCards').innerHTML = '<div class="cards__ring">' + FORMULA.map((c, i) =>
-      '<article class="card" style="--i:' + i + '">' + svg(ICONS[c.icon], 'card__icon') +
-      '<h3>' + c.h + '</h3><p>' + c.p + '</p></article>').join('') + '</div>';
+    // label teardown: a flat CSS label in the middle, claims as spec callouts
+    const note = (c) => '<div class="fnote reveal"><h3>' + svg(ICONS[c.icon]) + c.h + '</h3><p>' + c.p + '</p></div>';
+    const col = (s) => FORMULA.filter((c) => c.side === s).map(note).join('');
+    $('#formulaDiagram').innerHTML =
+      '<div class="fdiag__col fdiag__col--l">' + col('l') + '</div>' +
+      '<div class="fdiag__label reveal" aria-hidden="true">' +
+        '<span class="fdiag__strip">Sparkling &middot; Zero Sugar</span>' +
+        '<span class="fdiag__mark">Tempo</span>' +
+        '<span class="fdiag__flav" id="fdFlav">Citrus Strike</span>' +
+        '<span class="fdiag__grow"></span>' +
+        '<span class="fdiag__osmo">Osmolality 290 mOsm/kg</span>' +
+        '<span class="fdiag__pill">1g Sodium &middot; 0g Sugar</span>' +
+        '<span class="fdiag__micro">Carbonated water &middot; coconut water (12%) &middot; Red Sea salt &middot; potassium citrate &middot; magnesium glycinate &middot; natural citrus &middot; vitamin C &middot; zinc &mdash; that\'s the whole list.</span>' +
+      '</div>' +
+      '<div class="fdiag__col fdiag__col--r">' + col('r') + '</div>';
   }
   function renderDots() {
     $('#flDots').innerHTML = FLAVOR_ORDER.map((k) =>
