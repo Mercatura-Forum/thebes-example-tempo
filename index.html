@@ -9,7 +9,9 @@
   <link rel="preconnect" href="https://api.fontshare.com" />
   <link rel="preconnect" href="https://cdn.fontshare.com" crossorigin />
   <link href="https://api.fontshare.com/v2/css?f[]=clash-display@500,600,700&f[]=switzer@400,500,600,700&display=swap" rel="stylesheet" />
-  <link rel="stylesheet" href="styles.css?v=7" />
+  <link rel="preconnect" href="https://fonts.gstatic.com" crossorigin />
+  <link href="https://fonts.googleapis.com/css2?family=Cairo:wght@600;700&display=swap" rel="stylesheet" />
+  <link rel="stylesheet" href="styles.css?v=8" />
 </head>
 <body>
   <a class="skip-link" href="#main">Skip to content</a>
@@ -67,7 +69,7 @@
       <div class="wrap hero__inner">
         <div class="hero__copy">
           <p class="eyebrow reveal">Rapid electrolyte hydration</p>
-          <h1 class="hero__title reveal">Keep your<br /><span class="hl">tempo.</span></h1>
+          <h1 class="hero__title reveal">Keep your<br /><span class="hl">tempo<span class="beat">.</span></span></h1>
           <p class="hero__lede reveal">Five electrolytes, zero sugar, and enough salt to actually matter. Built for the last rep, the final kilometre, the second half.</p>
           <div class="hero__cta reveal">
             <a class="btn btn--solid" href="#shop" data-magnetic data-cursor="shop">Shop flavours</a>
@@ -110,6 +112,7 @@
         <div class="flavors__stage">
           <div class="flavors__viz">
             <div class="flavors__glow" aria-hidden="true"></div>
+            <div class="flavors__word" id="flWord" aria-hidden="true">Citrus Strike</div>
             <div class="can-slot can-slot--stage" data-can3d data-role="stage">
               <img class="can-fallback" alt="A can of TEMPO" />
             </div>
@@ -172,6 +175,7 @@
           <p class="eyebrow reveal">Find us cold</p>
           <h2 class="section-title reveal">On the shelf near you.</h2>
           <p class="reveal">Three cities to start. More every season — the newsletter gets the map first.</p>
+          <div class="stockists__map reveal" id="egyptMap" aria-hidden="true"></div>
         </div>
         <div class="stockists__grid" id="stockistGrid"></div>
       </div>
@@ -212,6 +216,7 @@
       <div class="footer__brand">
         <span class="brand__word">TEMPO</span>
         <p>Rapid electrolyte hydration.<br />Drink the pace.</p>
+        <p class="footer__ar" lang="ar" dir="rtl">اشرب على إيقاعك.</p>
       </div>
       <nav class="footer__cols" aria-label="Footer">
         <div>
@@ -238,11 +243,12 @@
       <p>© <span id="year"></span> TEMPO Hydration Co. — Cairo, Egypt. All rights reserved.</p>
       <p><a href="#" data-noop>Privacy</a> · <a href="#" data-noop>Terms</a> · <a href="#top">Back to top ↑</a></p>
     </div>
+    <div class="footer__giant" aria-hidden="true">Tempo</div>
   </footer>
 
   <div class="toast" id="toast" role="status" aria-live="polite" hidden></div>
 
-  <script src="app.js?v=8"></script>
+  <script src="app.js?v=9"></script>
   <script type="importmap">
   {
     "imports": {

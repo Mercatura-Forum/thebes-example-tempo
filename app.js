@@ -116,6 +116,7 @@
     const f = FLAVORS[state.flavor];
     if ($('#flHead')) $('#flHead').textContent = f.head;
     if ($('#flName')) $('#flName').textContent = f.name;
+    if ($('#flWord')) $('#flWord').textContent = f.name;
     if ($('#flBlurb')) $('#flBlurb').textContent = f.blurb;
     if ($('#flSpec')) $('#flSpec').innerHTML =
       f.spec.map((s) => '<li><span>' + s[0] + '</span><b>' + s[1] + '</b></li>').join('');
@@ -336,6 +337,35 @@
     $$('[data-noop]').forEach((a) => a.addEventListener('click', (e) => { e.preventDefault(); showToast('This is a demo link — no page behind it.'); }));
   }
 
+  /* ── Dotted Egypt map (stockists) ── */
+  function renderMap() {
+    const box = $('#egyptMap'); if (!box) return;
+    // rough Egypt outline as [lon, lat] — Mediterranean, Sinai, the gulfs,
+    // the Red Sea coast, then the straight southern and western borders
+    const EG = [[24.7,31.4],[27,31.2],[28.8,30.9],[30.3,31.5],[31.2,31.6],[32.1,31.1],[33.7,31.1],
+      [34.25,31.25],[34.9,29.5],[34.4,28.2],[33.9,27.75],[33.1,28.4],[32.6,29.4],[32.55,29.95],
+      [32.3,29.6],[32.6,28.5],[33.4,27.4],[34.1,26.5],[35.2,24.9],[35.6,23.9],[36.9,22],[24.9,22]];
+    const CITIES = [[31.24,30.05],[29.92,31.2],[33.68,27.39]];   // Cairo, Alexandria, El Gouna
+    const X = (lon) => (lon - 24.2) * 23, Y = (lat) => (32.1 - lat) * 23;
+    const inside = (x, y) => {                                   // ray casting
+      let inp = false;
+      for (let i = 0, j = EG.length - 1; i < EG.length; j = i++) {
+        const xi = X(EG[i][0]), yi = Y(EG[i][1]), xj = X(EG[j][0]), yj = Y(EG[j][1]);
+        if ((yi > y) !== (yj > y) && x < ((xj - xi) * (y - yi)) / (yj - yi) + xi) inp = !inp;
+      }
+      return inp;
+    };
+    let s = '';
+    for (let y = 4; y < 236; y += 8)
+      for (let x = 4; x < 300; x += 8)
+        if (inside(x, y)) s += '<circle class="dot" cx="' + x + '" cy="' + y + '" r="1.7"/>';
+    CITIES.forEach(([lon, lat], i) => {
+      s += '<circle class="pin-ring" cx="' + X(lon) + '" cy="' + Y(lat) + '" r="7" style="animation-delay:' + i * 0.8 + 's"/>' +
+           '<circle class="pin" cx="' + X(lon) + '" cy="' + Y(lat) + '" r="4"/>';
+    });
+    box.innerHTML = '<svg viewBox="0 0 300 240" role="img" aria-label="Map of Egypt with our three cities">' + s + '</svg>';
+  }
+
   /* ── Boot ── */
   function init() {
     $('#year').textContent = new Date().getFullYear();
@@ -346,6 +376,7 @@
     renderPress();
     renderStockists();
     renderShop();
+    renderMap();
     setFlavor('citrus');
     initMobileNav(); initNewsletter(); initReveal(); initCountUp();
     initFlavorScrub(); initScrollProgress(); initCursor(); initMagnetic(); initParallax(); initNoop();

@@ -544,3 +544,77 @@ body.webgl .can-fallback { visibility: hidden; }   /* the canvas draws over the 
   .can-slot--hero { height: 420px; }
   .can-slot--stage { width: 100%; height: 58%; top: 0; bottom: auto; }
 }
+
+/* ============================================================
+   Aesthetic pass: grain, stage word, map, beat, giant footer
+   ============================================================ */
+
+/* film grain over the whole frame — makes flat colour read as print */
+body::after {
+  content: ''; position: fixed; inset: 0; z-index: 380; pointer-events: none; opacity: .035;
+  background-image: url("data:image/svg+xml,%3Csvg xmlns='http://www.w3.org/2000/svg' width='140' height='140'%3E%3Cfilter id='n'%3E%3CfeTurbulence type='fractalNoise' baseFrequency='0.9' numOctaves='2'/%3E%3C/filter%3E%3Crect width='140' height='140' filter='url(%23n)'/%3E%3C/svg%3E");
+}
+
+/* themed selection + scrollbar */
+::selection { background: color-mix(in srgb, var(--accent) 35%, transparent); }
+html { scrollbar-width: thin; scrollbar-color: var(--accent) transparent; }
+
+/* giant outlined flavour name behind the stage can */
+.flavors__word {
+  position: absolute; z-index: 0; font-family: var(--font-display); font-weight: 600;
+  font-size: clamp(2.4rem, 11vw, 10rem); letter-spacing: .04em; text-transform: uppercase;
+  white-space: nowrap; color: transparent; user-select: none;
+  -webkit-text-stroke: 1px color-mix(in srgb, var(--accent) 55%, transparent);
+}
+
+/* metronome beat on the hero full stop */
+.hl .beat { display: inline-block; transform-origin: 30% 70%; animation: beat 1s ease-in-out infinite; }
+@keyframes beat { 0%, 45%, 100% { transform: scale(1); } 8% { transform: scale(1.35); } }
+
+/* oversized wordmark cropped by the page bottom */
+.footer { overflow: hidden; }
+.footer__giant {
+  font-family: var(--font-display); font-weight: 600; text-transform: uppercase;
+  font-size: 19vw; line-height: .72; text-align: center; letter-spacing: .02em;
+  color: color-mix(in srgb, var(--ink) 5%, transparent);
+  margin: 2.5rem 0 -0.28em; user-select: none;
+}
+
+/* story timeline draws itself in as you scroll (where supported) */
+@supports (animation-timeline: view()) {
+  @media (prefers-reduced-motion: no-preference) {
+    .timeline::before {
+      transform-origin: top; animation: tl-draw linear both;
+      animation-timeline: view(); animation-range: entry 10% cover 60%;
+    }
+  }
+}
+@keyframes tl-draw { from { transform: scaleY(0); } to { transform: scaleY(1); } }
+
+/* flavour-tinted shadow under each shop can */
+.sku__art { position: relative; }
+.sku__art .can-fallback { position: relative; }
+.sku__art::before {
+  content: ''; position: absolute; left: 50%; bottom: 8%; width: 62%; height: 12%;
+  transform: translateX(-50%); border-radius: 50%; filter: blur(10px); opacity: .35;
+}
+.sku__art[data-flavor='citrus']::before { background: #ff7a1a; }
+.sku__art[data-flavor='berry']::before { background: #5566ff; }
+.sku__art[data-flavor='lime']::before { background: #2fbf5d; }
+
+/* dotted Egypt map (stockists) */
+.stockists__map { margin-top: 2.2rem; max-width: 300px; color: var(--ink); }
+.stockists__map .dot { fill: currentColor; opacity: .16; }
+.stockists__map .pin { fill: var(--accent); }
+.stockists__map .pin-ring {
+  fill: none; stroke: var(--accent); stroke-width: 1.5; opacity: 0;
+  transform-origin: center; transform-box: fill-box; animation: pin-pulse 2.4s ease-out infinite;
+}
+@keyframes pin-pulse { 0% { transform: scale(.4); opacity: .8; } 70%, 100% { transform: scale(1.9); opacity: 0; } }
+
+/* arabic tagline (footer) */
+.footer__ar { font-family: 'Cairo', var(--font-body); font-weight: 600; color: var(--ink-soft); margin-top: .5rem; font-size: 1.02rem; }
+
+@media (prefers-reduced-motion: reduce) {
+  .hl .beat, .stockists__map .pin-ring { animation: none; }
+}
