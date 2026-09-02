@@ -210,7 +210,7 @@ function boot() {
       // journey camera dollies to fit the can's projected height at the current
       // tilt — the 45° diagonal is LONGER than either endpoint, so this must
       // track the real extent (can: 2.05 long, 0.72 wide; fov 24 → tan 12°)
-      const jFit = (2.05 * Math.cos(jTilt) + 0.72 * Math.sin(jTilt)) / (2 * Math.tan(Math.PI / 15)) * 1.16;
+      const jFit = (2.05 * Math.cos(jTilt) + 0.72 * Math.sin(jTilt)) / (2 * Math.tan(Math.PI / 15)) * 1.3;
       const dist = s.role === 'hero' ? 6.3 : s.role === 'stage' ? 5.0 : s.role === 'journey' ? jFit : 5.6;
       const cy = s.role === 'hero' ? 1.35 : 1;
       const cx = s.role === 'hero' ? 0.2 : 0;    // leaned mass sits up-right; recenter in the slot
@@ -231,7 +231,7 @@ function boot() {
       // hero leans 26°; the journey can tilts with scroll until it lies at 90°
       rig.rotation.z = s.role === 'hero' ? -0.45 : s.role === 'journey' ? jTilt : 0;
       // slight yaw shows the lid ellipse — the depth cue that makes it read as 3D
-      rig.rotation.y = s.role === 'journey' ? 0.14 : 0;
+      rig.rotation.y = s.role === 'journey' ? 0.11 : 0;
 
       if (splash) {
         splash.visible = s.role === 'hero';

@@ -182,7 +182,7 @@
     const inner = $('.story__inner', track);
     const list = $('#timeline');
     const items = $$('#timeline li');
-    const ROLLH = 340;
+    const ROLLH = 400;
     const lerpN = (a2, b2, t) => a2 + (b2 - a2) * t;
     const apply = (r) => {
       slot.style.left = r.left + 'px'; slot.style.top = r.top + 'px';
@@ -208,12 +208,12 @@
           items.forEach((el) => el.classList.remove('printed'));
         };
         let tilt, spin = 0, clip = false;
-        if (tr.top > H * 0.85) {                    // A: upright at home in 02
+        if (tr.top > H * 0.5) {                     // A: upright at home in 02
           tilt = 0;
           apply(home.getBoundingClientRect());
           hide();
         } else if (tr.top > 0) {                    // B: tilt + travel to the top of 03
-          const t = 1 - tr.top / (H * 0.85);
+          const t = 1 - tr.top / (H * 0.5);
           const e = t * t * (3 - 2 * t);            // smoothstep
           tilt = e * Math.PI / 2;
           const hr = home.getBoundingClientRect();
