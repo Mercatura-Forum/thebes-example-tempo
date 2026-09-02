@@ -583,9 +583,13 @@ body::after {
   background-image: url("data:image/svg+xml,%3Csvg xmlns='http://www.w3.org/2000/svg' width='140' height='140'%3E%3Cfilter id='n'%3E%3CfeTurbulence type='fractalNoise' baseFrequency='0.9' numOctaves='2'/%3E%3C/filter%3E%3Crect width='140' height='140' filter='url(%23n)'/%3E%3C/svg%3E");
 }
 
-/* themed selection + scrollbar */
+/* themed selection */
 ::selection { background: color-mix(in srgb, var(--accent) 35%, transparent); }
-html { scrollbar-width: thin; scrollbar-color: var(--accent) transparent; }
+/* no scrollbar: the page is meant to be ridden through, not skipped — the
+   accent progress bar up top is the position cue. Scrolling itself still
+   works everywhere (wheel, touch, keys). */
+html { scrollbar-width: none; }
+html::-webkit-scrollbar, body::-webkit-scrollbar { width: 0; height: 0; display: none; }
 
 /* giant outlined flavour name behind the stage can */
 .flavors__word {
