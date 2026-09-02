@@ -35,7 +35,7 @@
   ];
 
   const INGREDIENTS = [
-    { k: 'Sodium', n: '01', h: 'Sodium — the one that matters', p: 'You lose it by the gram in sweat, and it is what pulls water into your bloodstream. TEMPO carries a full 1000–1200mg per can, sourced from sea salt.' },
+    { k: 'Sodium', n: '01', h: 'Sodium — the one that matters', p: 'You lose it by the gram in sweat, and it is what pulls water into your bloodstream. TEMPO carries a full 1000–1200mg per can, sourced from Red Sea salt.' },
     { k: 'Potassium', n: '02', h: 'Potassium', p: 'Partners with sodium to move fluid into your cells and keep muscles firing cleanly through the back half of a session.' },
     { k: 'Magnesium', n: '03', h: 'Magnesium', p: 'The mineral most of us run low on. It supports energy metabolism and helps quiet the late-session cramps before they start.' },
     { k: 'Chloride', n: '04', h: 'Chloride', p: 'The quiet half of salt. It keeps your fluid balance and blood pH steady while everything else is working hard.' },
@@ -44,9 +44,9 @@
   ];
 
   const TIMELINE = [
-    { y: '2021', h: 'A bonk on the Rimutakas', p: 'Our founder cramped out of a race she should have finished, stared at a sugar-bomb sports drink, and started reading labels that night.' },
-    { y: '2022', h: 'The kitchen-bench formula', p: 'Forty batches, one blender and a lot of salt later, the first drinkable version of TEMPO existed in three unlabelled bottles.' },
-    { y: '2023', h: 'First cans, first run club', p: 'We printed 5,000 cans of Citrus Strike and handed most of them out at Saturday parkruns. They came back for the recipe.' },
+    { y: '2021', h: 'A bonk on the Sokhna road', p: 'Our founder cramped out of a race she should have finished, stared at a sugar-bomb sports drink, and started reading labels that night.' },
+    { y: '2022', h: 'The kitchen-counter formula', p: 'Forty batches, one blender and a lot of salt later, the first drinkable version of TEMPO existed in three unlabelled bottles.' },
+    { y: '2023', h: 'First cans, first run club', p: 'We printed 5,000 cans of Citrus Strike and handed most of them out at Friday-morning runs in Cairo. They came back for the recipe.' },
     { y: '2024', h: 'Arctic Berry & Lime Charge', p: 'Two new flavours, a real cannery, and a promise we still keep: nothing on the can we would not drink mid-race.' },
     { y: '2025', h: 'On the shelf, on the start line', p: 'Now in three cities and a few hundred gyms, cafés and bike shops — with the same one-gram-of-sodium backbone we started with.' },
   ];
@@ -58,15 +58,15 @@
   ];
 
   const STOCKISTS = [
-    { city: 'Auckland', meta: 'Cafés, gyms & bike shops across the isthmus', count: '38 spots' },
-    { city: 'Wellington', meta: 'From Te Aro run clubs to Miramar cafés', count: '21 spots' },
-    { city: 'Christchurch', meta: 'Riccarton, the Port Hills trailheads & more', count: '17 spots' },
+    { city: 'Cairo', meta: 'Cafés, gyms & bike shops from Zamalek to New Cairo', count: '38 spots' },
+    { city: 'Alexandria', meta: 'Run clubs & cafés along the Corniche', count: '21 spots' },
+    { city: 'El Gouna', meta: 'The tri club, marina cafés & kite beaches', count: '17 spots' },
   ];
 
   const SKUS = [
-    { h: '4-Pack', desc: 'A short stack of one flavour. The easy way to find your pace.', price: '18', unit: '/ 4 cans', tag: '', featured: false },
-    { h: '12-Case', desc: 'The training case. One flavour, twelve cans, best value per pour.', price: '48', unit: '/ 12 cans', tag: 'Most popular', featured: true },
-    { h: 'Variety Case', desc: 'Four of each — Citrus Strike, Arctic Berry, Lime Charge. Meet all three.', price: '50', unit: '/ 12 cans', tag: '', featured: false },
+    { h: '4-Pack', desc: 'A short stack of one flavour. The easy way to find your pace.', price: '200', unit: '/ 4 cans', tag: '', featured: false },
+    { h: '12-Case', desc: 'The training case. One flavour, twelve cans, best value per pour.', price: '540', unit: '/ 12 cans', tag: 'Most popular', featured: true },
+    { h: 'Variety Case', desc: 'Four of each — Citrus Strike, Arctic Berry, Lime Charge. Meet all three.', price: '560', unit: '/ 12 cans', tag: '', featured: false },
   ];
 
   const ICONS = {
@@ -176,7 +176,7 @@
         '<div class="sku__art can-slot" data-can3d data-role="sku" data-flavor="' + key + '">' +
         '<img class="can-fallback" src="assets/can_' + key + '.png?v=4" alt="A can of TEMPO ' + FLAVORS[key].name + '" /></div>' +
         '<h3>' + s.h + '</h3><p class="sku__desc">' + s.desc + '</p>' +
-        '<div class="sku__price">$' + s.price + ' <small>' + s.unit + '</small></div>' +
+        '<div class="sku__price">' + s.price + ' <small>EGP ' + s.unit + '</small></div>' +
         '<div class="sku__buy"><button class="btn btn--solid" data-add="' + s.h + '" data-magnetic data-cursor="add">Add to cart</button></div>' +
         '<button class="sku__sub" data-sub="' + s.h + '">Subscribe &amp; save 15%</button></article>';
     }).join('');

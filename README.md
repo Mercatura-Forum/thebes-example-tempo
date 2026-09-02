@@ -1,6 +1,6 @@
 # TEMPO — an on-chain WebGL storefront
 
-A single-page site for **TEMPO**, a sample sports-drink brand, served fully
+A single-page site for **TEMPO**, a sample Egyptian sports-drink brand, served fully
 on-chain via [Thebes Protocol](https://thebesprotocol.com) as certified static
 assets. No server, no build step, no framework.
 
