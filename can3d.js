@@ -61,7 +61,7 @@ function boot() {
   const texLoader = new THREE.TextureLoader();
   const textures = {};
   ['citrus', 'berry', 'lime'].forEach((k) => {
-    const t = texLoader.load('assets/label_' + k + '.png');
+    const t = texLoader.load('assets/label_' + k + '.png?v=2');
     t.colorSpace = THREE.SRGBColorSpace; t.flipY = false; t.anisotropy = 8;
     t.wrapS = THREE.RepeatWrapping;   // UV wraps the full circumference; keep the seam clean
     textures[k] = t;
@@ -70,7 +70,7 @@ function boot() {
   let labelMat = null, current = 'citrus', ready = false;
   let targetSpin = 0, spin = 0, targetTiltX = 0, targetTiltY = 0, tiltX = 0, tiltY = 0;
 
-  new GLTFLoader().load('assets/tempo-can.glb', (gltf) => {
+  new GLTFLoader().load('assets/tempo-can.glb?v=2', (gltf) => {
     gltf.scene.traverse((o) => {
       if (!o.isMesh || !o.material) return;
       const m = o.material;

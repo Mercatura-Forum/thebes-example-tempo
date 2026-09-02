@@ -94,7 +94,7 @@
 
   /* ── Static fallback image (shown only when WebGL is unavailable) ── */
   function updateFallbacks() {
-    const src = 'assets/can_' + state.flavor + '.png';
+    const src = 'assets/can_' + state.flavor + '.png?v=2';
     $$('.can-slot--hero .can-fallback, .can-slot--stage .can-fallback').forEach((img) => {
       if (img.getAttribute('src') !== src) img.setAttribute('src', src);
     });
@@ -174,7 +174,7 @@
       return '<article class="sku' + (s.featured ? ' sku--featured' : '') + '">' +
         (s.tag ? '<span class="sku__tag">' + s.tag + '</span>' : '') +
         '<div class="sku__art can-slot" data-can3d data-role="sku" data-flavor="' + key + '">' +
-        '<img class="can-fallback" src="assets/can_' + key + '.png" alt="A can of TEMPO ' + FLAVORS[key].name + '" /></div>' +
+        '<img class="can-fallback" src="assets/can_' + key + '.png?v=2" alt="A can of TEMPO ' + FLAVORS[key].name + '" /></div>' +
         '<h3>' + s.h + '</h3><p class="sku__desc">' + s.desc + '</p>' +
         '<div class="sku__price">$' + s.price + ' <small>' + s.unit + '</small></div>' +
         '<div class="sku__buy"><button class="btn btn--solid" data-add="' + s.h + '" data-magnetic data-cursor="add">Add to cart</button></div>' +
