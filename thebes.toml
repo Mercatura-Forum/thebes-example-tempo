@@ -15,7 +15,7 @@ routing = "smart"
 
 [canisters.web]
 type = "frontend"
-cid = "auto"
+cid = 59257520488477
 wasm = "asset_canister.wasm"
 bundle = "dist"
 health_check_url = "/index.html"
