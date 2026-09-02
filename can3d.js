@@ -55,8 +55,22 @@ function boot() {
   const key = new THREE.DirectionalLight(0xffffff, 2.2); key.position.set(3, 6, 5); scene.add(key);
   const rim = new THREE.DirectionalLight(0xffffff, 1.1); rim.position.set(-4, 2, -3); scene.add(rim);
 
+  // rig carries the hero lean for the WHOLE composition (can + splash together),
+  // pivoted at the can's mid-height so it leans in place instead of sweeping
+  // sideways. With rig z at 0 the pair of offsets cancels exactly, so the
+  // stage and the shop cards render precisely as before.
+  const rig = new THREE.Group();
+  rig.position.set(0, 1, 0);
+  scene.add(rig);
   const group = new THREE.Group();
-  scene.add(group);
+  group.position.set(0, -1, 0);
+  rig.add(group);
+  // the splash rides the rig (leans with the can) but NOT the group: group.y
+  // revolves continuously in the hero, and a revolving splash sweeps its long
+  // arms through the slot edges — the scissor slices them into hard flat cuts
+  const splashHolder = new THREE.Group();
+  splashHolder.position.set(0, -1, 0);
+  rig.add(splashHolder);
 
   const texLoader = new THREE.TextureLoader();
   const textures = {};
@@ -70,6 +84,8 @@ function boot() {
   let labelMat = null, current = 'citrus', ready = false;
   let targetSpin = 0, spin = 0, targetTiltX = 0, targetTiltY = 0, tiltX = 0, tiltY = 0;
   let splash = null, splashMat = null;
+  // hero slot rect in DEVICE pixels (gl_FragCoord space) for the edge feather
+  const uSlot = { value: new THREE.Vector4(0, 0, 1, 1) };
 
   function tintSplash(k) {
     if (!splashMat) return;
@@ -93,12 +109,29 @@ function boot() {
       envMapIntensity: 0.9, specularIntensity: 0.35, ior: 1.15,
       depthWrite: false, side: THREE.DoubleSide,
     });
+    // screen-space edge feather: the splash arms are longer than any sane
+    // framing can contain, so instead of letting the scissor slice them into
+    // hard flat cuts, fade them out over the outer 12% of the hero slot —
+    // every tail then ENDS the way the in-frame ones do, on any viewport
+    splashMat.onBeforeCompile = (sh) => {
+      sh.uniforms.uSlot = uSlot;
+      sh.fragmentShader = sh.fragmentShader
+        .replace('#include <clipping_planes_pars_fragment>',
+          '#include <clipping_planes_pars_fragment>\nuniform vec4 uSlot;')
+        .replace('#include <dithering_fragment>', `#include <dithering_fragment>
+          vec2 relF = (gl_FragCoord.xy - uSlot.xy) / uSlot.zw;
+          vec2 dpxF = min(relF, 1.0 - relF) * uSlot.zw;
+          float featherF = 0.12 * min(uSlot.z, uSlot.w);
+          gl_FragColor.a *= smoothstep(0.0, featherF, min(dpxF.x, dpxF.y));`);
+    };
     g.scene.traverse((o) => { if (o.isMesh) o.material = splashMat; });
     splash = g.scene;
     splash.visible = false;
     splash.scale.setScalar(1.22);      // reads bigger than the can
-    splash.rotation.z = -0.45;         // ~26 deg diagonal tilt
-    group.add(splash);
+    // no local tilt: the splash leans with the whole rig so the can and the
+    // water read as one tilted composition, not a straight can in a tilted splash
+    splash.rotation.y = 1.1;           // base pose — keeps the wordmark clear, even under reduced motion
+    splashHolder.add(splash);
     tintSplash(current);
   }, undefined, () => { if (window.console) console.warn('[can3d] splash unavailable'); });
 
@@ -158,26 +191,36 @@ function boot() {
       renderer.setViewport(left, bottom, w, h);
       renderer.setScissor(left, bottom, w, h);
 
-      const dist = s.role === 'hero' ? 5.8 : s.role === 'stage' ? 5.0 : 5.6;
+      // hero: camera rides higher so the composition sits low in the slot —
+      // the splash tails must END inside the frame (top included), never get
+      // sliced by the scissor edge into a hard straight cut
+      const dist = s.role === 'hero' ? 6.3 : s.role === 'stage' ? 5.0 : 5.6;
+      const cy = s.role === 'hero' ? 1.35 : 1;
+      const cx = s.role === 'hero' ? 0.2 : 0;    // leaned mass sits up-right; recenter in the slot
       camera.aspect = w / h;
-      camera.position.set(0, 1, dist);
+      camera.position.set(cx, cy, dist);
       camera.updateProjectionMatrix();
-      camera.lookAt(0, 1, 0);
+      camera.lookAt(cx, cy, 0);
 
       let ry, rx = 0;
       if (s.role === 'stage') { ry = spin + tiltY + idle * 0.5; rx = tiltX * 0.5; }
       else if (s.role === 'hero') { ry = idle * 0.8 + tiltY * 0.4; rx = tiltX * 0.25; }
       else { ry = idle * 0.9 + s.phase; }
       group.rotation.set(rx * 0.6, ry, 0);
+      rig.rotation.z = s.role === 'hero' ? -0.45 : 0;   // ~26 deg lean, can + splash as one
 
       if (splash) {
         splash.visible = s.role === 'hero';
+        if (splash.visible) {
+          const pr = renderer.getPixelRatio();
+          uSlot.value.set(left * pr, bottom * pr, w * pr, h * pr);
+        }
         if (splash.visible && !reduced) {
           // oscillate around the vetted pose instead of a full orbit — a
           // continuous turn drags every thick tail through the slot edge
           // where the scissor slices it into a hard straight cut
-          splash.rotation.y = 1.1 + Math.sin(time * 0.00035) * 0.25;
-          splash.position.y = Math.sin(time * 0.0011) * 0.05;
+          splash.rotation.y = 1.1 + Math.sin(time * 0.00035) * 0.2;
+          splash.position.y = Math.sin(time * 0.0011) * 0.04;
           for (let i = 0; i < splash.children.length; i++)
             splash.children[i].rotation.y = Math.sin(time * 0.0007 + i * 2.1) * 0.06;
         }
