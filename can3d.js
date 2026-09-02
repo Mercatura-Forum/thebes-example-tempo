@@ -63,6 +63,7 @@ function boot() {
   ['citrus', 'berry', 'lime'].forEach((k) => {
     const t = texLoader.load('assets/label_' + k + '.png');
     t.colorSpace = THREE.SRGBColorSpace; t.flipY = false; t.anisotropy = 8;
+    t.wrapS = THREE.RepeatWrapping;   // UV wraps the full circumference; keep the seam clean
     textures[k] = t;
   });
 
