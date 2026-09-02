@@ -1,6 +1,6 @@
 # NOTICE
 
-The source code, styling, iconography, logo, and all TEMPO brand artwork in this
+The source code, styling, logo, and all TEMPO brand artwork in this
 repository — including the generated can labels (`assets/label_*.png`) and the
 static can renders (`assets/can_*.png`) — are original works, released under the
 MIT License (see [LICENSE](LICENSE)).
@@ -20,6 +20,9 @@ by [Asfandyar Hesami](https://sketchfab.com/allkhanan1), licensed under
 simulation's stand-in body and baked textures were removed, the three splash
 meshes were decimated and rescaled onto the TEMPO can's frame
 (`src-model/tools/build_splash.py`), and materials are replaced at runtime.
+
+**Icons.** The UI icons are from [Tabler Icons](https://tabler.io/icons)
+(MIT), inlined in `app.js` and `index.html`.
 
 **TEMPO** is a sample brand created solely for this demo. It is not a real
 product, company, or endorsement.

@@ -69,12 +69,13 @@
     { h: 'Variety Case', desc: 'Four of each — Citrus Strike, Arctic Berry, Lime Charge. Meet all three.', price: '560', unit: '/ 12 cans', tag: '', featured: false },
   ];
 
+  /* Tabler Icons (MIT) — see NOTICE.md */
   const ICONS = {
-    salt: '<path d="M12 3v4M9 7h6l1.5 11a2 2 0 0 1-2 2h-5a2 2 0 0 1-2-2L9 7z"/><path d="M11 12h.01M13 15h.01M10 16h.01"/>',
-    drop: '<path d="M12 3s6 6.5 6 10.5a6 6 0 1 1-12 0C6 9.5 12 3 12 3z"/>',
-    leaf: '<path d="M5 19c0-8 6-13 14-13 0 8-5 14-14 14"/><path d="M5 19c3-4 6-6 10-7"/>',
-    bolt: '<path d="M13 2 4 14h7l-2 8 9-12h-7l2-8z"/>',
-    pin: '<path d="M12 21s7-6.2 7-11a7 7 0 1 0-14 0c0 4.8 7 11 7 11z"/><circle cx="12" cy="10" r="2.5"/>',
+    salt: '<path d="M12 13v.01"/><path d="M10 16v.01"/><path d="M14 16v.01"/><path d="M7.5 8h9l-.281 -2.248a2 2 0 0 0 -1.985 -1.752h-4.468a2 2 0 0 0 -1.986 1.752l-.28 2.248z"/><path d="M7.5 8l-1.612 9.671a2 2 0 0 0 1.973 2.329h8.278a2 2 0 0 0 1.973 -2.329l-1.612 -9.671"/>',
+    drop: '<path d="M7.502 19.423c2.602 2.105 6.395 2.105 8.996 0c2.602 -2.105 3.262 -5.708 1.566 -8.546l-4.89 -7.26c-.42 -.625 -1.287 -.803 -1.936 -.397a1.376 1.376 0 0 0 -.41 .397l-4.893 7.26c-1.695 2.838 -1.035 6.441 1.567 8.546z"/><path d="M5 14h14"/>',
+    leaf: '<path d="M5 21c.5 -4.5 2.5 -8 7 -10"/><path d="M9 18c6.218 0 10.5 -3.288 11 -12v-2h-4.014c-9 0 -11.986 4 -12 9c0 1 0 3 2 5h3z"/>',
+    bolt: '<path d="M13 3l0 7l6 0l-8 11l0 -7l-6 0l8 -11"/>',
+    pin: '<path d="M9 11a3 3 0 1 0 6 0a3 3 0 0 0 -6 0"/><path d="M17.657 16.657l-4.243 4.243a2 2 0 0 1 -2.827 0l-4.244 -4.243a8 8 0 1 1 11.314 0z"/>',
   };
   const svg = (inner, cls) =>
     `<svg class="${cls || ''}" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="1.7" stroke-linecap="round" stroke-linejoin="round" aria-hidden="true">${inner}</svg>`;
