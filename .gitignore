@@ -11,3 +11,9 @@ src-model/tools/out/
 
 node_modules/
 .DS_Store
+
+# donor splash mesh — input to src-model/tools/build_splash.py, not redistributed
+/water_splash.glb
+
+# local scratch (screenshots etc.)
+/image.png
