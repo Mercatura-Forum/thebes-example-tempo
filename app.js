@@ -86,7 +86,7 @@
   /* ── Static fallback image (shown only when WebGL is unavailable) ── */
   function updateFallbacks() {
     const src = 'assets/can_' + state.flavor + '.png?v=5';
-    $$('.can-slot--hero .can-fallback, .can-slot--stage .can-fallback, .can-slot--roll .can-fallback').forEach((img) => {
+    $$('.can-slot--hero .can-fallback, .can-slot--stage .can-fallback, .ing__canhome .can-fallback').forEach((img) => {
       if (img.getAttribute('src') !== src) img.setAttribute('src', src);
     });
   }
@@ -171,37 +171,69 @@
       '<div><h3>' + t.h + '</h3><p>' + t.p + '</p></div></li>').join('');
   }
 
-  /* ── Story scrub: a huge can lies across the column, covering the years.
-     Scrolling rolls it down and off; the story prints in its wake — the
-     reveal line rides the can's upper curve. ── */
-  function initStoryScrub() {
-    const track = $('#storyTrack'); if (!track) return;
+  /* ── Can journey: upright beside the ingredients (02), tilts to 90 as the
+     story arrives (03), then rolls down the page printing the years.
+     One can, one fixed slot, three scroll phases. ── */
+  function initCanJourney() {
+    const slot = $('.can-slot--journey'); if (!slot) return;
+    const home = $('#canHome');
+    const track = $('#storyTrack');
     const stage = $('.story__stage', track);
-    const slot = $('.can-slot--roll', track);
+    const inner = $('.story__inner', track);
     const list = $('#timeline');
     const items = $$('#timeline li');
+    const ROLLH = 340;
+    const lerpN = (a2, b2, t) => a2 + (b2 - a2) * t;
+    const apply = (r) => {
+      slot.style.left = r.left + 'px'; slot.style.top = r.top + 'px';
+      slot.style.width = r.width + 'px'; slot.style.height = r.height + 'px';
+    };
     let ticking = false;
     function onScroll() {
       if (ticking) return; ticking = true;
       requestAnimationFrame(() => {
         ticking = false;
-        if (window.innerWidth <= 940) {          // flat list on small screens
+        if (window.innerWidth <= 940 || !document.body.classList.contains('webgl')) {
           list.style.clipPath = '';
-          slot.style.transform = '';
           items.forEach((el) => el.classList.add('printed'));
           return;
         }
-        const top = track.getBoundingClientRect().top + window.scrollY;
-        const dist = track.offsetHeight - window.innerHeight;
-        const p = clamp((window.scrollY - top) / dist, 0, 1);
-        const slotH = slot.offsetHeight;
-        const travel = stage.clientHeight + slotH * 1.1;  // ends fully rolled off
-        const y = -slotH * 0.2 + p * travel;
-        slot.style.transform = 'translateY(' + y + 'px)';
-        const edge = y + slotH * 0.25 - list.offsetTop;   // the print line
-        list.style.clipPath = 'inset(-60px -20px calc(100% - ' + Math.max(0, edge) + 'px) -20px)';
-        items.forEach((el) => el.classList.toggle('printed', el.offsetTop < edge));
-        if (TEMPO.can && TEMPO.can.setRoll) TEMPO.can.setRoll(p);
+        const H = window.innerHeight;
+        const tr = track.getBoundingClientRect();
+        const ir = inner.getBoundingClientRect();
+        const dist = track.offsetHeight - H;
+        const roller = (topY) => ({ left: ir.left, top: topY, width: ir.width, height: ROLLH });
+        const hide = () => {
+          list.style.clipPath = 'inset(-60px -20px 100% -20px)';
+          items.forEach((el) => el.classList.remove('printed'));
+        };
+        let tilt, spin = 0, clip = false;
+        if (tr.top > H * 0.85) {                    // A: upright at home in 02
+          tilt = 0;
+          apply(home.getBoundingClientRect());
+          hide();
+        } else if (tr.top > 0) {                    // B: tilt + travel to the top of 03
+          const t = 1 - tr.top / (H * 0.85);
+          const e = t * t * (3 - 2 * t);            // smoothstep
+          tilt = e * Math.PI / 2;
+          const hr = home.getBoundingClientRect();
+          const to = roller(tr.top - ROLLH * 0.2);
+          apply({ left: lerpN(hr.left, to.left, e), top: lerpN(hr.top, to.top, e),
+                  width: lerpN(hr.width, to.width, e), height: lerpN(hr.height, to.height, e) });
+          hide();
+        } else {                                    // C: roll down, print the years
+          tilt = Math.PI / 2; clip = true;
+          const p = clamp(-tr.top / dist, 0, 1);
+          spin = p * Math.PI * 6;
+          const travel = stage.clientHeight + ROLLH * 1.1;
+          const y = -ROLLH * 0.2 + p * travel;
+          apply(roller(y));
+          const edge = y + ROLLH * 0.25 - ir.top - list.offsetTop;
+          list.style.clipPath = 'inset(-60px -20px calc(100% - ' + Math.max(0, edge) + 'px) -20px)';
+          items.forEach((el) => el.classList.toggle('printed', el.offsetTop < edge));
+        }
+        slot.dataset.clipActive = clip ? '1' : '';
+        if (TEMPO.can && TEMPO.can.setJourney) TEMPO.can.setJourney(tilt, spin);
       });
     }
     window.addEventListener('scroll', onScroll, { passive: true });
@@ -437,7 +469,7 @@
     renderMap();
     setFlavor('citrus');
     initMobileNav(); initNewsletter(); initReveal(); initCountUp();
-    initFlavorScrub(); initStoryScrub(); initScrollProgress(); initCursor(); initMagnetic(); initParallax(); initNoop();
+    initFlavorScrub(); initCanJourney(); initScrollProgress(); initCursor(); initMagnetic(); initParallax(); initNoop();
   }
   if (document.readyState === 'loading') document.addEventListener('DOMContentLoaded', init);
   else init();

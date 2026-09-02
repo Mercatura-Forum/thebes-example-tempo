@@ -283,7 +283,8 @@ img, svg { display: block; }
    Ingredients tabs
    ============================================================ */
 .ingredients { padding: clamp(4rem, 8vw, 7rem) 0; }
-.ingredients__inner { display: grid; grid-template-columns: .8fr 1.2fr; gap: 3rem; align-items: start; }
+.ingredients__inner { display: grid; grid-template-columns: 280px .75fr 1.25fr; gap: 2.5rem; align-items: start; }
+.ing__canhome { grid-row: 1 / span 2; position: sticky; top: 90px; height: 480px; }
 .ingredients__intro p { color: var(--ink-soft); margin-top: 1rem; }
 .ing { border: 1px solid var(--line); border-radius: var(--radius); overflow: hidden; background: var(--surface); }
 .ing__tabs { display: flex; flex-wrap: wrap; border-bottom: 1px solid var(--line); }
@@ -323,8 +324,7 @@ img, svg { display: block; }
 .story__years h3 { font-size: 1.08rem; margin-bottom: .25rem; }
 .story__years p { color: var(--ink-soft); font-size: .93rem; }
 /* the roller itself: spans the whole column, rides over the years */
-.story__inner .can-slot--roll { position: absolute; left: 0; right: 0; top: 0; height: clamp(260px, 40vh, 380px); will-change: transform; }
-.story__inner .can-slot--roll .can-fallback { height: 72%; margin: auto; object-fit: contain; transform: rotate(90deg); }
+.can-slot--journey { position: fixed !important; left: 0; top: -600px; width: 10px; height: 10px; pointer-events: none; }
 
 /* ============================================================
    Press
@@ -442,7 +442,8 @@ img, svg { display: block; }
   .story__years { gap: 1.5rem; clip-path: none !important; }
   .story__years li { opacity: 1; transform: none; grid-template-columns: 72px 1fr; gap: 1rem; }
   .story__years li:nth-child(even) { margin-left: 0; }
-  .can-slot--roll { display: none; }
+  .can-slot--journey, .ing__canhome { display: none; }
+  .ingredients__inner { grid-template-columns: 1fr; }
 }
 @media (max-width: 560px) {
   body { font-size: 16px; }
@@ -658,3 +659,5 @@ html { scrollbar-width: thin; scrollbar-color: var(--accent) transparent; }
   .fdiag__col--r .fnote::before { left: -2.4rem; }
   .fdiag__col--r .fnote::after { left: -2.6rem; }
 }
+
+body:not(.webgl) .can-slot--journey { display: none; }

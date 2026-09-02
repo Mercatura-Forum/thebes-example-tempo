@@ -11,7 +11,7 @@
   <link href="https://api.fontshare.com/v2/css?f[]=clash-display@400,500,600,700&f[]=switzer@400,500,600,700&display=swap" rel="stylesheet" />
   <link rel="preconnect" href="https://fonts.gstatic.com" crossorigin />
   <link href="https://fonts.googleapis.com/css2?family=Cairo:wght@600;700&display=swap" rel="stylesheet" />
-  <link rel="stylesheet" href="styles.css?v=13" />
+  <link rel="stylesheet" href="styles.css?v=14" />
 </head>
 <body>
   <a class="skip-link" href="#main">Skip to content</a>
@@ -138,6 +138,9 @@
     <!-- ── Ingredients ── -->
     <section class="ingredients" id="ingredients">
       <div class="wrap ingredients__inner">
+        <div class="ing__canhome" id="canHome" aria-hidden="true">
+          <img class="can-fallback" alt="" />
+        </div>
         <div class="ingredients__intro">
           <p class="eyebrow reveal">02 — What's inside</p>
           <h2 class="section-title reveal">Every gram earns its place.</h2>
@@ -160,9 +163,7 @@
         <div class="story__stage" data-can-clip>
           <div class="wrap story__inner">
             <ol class="story__years" id="timeline"></ol>
-            <div class="can-slot can-slot--roll" data-can3d data-role="roll" aria-hidden="true">
-              <img class="can-fallback" alt="" />
-            </div>
+            <div class="can-slot can-slot--journey" data-can3d data-role="journey" aria-hidden="true"></div>
           </div>
         </div>
       </div>
@@ -257,7 +258,7 @@
 
   <div class="toast" id="toast" role="status" aria-live="polite" hidden></div>
 
-  <script src="app.js?v=14"></script>
+  <script src="app.js?v=15"></script>
   <script type="importmap">
   {
     "imports": {
@@ -266,6 +267,6 @@
     }
   }
   </script>
-  <script type="module" src="can3d.js?v=10"></script>
+  <script type="module" src="can3d.js?v=11"></script>
 </body>
 </html>

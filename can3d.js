@@ -84,7 +84,7 @@ function boot() {
 
   let labelMat = null, current = 'citrus', ready = false;
   let targetSpin = 0, spin = 0, targetTiltX = 0, targetTiltY = 0, tiltX = 0, tiltY = 0;
-  let targetRoll = 0, roll = 0;   // story rail: rotation tied to scroll travel
+  let jTilt = 0, jSpin = 0;       // can journey (02→03): tilt + rolling spin, scroll-driven
   let splash = null, splashMat = null;
   // hero slot rect in DEVICE pixels (gl_FragCoord space) for the edge feather
   const uSlot = { value: new THREE.Vector4(0, 0, 1, 1) };
@@ -158,7 +158,7 @@ function boot() {
     window.TEMPO.can = {
       setFlavor(k) { if (textures[k]) { current = k; tintSplash(k); } },  // hero + stage follow the page
       setSpin(p) { targetSpin = p * Math.PI * 4; },        // two turns across the scrub
-      setRoll(p) { targetRoll = p * Math.PI * 6; },        // three turns down the page
+      setJourney(tilt, spin) { jTilt = tilt; jSpin = spin; },
     };
     if (window.TEMPO.__pendingFlavor) current = window.TEMPO.__pendingFlavor;
   }
@@ -178,7 +178,6 @@ function boot() {
   function frame(time) {
     if (!ready) return;
     spin = lerp(spin, targetSpin, 0.09);
-    roll = lerp(roll, targetRoll, 0.12);
     tiltX = lerp(tiltX, targetTiltX, 0.08);
     tiltY = lerp(tiltY, targetTiltY, 0.08);
     const idle = reduced ? 0 : time * 0.0004;
@@ -193,7 +192,7 @@ function boot() {
       if (r.width < 2 || r.height < 2 || r.bottom <= 0 || r.top >= H || r.right <= 0 || r.left >= W) continue;
       const w = r.width, h = r.height, left = r.left, bottom = H - r.bottom;
       renderer.setViewport(left, bottom, w, h);
-      if (s.clip) {
+      if (s.clip && s.el.dataset.clipActive) {
         // clamp the scissor to the clip ancestor: the can slides out of view
         // at its edge (the story roller rolling off) instead of painting on
         const cr = s.clip.getBoundingClientRect();
@@ -208,10 +207,14 @@ function boot() {
       // hero: camera rides higher so the composition sits low in the slot —
       // the splash tails must END inside the frame (top included), never get
       // sliced by the scissor edge into a hard straight cut
-      const dist = s.role === 'hero' ? 6.3 : s.role === 'stage' ? 5.0 : s.role === 'roll' ? 3.2 : 5.6;
+      // journey camera dollies to fit the can's projected height at the current
+      // tilt — the 45° diagonal is LONGER than either endpoint, so this must
+      // track the real extent (can: 2.05 long, 0.72 wide; fov 24 → tan 12°)
+      const jFit = (2.05 * Math.cos(jTilt) + 0.72 * Math.sin(jTilt)) / (2 * Math.tan(Math.PI / 15)) * 1.16;
+      const dist = s.role === 'hero' ? 6.3 : s.role === 'stage' ? 5.0 : s.role === 'journey' ? jFit : 5.6;
       const cy = s.role === 'hero' ? 1.35 : 1;
       const cx = s.role === 'hero' ? 0.2 : 0;    // leaned mass sits up-right; recenter in the slot
-      camera.fov = s.role === 'roll' ? 14 : 30;  // long lens: the lying can fills the slot without distortion
+      camera.fov = s.role === 'journey' ? 24 : 30;
       camera.aspect = w / h;
       camera.position.set(cx, cy, dist);
       camera.updateProjectionMatrix();
@@ -220,13 +223,15 @@ function boot() {
       let ry, rx = 0;
       if (s.role === 'stage') { ry = spin + tiltY + idle * 0.5; rx = tiltX * 0.5; }
       else if (s.role === 'hero') { ry = idle * 0.8 + tiltY * 0.4; rx = tiltX * 0.25; }
-      else if (s.role === 'roll') { ry = roll; }         // rolling = spin about the lying axis
+      else if (s.role === 'journey') { ry = 1.1 + jSpin; }   // rolling = spin about the lying axis
       else { ry = idle * 0.9 + s.phase; }
       group.rotation.set(rx * 0.6, ry, 0);
       // hero: lift the can so it sits centered in the swirl (splash stays put)
       group.position.y = s.role === 'hero' ? -0.7 : -1;
-      // hero leans 26°; the story can lies fully on its side (90°) and rolls
-      rig.rotation.z = s.role === 'hero' ? -0.45 : s.role === 'roll' ? Math.PI / 2 : 0;
+      // hero leans 26°; the journey can tilts with scroll until it lies at 90°
+      rig.rotation.z = s.role === 'hero' ? -0.45 : s.role === 'journey' ? jTilt : 0;
+      // slight yaw shows the lid ellipse — the depth cue that makes it read as 3D
+      rig.rotation.y = s.role === 'journey' ? 0.14 : 0;
 
       if (splash) {
         splash.visible = s.role === 'hero';
