@@ -135,8 +135,11 @@
     const label = $('#formulaDiagram .fdiag__label');
     $$('#formulaDiagram .fnote').forEach((n) => {
       const t = $('.fdiag__' + n.dataset.target, label);
-      n.addEventListener('mouseenter', () => { label.classList.add('dim'); t.classList.add('lit'); });
-      n.addEventListener('mouseleave', () => { label.classList.remove('dim'); t.classList.remove('lit'); });
+      const on = () => { label.classList.add('dim'); t.classList.add('lit'); };
+      const off = () => { label.classList.remove('dim'); t.classList.remove('lit'); };
+      n.addEventListener('mouseenter', on);
+      n.addEventListener('mouseleave', off);
+      n.addEventListener('click', () => { on(); clearTimeout(n.__t); n.__t = setTimeout(off, 1600); });
     });
   }
   function renderDots() {
@@ -182,7 +185,7 @@
     const inner = $('.story__inner', track);
     const list = $('#timeline');
     const items = $$('#timeline li');
-    const ROLLH = 400;
+    const rollH = () => Math.min(400, Math.round(window.innerHeight * 0.42));
     const lerpN = (a2, b2, t) => a2 + (b2 - a2) * t;
     const apply = (r) => {
       slot.style.left = r.left + 'px'; slot.style.top = r.top + 'px';
@@ -193,7 +196,7 @@
       if (ticking) return; ticking = true;
       requestAnimationFrame(() => {
         ticking = false;
-        if (window.innerWidth <= 940 || !document.body.classList.contains('webgl')) {
+        if (window.innerHeight < 560 || !document.body.classList.contains('webgl')) {
           list.style.clipPath = '';
           items.forEach((el) => el.classList.add('printed'));
           return;
@@ -202,7 +205,8 @@
         const tr = track.getBoundingClientRect();
         const ir = inner.getBoundingClientRect();
         const dist = track.offsetHeight - H;
-        const roller = (topY) => ({ left: ir.left, top: topY, width: ir.width, height: ROLLH });
+        const RH = rollH();
+        const roller = (topY) => ({ left: ir.left, top: topY, width: ir.width, height: RH });
         const hide = () => {
           list.style.clipPath = 'inset(-60px -20px 100% -20px)';
           items.forEach((el) => el.classList.remove('printed'));
@@ -217,8 +221,11 @@
           const e = t * t * (3 - 2 * t);            // smoothstep
           tilt = e * Math.PI / 2;
           const hr = home.getBoundingClientRect();
+          // if the home has scrolled far above (mobile: it is static in 02),
+          // start the morph from just above the viewport so the tilt is SEEN
+          const srcTop = Math.max(hr.top, -hr.height);
           const to = roller(tr.top + 8);
-          apply({ left: lerpN(hr.left, to.left, e), top: lerpN(hr.top, to.top, e),
+          apply({ left: lerpN(hr.left, to.left, e), top: lerpN(srcTop, to.top, e),
                   width: lerpN(hr.width, to.width, e), height: lerpN(hr.height, to.height, e) });
           hide();
         } else {                                    // C: roll down, print the years
@@ -227,7 +234,7 @@
           spin = p * Math.PI * 6;
           const y = 8 + p * stage.clientHeight;     // starts fully inside — no top cut
           apply(roller(y));
-          const edge = y + ROLLH * 0.25 - ir.top - list.offsetTop;
+          const edge = y + RH * 0.25 - ir.top - list.offsetTop;
           list.style.clipPath = 'inset(-60px -20px calc(100% - ' + Math.max(0, edge) + 'px) -20px)';
           items.forEach((el) => el.classList.toggle('printed', el.offsetTop < edge));
         }
@@ -249,16 +256,19 @@
       '<div><div class="stockist__city">' + s.city + '</div><div class="stockist__meta">' + s.meta + '</div></div>' +
       '<span class="stockist__count">' + s.count + '</span></div>').join('');
     $$('#stockistGrid .stockist').forEach((row) => {
-      row.addEventListener('mouseenter', () => {
+      const on = () => {
         const map = $('#egyptMap svg'); if (!map) return;
         map.classList.add('dim');
         const pin = $('.pin.p-' + row.dataset.pin, map); if (pin) pin.classList.add('hot');
-      });
-      row.addEventListener('mouseleave', () => {
+      };
+      const off = () => {
         const map = $('#egyptMap svg'); if (!map) return;
         map.classList.remove('dim');
         $$('.pin', map).forEach((p) => p.classList.remove('hot'));
-      });
+      };
+      row.addEventListener('mouseenter', on);
+      row.addEventListener('mouseleave', off);
+      row.addEventListener('click', () => { on(); clearTimeout(row.__t); row.__t = setTimeout(off, 1600); });
     });
   }
   function renderShop() {
