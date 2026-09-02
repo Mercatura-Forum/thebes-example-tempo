@@ -86,7 +86,7 @@
   /* ── Static fallback image (shown only when WebGL is unavailable) ── */
   function updateFallbacks() {
     const src = 'assets/can_' + state.flavor + '.png?v=5';
-    $$('.can-slot--hero .can-fallback, .can-slot--stage .can-fallback').forEach((img) => {
+    $$('.can-slot--hero .can-fallback, .can-slot--stage .can-fallback, .can-slot--roll .can-fallback').forEach((img) => {
       if (img.getAttribute('src') !== src) img.setAttribute('src', src);
     });
   }
@@ -167,8 +167,40 @@
   }
   function renderTimeline() {
     $('#timeline').innerHTML = TIMELINE.map((t) =>
-      '<li class="tl"><span class="tl__year">' + t.y + '</span>' +
-      '<div class="tl__body"><h3>' + t.h + '</h3><p>' + t.p + '</p></div></li>').join('');
+      '<li><span class="story__year">' + t.y + '</span>' +
+      '<div><h3>' + t.h + '</h3><p>' + t.p + '</p></div></li>').join('');
+  }
+
+  /* ── Story scrub: the can lies at 90° and rolls down the rail, lighting
+     each year as it passes. Rotation is tied to travel, like real rolling. ── */
+  function initStoryScrub() {
+    const track = $('#storyTrack'); if (!track) return;
+    const stage = $('.story__stage', track);
+    const slot = $('.can-slot--roll', track);
+    const items = $$('#timeline li');
+    let ticking = false;
+    function onScroll() {
+      if (ticking) return; ticking = true;
+      requestAnimationFrame(() => {
+        ticking = false;
+        const top = track.getBoundingClientRect().top + window.scrollY;
+        const dist = track.offsetHeight - window.innerHeight;
+        const p = clamp((window.scrollY - top) / dist, 0, 1);
+        const idx = Math.min(TIMELINE.length - 1, Math.floor(p * TIMELINE.length));
+        items.forEach((el, i) => {
+          el.classList.toggle('on', i === idx);
+          el.classList.toggle('past', i < idx);
+        });
+        if (slot && stage) {
+          const travel = stage.clientHeight - slot.offsetHeight - 120;
+          slot.style.transform = 'translateY(' + (60 + p * travel) + 'px)';
+        }
+        if (TEMPO.can && TEMPO.can.setRoll) TEMPO.can.setRoll(p);
+      });
+    }
+    window.addEventListener('scroll', onScroll, { passive: true });
+    window.addEventListener('resize', onScroll);
+    onScroll();
   }
   function renderPress() {
     $('#pressGrid').innerHTML = PRESS.map((p) =>
@@ -399,7 +431,7 @@
     renderMap();
     setFlavor('citrus');
     initMobileNav(); initNewsletter(); initReveal(); initCountUp();
-    initFlavorScrub(); initScrollProgress(); initCursor(); initMagnetic(); initParallax(); initNoop();
+    initFlavorScrub(); initStoryScrub(); initScrollProgress(); initCursor(); initMagnetic(); initParallax(); initNoop();
   }
   if (document.readyState === 'loading') document.addEventListener('DOMContentLoaded', init);
   else init();

@@ -303,15 +303,29 @@ img, svg { display: block; }
 /* ============================================================
    Timeline
    ============================================================ */
-.story { padding: clamp(4rem, 8vw, 7rem) 0; }
-.timeline { list-style: none; margin: 2.6rem 0 0; padding: 0; position: relative; display: grid; gap: 1.4rem; }
-.timeline::before { content: ''; position: absolute; left: 90px; top: 8px; bottom: 8px; width: 2px; background: var(--line); }
-.tl { display: grid; grid-template-columns: 90px 1fr; gap: 1.6rem; position: relative; }
-.tl__year { font-family: var(--font-display); font-size: 1.5rem; color: var(--accent); transition: color .4s; }
-.tl__body { background: var(--surface); border: 1px solid var(--line); border-radius: var(--radius); padding: 1.2rem 1.4rem; position: relative; }
-.tl__body::before { content: ''; position: absolute; left: -30px; top: 18px; width: 12px; height: 12px; border-radius: 50%; background: var(--accent); box-shadow: 0 0 0 4px var(--paper); transition: background .4s; }
-.tl__body h3 { font-size: 1.15rem; margin-bottom: .35rem; }
-.tl__body p { color: var(--ink-soft); font-size: .98rem; }
+.story { padding: clamp(4rem, 8vw, 7rem) 0 0; }
+.story__track { height: 380vh; position: relative; margin-top: 1.5rem; }
+.story__stage { position: sticky; top: 0; height: 100vh; overflow: hidden; }
+.story__inner { display: grid; grid-template-columns: 1.1fr .9fr; gap: 2rem; height: 100%; padding-block: 90px 40px; }
+.story__years { list-style: none; margin: 0; padding: 0; display: flex; flex-direction: column; justify-content: space-between; }
+.story__years li {
+  display: grid; grid-template-columns: 96px 1fr; gap: 1.2rem; align-items: start;
+  max-width: 52ch; opacity: .18; transform: translateX(-12px);
+  transition: opacity .45s ease, transform .45s ease;
+}
+.story__years li.on { opacity: 1; transform: none; }
+.story__years li.past { opacity: .38; transform: none; }
+.story__year { font-family: var(--font-display); font-weight: 500; font-size: 2rem; line-height: 1.1; color: var(--accent); transition: color .4s; }
+.story__years h3 { font-size: 1.1rem; margin-bottom: .3rem; }
+.story__years p { color: var(--ink-soft); font-size: .95rem; }
+/* the rail the can rolls down */
+.story__rail { position: relative; }
+.story__rail::before {
+  content: ''; position: absolute; inset: 30px calc(50% - 1px);
+  border-left: 2px dashed color-mix(in srgb, var(--accent) 30%, transparent);
+}
+.can-slot--roll { position: absolute; left: 0; right: 0; height: 250px; will-change: transform; }
+.can-slot--roll .can-fallback { height: 100%; margin-inline: auto; object-fit: contain; transform: rotate(90deg); }
 
 /* ============================================================
    Press
@@ -422,8 +436,13 @@ img, svg { display: block; }
   .press__grid { grid-template-columns: 1fr; }
   .shop__grid { grid-template-columns: 1fr; }
   .news__inner, .footer__inner { grid-template-columns: 1fr; }
-  .timeline::before { left: 70px; }
-  .tl { grid-template-columns: 70px 1fr; gap: 1.1rem; }
+  /* small screens: no pin — the years read as a plain list, no rail */
+  .story__track { height: auto; margin-top: .5rem; }
+  .story__stage { position: static; height: auto; overflow: visible; }
+  .story__inner { grid-template-columns: 1fr; height: auto; padding-block: 0; }
+  .story__years { gap: 1.5rem; }
+  .story__years li { opacity: 1; transform: none; grid-template-columns: 72px 1fr; gap: 1rem; }
+  .story__rail { display: none; }
 }
 @media (max-width: 560px) {
   body { font-size: 16px; }
@@ -588,16 +607,6 @@ html { scrollbar-width: thin; scrollbar-color: var(--accent) transparent; }
   margin: 2.5rem 0 -0.28em; user-select: none;
 }
 
-/* story timeline draws itself in as you scroll (where supported) */
-@supports (animation-timeline: view()) {
-  @media (prefers-reduced-motion: no-preference) {
-    .timeline::before {
-      transform-origin: top; animation: tl-draw linear both;
-      animation-timeline: view(); animation-range: entry 10% cover 60%;
-    }
-  }
-}
-@keyframes tl-draw { from { transform: scaleY(0); } to { transform: scaleY(1); } }
 
 /* flavour-tinted shadow under each shop can */
 .sku__art { position: relative; }

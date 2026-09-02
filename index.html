@@ -11,7 +11,7 @@
   <link href="https://api.fontshare.com/v2/css?f[]=clash-display@400,500,600,700&f[]=switzer@400,500,600,700&display=swap" rel="stylesheet" />
   <link rel="preconnect" href="https://fonts.gstatic.com" crossorigin />
   <link href="https://fonts.googleapis.com/css2?family=Cairo:wght@600;700&display=swap" rel="stylesheet" />
-  <link rel="stylesheet" href="styles.css?v=11" />
+  <link rel="stylesheet" href="styles.css?v=12" />
 </head>
 <body>
   <a class="skip-link" href="#main">Skip to content</a>
@@ -150,12 +150,23 @@
       </div>
     </section>
 
-    <!-- ── Story timeline ── -->
+    <!-- ── Story: the can rolls down through the years ── -->
     <section class="story" id="story">
       <div class="wrap">
         <p class="eyebrow reveal">03 — How we got here</p>
         <h2 class="section-title reveal">Four years, one obsession: hydration that keeps up.</h2>
-        <ol class="timeline" id="timeline"></ol>
+      </div>
+      <div class="story__track" id="storyTrack">
+        <div class="story__stage">
+          <div class="wrap story__inner">
+            <ol class="story__years" id="timeline"></ol>
+            <div class="story__rail" aria-hidden="true">
+              <div class="can-slot can-slot--roll" data-can3d data-role="roll">
+                <img class="can-fallback" alt="" />
+              </div>
+            </div>
+          </div>
+        </div>
       </div>
     </section>
 
@@ -248,7 +259,7 @@
 
   <div class="toast" id="toast" role="status" aria-live="polite" hidden></div>
 
-  <script src="app.js?v=12"></script>
+  <script src="app.js?v=13"></script>
   <script type="importmap">
   {
     "imports": {
@@ -257,6 +268,6 @@
     }
   }
   </script>
-  <script type="module" src="can3d.js?v=8"></script>
+  <script type="module" src="can3d.js?v=9"></script>
 </body>
 </html>

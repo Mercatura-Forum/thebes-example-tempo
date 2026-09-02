@@ -83,6 +83,7 @@ function boot() {
 
   let labelMat = null, current = 'citrus', ready = false;
   let targetSpin = 0, spin = 0, targetTiltX = 0, targetTiltY = 0, tiltX = 0, tiltY = 0;
+  let targetRoll = 0, roll = 0;   // story rail: rotation tied to scroll travel
   let splash = null, splashMat = null;
   // hero slot rect in DEVICE pixels (gl_FragCoord space) for the edge feather
   const uSlot = { value: new THREE.Vector4(0, 0, 1, 1) };
@@ -156,6 +157,7 @@ function boot() {
     window.TEMPO.can = {
       setFlavor(k) { if (textures[k]) { current = k; tintSplash(k); } },  // hero + stage follow the page
       setSpin(p) { targetSpin = p * Math.PI * 4; },        // two turns across the scrub
+      setRoll(p) { targetRoll = p * Math.PI * 5; },        // 2.5 turns rolling down the rail
     };
     if (window.TEMPO.__pendingFlavor) current = window.TEMPO.__pendingFlavor;
   }
@@ -175,6 +177,7 @@ function boot() {
   function frame(time) {
     if (!ready) return;
     spin = lerp(spin, targetSpin, 0.09);
+    roll = lerp(roll, targetRoll, 0.12);
     tiltX = lerp(tiltX, targetTiltX, 0.08);
     tiltY = lerp(tiltY, targetTiltY, 0.08);
     const idle = reduced ? 0 : time * 0.0004;
@@ -194,7 +197,7 @@ function boot() {
       // hero: camera rides higher so the composition sits low in the slot —
       // the splash tails must END inside the frame (top included), never get
       // sliced by the scissor edge into a hard straight cut
-      const dist = s.role === 'hero' ? 6.3 : s.role === 'stage' ? 5.0 : 5.6;
+      const dist = s.role === 'hero' ? 6.3 : s.role === 'stage' ? 5.0 : s.role === 'roll' ? 5.2 : 5.6;
       const cy = s.role === 'hero' ? 1.35 : 1;
       const cx = s.role === 'hero' ? 0.2 : 0;    // leaned mass sits up-right; recenter in the slot
       camera.aspect = w / h;
@@ -205,11 +208,13 @@ function boot() {
       let ry, rx = 0;
       if (s.role === 'stage') { ry = spin + tiltY + idle * 0.5; rx = tiltX * 0.5; }
       else if (s.role === 'hero') { ry = idle * 0.8 + tiltY * 0.4; rx = tiltX * 0.25; }
+      else if (s.role === 'roll') { ry = roll; }         // rolling = spin about the lying axis
       else { ry = idle * 0.9 + s.phase; }
       group.rotation.set(rx * 0.6, ry, 0);
       // hero: lift the can so it sits centered in the swirl (splash stays put)
       group.position.y = s.role === 'hero' ? -0.7 : -1;
-      rig.rotation.z = s.role === 'hero' ? -0.45 : 0;   // ~26 deg lean, can + splash as one
+      // hero leans 26°; the story can lies fully on its side (90°) and rolls
+      rig.rotation.z = s.role === 'hero' ? -0.45 : s.role === 'roll' ? Math.PI / 2 : 0;
 
       if (splash) {
         splash.visible = s.role === 'hero';
