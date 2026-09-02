@@ -306,26 +306,25 @@ img, svg { display: block; }
 .story { padding: clamp(4rem, 8vw, 7rem) 0 0; }
 .story__track { height: 380vh; position: relative; margin-top: 1.5rem; }
 .story__stage { position: sticky; top: 0; height: 100vh; overflow: hidden; }
-.story__inner { display: grid; grid-template-columns: 1.1fr .9fr; gap: 2rem; height: 100%; padding-block: 90px 40px; }
-.story__years { list-style: none; margin: 0; padding: 0; display: flex; flex-direction: column; justify-content: space-between; }
+.story__inner { position: relative; height: 100%; padding: 120px 0 48px; }
+.story__years {
+  position: relative; list-style: none; margin: 0; padding: 0; height: 100%;
+  display: flex; flex-direction: column; justify-content: space-between;
+  will-change: clip-path;
+}
 .story__years li {
-  display: grid; grid-template-columns: 96px 1fr; gap: 1.2rem; align-items: start;
-  max-width: 52ch; opacity: .18; transform: translateX(-12px);
-  transition: opacity .45s ease, transform .45s ease;
+  display: grid; grid-template-columns: 110px 1fr; gap: 1.4rem; align-items: start;
+  max-width: 62ch; opacity: 0; transform: translateY(10px);
+  transition: opacity .5s ease, transform .5s ease;
 }
-.story__years li.on { opacity: 1; transform: none; }
-.story__years li.past { opacity: .38; transform: none; }
-.story__year { font-family: var(--font-display); font-weight: 500; font-size: 2rem; line-height: 1.1; color: var(--accent); transition: color .4s; }
-.story__years h3 { font-size: 1.1rem; margin-bottom: .3rem; }
-.story__years p { color: var(--ink-soft); font-size: .95rem; }
-/* the rail the can rolls down */
-.story__rail { position: relative; }
-.story__rail::before {
-  content: ''; position: absolute; inset: 30px calc(50% - 1px);
-  border-left: 2px dashed color-mix(in srgb, var(--accent) 30%, transparent);
-}
-.can-slot--roll { position: absolute; left: 0; right: 0; height: 250px; will-change: transform; }
-.can-slot--roll .can-fallback { height: 100%; margin-inline: auto; object-fit: contain; transform: rotate(90deg); }
+.story__years li.printed { opacity: 1; transform: none; }
+.story__years li:nth-child(even) { margin-left: clamp(0px, 14vw, 220px); }  /* the roller prints across the width */
+.story__year { font-family: var(--font-display); font-weight: 500; font-size: 2.1rem; line-height: 1.05; color: var(--accent); transition: color .4s; }
+.story__years h3 { font-size: 1.08rem; margin-bottom: .25rem; }
+.story__years p { color: var(--ink-soft); font-size: .93rem; }
+/* the roller itself: spans the whole column, rides over the years */
+.story__inner .can-slot--roll { position: absolute; left: 0; right: 0; top: 0; height: clamp(260px, 40vh, 380px); will-change: transform; }
+.story__inner .can-slot--roll .can-fallback { height: 72%; margin: auto; object-fit: contain; transform: rotate(90deg); }
 
 /* ============================================================
    Press
@@ -436,13 +435,14 @@ img, svg { display: block; }
   .press__grid { grid-template-columns: 1fr; }
   .shop__grid { grid-template-columns: 1fr; }
   .news__inner, .footer__inner { grid-template-columns: 1fr; }
-  /* small screens: no pin — the years read as a plain list, no rail */
+  /* small screens: no pin — the years read as a plain list, no roller */
   .story__track { height: auto; margin-top: .5rem; }
   .story__stage { position: static; height: auto; overflow: visible; }
-  .story__inner { grid-template-columns: 1fr; height: auto; padding-block: 0; }
-  .story__years { gap: 1.5rem; }
+  .story__inner { height: auto; padding: 0; }
+  .story__years { gap: 1.5rem; clip-path: none !important; }
   .story__years li { opacity: 1; transform: none; grid-template-columns: 72px 1fr; gap: 1rem; }
-  .story__rail { display: none; }
+  .story__years li:nth-child(even) { margin-left: 0; }
+  .can-slot--roll { display: none; }
 }
 @media (max-width: 560px) {
   body { font-size: 16px; }

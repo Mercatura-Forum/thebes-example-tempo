@@ -171,30 +171,36 @@
       '<div><h3>' + t.h + '</h3><p>' + t.p + '</p></div></li>').join('');
   }
 
-  /* ── Story scrub: the can lies at 90° and rolls down the rail, lighting
-     each year as it passes. Rotation is tied to travel, like real rolling. ── */
+  /* ── Story scrub: a huge can lies across the column, covering the years.
+     Scrolling rolls it down and off; the story prints in its wake — the
+     reveal line rides the can's upper curve. ── */
   function initStoryScrub() {
     const track = $('#storyTrack'); if (!track) return;
     const stage = $('.story__stage', track);
     const slot = $('.can-slot--roll', track);
+    const list = $('#timeline');
     const items = $$('#timeline li');
     let ticking = false;
     function onScroll() {
       if (ticking) return; ticking = true;
       requestAnimationFrame(() => {
         ticking = false;
+        if (window.innerWidth <= 940) {          // flat list on small screens
+          list.style.clipPath = '';
+          slot.style.transform = '';
+          items.forEach((el) => el.classList.add('printed'));
+          return;
+        }
         const top = track.getBoundingClientRect().top + window.scrollY;
         const dist = track.offsetHeight - window.innerHeight;
         const p = clamp((window.scrollY - top) / dist, 0, 1);
-        const idx = Math.min(TIMELINE.length - 1, Math.floor(p * TIMELINE.length));
-        items.forEach((el, i) => {
-          el.classList.toggle('on', i === idx);
-          el.classList.toggle('past', i < idx);
-        });
-        if (slot && stage) {
-          const travel = stage.clientHeight - slot.offsetHeight - 120;
-          slot.style.transform = 'translateY(' + (60 + p * travel) + 'px)';
-        }
+        const slotH = slot.offsetHeight;
+        const travel = stage.clientHeight + slotH * 1.1;  // ends fully rolled off
+        const y = -slotH * 0.2 + p * travel;
+        slot.style.transform = 'translateY(' + y + 'px)';
+        const edge = y + slotH * 0.25 - list.offsetTop;   // the print line
+        list.style.clipPath = 'inset(-60px -20px calc(100% - ' + Math.max(0, edge) + 'px) -20px)';
+        items.forEach((el) => el.classList.toggle('printed', el.offsetTop < edge));
         if (TEMPO.can && TEMPO.can.setRoll) TEMPO.can.setRoll(p);
       });
     }

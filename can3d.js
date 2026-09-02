@@ -18,6 +18,7 @@ let slots = [];
 function collectSlots() {
   slots = Array.from(document.querySelectorAll('[data-can3d]')).map((el, i) => ({
     el, role: el.dataset.role || 'sku', flavor: el.dataset.flavor || null, phase: i * 2.1,
+    clip: el.closest('[data-can-clip]'),
   }));
 }
 
@@ -157,7 +158,7 @@ function boot() {
     window.TEMPO.can = {
       setFlavor(k) { if (textures[k]) { current = k; tintSplash(k); } },  // hero + stage follow the page
       setSpin(p) { targetSpin = p * Math.PI * 4; },        // two turns across the scrub
-      setRoll(p) { targetRoll = p * Math.PI * 5; },        // 2.5 turns rolling down the rail
+      setRoll(p) { targetRoll = p * Math.PI * 6; },        // three turns down the page
     };
     if (window.TEMPO.__pendingFlavor) current = window.TEMPO.__pendingFlavor;
   }
@@ -192,14 +193,25 @@ function boot() {
       if (r.width < 2 || r.height < 2 || r.bottom <= 0 || r.top >= H || r.right <= 0 || r.left >= W) continue;
       const w = r.width, h = r.height, left = r.left, bottom = H - r.bottom;
       renderer.setViewport(left, bottom, w, h);
-      renderer.setScissor(left, bottom, w, h);
+      if (s.clip) {
+        // clamp the scissor to the clip ancestor: the can slides out of view
+        // at its edge (the story roller rolling off) instead of painting on
+        const cr = s.clip.getBoundingClientRect();
+        const x0 = Math.max(r.left, cr.left), x1 = Math.min(r.right, cr.right);
+        const y0 = Math.max(r.top, cr.top), y1 = Math.min(r.bottom, cr.bottom);
+        if (x1 - x0 < 1 || y1 - y0 < 1) continue;
+        renderer.setScissor(x0, H - y1, x1 - x0, y1 - y0);
+      } else {
+        renderer.setScissor(left, bottom, w, h);
+      }
 
       // hero: camera rides higher so the composition sits low in the slot —
       // the splash tails must END inside the frame (top included), never get
       // sliced by the scissor edge into a hard straight cut
-      const dist = s.role === 'hero' ? 6.3 : s.role === 'stage' ? 5.0 : s.role === 'roll' ? 5.2 : 5.6;
+      const dist = s.role === 'hero' ? 6.3 : s.role === 'stage' ? 5.0 : s.role === 'roll' ? 3.2 : 5.6;
       const cy = s.role === 'hero' ? 1.35 : 1;
       const cx = s.role === 'hero' ? 0.2 : 0;    // leaned mass sits up-right; recenter in the slot
+      camera.fov = s.role === 'roll' ? 14 : 30;  // long lens: the lying can fills the slot without distortion
       camera.aspect = w / h;
       camera.position.set(cx, cy, dist);
       camera.updateProjectionMatrix();
