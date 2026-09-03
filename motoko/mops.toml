@@ -1,0 +1,12 @@
+[package]
+name = "thebes-example-tempo-backend"
+version = "0.1.0"
+description = "On-chain backend for the Thebes Protocol tempo example."
+license = "MIT"
+
+[dependencies]
+core = "2.5.0"
+thebes-lib = "./thebes-lib"
+
+[toolchain]
+moc = "1.4.1"
