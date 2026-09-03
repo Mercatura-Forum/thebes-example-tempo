@@ -292,6 +292,8 @@
     }).join('');
     $$('#shopGrid [data-add]').forEach((b) => b.addEventListener('click', () => addToCart(b.dataset.add, false)));
     $$('#shopGrid [data-sub]').forEach((b) => b.addEventListener('click', () => addToCart(b.dataset.sub, true)));
+    // The grid was just rebuilt — the 3D module must re-collect its slots.
+    document.dispatchEvent(new Event('tempo:slots-changed'));
   }
 
   /* ── Cart + toast ── */

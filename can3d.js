@@ -24,6 +24,9 @@ function collectSlots() {
 
 document.addEventListener('DOMContentLoaded', collectSlots);
 window.addEventListener('load', collectSlots);
+// Chain hydration re-renders the shop grid AFTER load — app.js announces any
+// slot-bearing re-render so we never keep drawing into detached nodes.
+document.addEventListener('tempo:slots-changed', collectSlots);
 
 function fail(msg) {
   document.body.classList.remove('webgl');
