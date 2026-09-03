@@ -19,7 +19,7 @@
   --radius: 16px;
   --maxw: 1180px;
   --font-body: 'Switzer', ui-sans-serif, system-ui, sans-serif;
-  --font-display: 'Clash Display', 'Switzer', ui-sans-serif, sans-serif;
+  --font-display: 'Tanker', 'Switzer', ui-sans-serif, sans-serif;
 }
 
 /* Flavour themes — one variable set each, swapped on <html data-flavor>. */
@@ -189,9 +189,11 @@ img, svg { display: block; }
 .hero__stats b { font-family: var(--font-display); font-weight: 400; font-size: 2.2rem; letter-spacing: -.01em; display: block; }
 .hero__stats span { font-size: .82rem; color: var(--ink-soft); text-transform: uppercase; letter-spacing: .1em; }
 
-.hero__art { position: relative; display: grid; place-items: center; min-height: 540px; }
+.hero__art { position: relative; display: grid; place-items: center; min-height: 600px; }
 .hero__glow {
-  position: absolute; width: 380px; height: 380px; border-radius: 50%;
+  /* cap to the viewport: an absolute glow poking past the right edge widens
+     the document, and mobile Chrome zooms the whole page out to fit it */
+  position: absolute; width: min(430px, calc(100vw - 3rem)); height: min(430px, calc(100vw - 3rem)); border-radius: 50%;
   background: radial-gradient(circle, color-mix(in srgb, var(--accent) 55%, transparent), transparent 68%);
   filter: blur(10px); transition: background .5s ease; animation: float 7s ease-in-out infinite;
 }
@@ -224,7 +226,7 @@ img, svg { display: block; }
   background: linear-gradient(90deg, rgba(0,0,0,.16), rgba(255,255,255,.18) 26%, transparent 52%, rgba(0,0,0,.14));
 }
 .fdiag__strip { font-size: .66rem; font-weight: 700; letter-spacing: .32em; text-transform: uppercase; opacity: .92; }
-.fdiag__mark { font-family: var(--font-display); font-weight: 600; font-size: 4.4rem; line-height: 1; letter-spacing: .01em; text-transform: uppercase; }
+.fdiag__mark { font-family: var(--font-display); font-weight: 400; font-size: 4.4rem; line-height: 1; letter-spacing: .01em; text-transform: uppercase; }
 .fdiag__flav { font-size: .82rem; font-weight: 700; letter-spacing: .34em; text-transform: uppercase; }
 .fdiag__grow { flex: 1; }
 .fdiag__osmo { font-size: .66rem; font-weight: 600; letter-spacing: .18em; text-transform: uppercase; opacity: .85; border-top: 1px solid rgba(255,255,255,.35); padding-top: .8rem; }
@@ -239,7 +241,7 @@ img, svg { display: block; }
 .fdiag__col--r .fnote:hover { transform: translateX(-6px); }
 .fnote h3 { font-size: .78rem; letter-spacing: .12em; text-transform: uppercase; display: flex; align-items: baseline; gap: .55rem; margin-bottom: .35rem; }
 .fdiag__col--l .fnote h3 { flex-direction: row-reverse; }
-.fnote__num { font-family: var(--font-display); font-weight: 500; font-size: 1.35rem; line-height: 1; color: var(--accent); letter-spacing: 0; transition: color .4s; }
+.fnote__num { font-family: var(--font-display); font-weight: 400; font-size: 1.35rem; line-height: 1; color: var(--accent); letter-spacing: 0; transition: color .4s; }
 .fnote p { font-size: .92rem; color: var(--ink-soft); }
 /* hovering a callout spotlights the label part it annotates */
 .fdiag__label > span { transition: opacity .35s ease, transform .35s ease; }
@@ -320,7 +322,7 @@ img, svg { display: block; }
 }
 .story__years li.printed { opacity: 1; transform: none; }
 .story__years li:nth-child(even) { margin-left: clamp(0px, 14vw, 220px); }  /* the roller prints across the width */
-.story__year { font-family: var(--font-display); font-weight: 500; font-size: 2.1rem; line-height: 1.05; color: var(--accent); transition: color .4s; }
+.story__year { font-family: var(--font-display); font-weight: 400; font-size: 2.1rem; line-height: 1.05; color: var(--accent); transition: color .4s; }
 .story__years h3 { font-size: 1.08rem; margin-bottom: .25rem; }
 .story__years p { color: var(--ink-soft); font-size: .93rem; }
 /* the roller itself: spans the whole column, rides over the years */
@@ -333,7 +335,7 @@ img, svg { display: block; }
 .press__grid { display: grid; grid-template-columns: repeat(3, 1fr); gap: 1.4rem; margin-top: 1.5rem; }
 .press__card { border: 1px solid #2a2d34; border-radius: var(--radius); padding: 1.6rem; background: #16181d; }
 .press__card::before {
-  content: '\201C'; display: block; font-family: var(--font-display); font-weight: 600;
+  content: '\201C'; display: block; font-family: var(--font-display); font-weight: 400;
   font-size: 3.6rem; line-height: .6; height: .48em; color: var(--accent); transition: color .4s;
 }
 .press__card p { font-size: 1.08rem; line-height: 1.5; }
@@ -349,7 +351,7 @@ img, svg { display: block; }
 .stockists__grid { display: grid; gap: 1rem; }
 .stockist { display: flex; align-items: center; gap: 1.2rem; padding: 1.2rem 1.4rem; border: 1px solid var(--line); border-radius: var(--radius); background: var(--surface); transition: border-color .2s, transform .2s; }
 .stockist:hover { border-color: var(--accent); transform: translateX(4px); }
-.stockist__num { font-family: var(--font-display); font-weight: 500; font-size: 1.6rem; line-height: 1; color: var(--accent); flex: 0 0 auto; min-width: 2ch; transition: color .4s; }
+.stockist__num { font-family: var(--font-display); font-weight: 400; font-size: 1.6rem; line-height: 1; color: var(--accent); flex: 0 0 auto; min-width: 2ch; transition: color .4s; }
 .stockist__city { font-family: var(--font-display); font-size: 1.2rem; }
 .stockist__meta { color: var(--ink-soft); font-size: .9rem; }
 .stockist__count { margin-left: auto; font-weight: 700; font-size: .74rem; letter-spacing: .08em; text-transform: uppercase; color: var(--accent-ink); border: 1px solid color-mix(in srgb, var(--accent) 35%, transparent); border-radius: 999px; padding: .35rem .75rem; white-space: nowrap; transition: color .4s, border-color .4s; }
@@ -424,7 +426,7 @@ img, svg { display: block; }
   .hamburger { display: flex; }
   .nav__cta { display: none; }
   .hero__inner { grid-template-columns: 1fr; text-align: left; }
-  .hero__art { grid-row: 1; min-height: 380px; }
+  .hero__art { grid-row: 1; min-height: 460px; }
   .fdiag { grid-template-columns: 1fr; gap: 1.6rem; }
   .fdiag__label { order: -1; width: min(340px, 100%); margin-inline: auto; }
   .fdiag__col, .fdiag__col--l, .fdiag__col--r { display: grid; grid-template-columns: 1fr 1fr; gap: 1.3rem; padding: 0; text-align: left; align-items: start; }
@@ -551,10 +553,18 @@ body.has-cursor, body.has-cursor a, body.has-cursor button, body.has-cursor [dat
 
 @media (max-width: 940px) {
   .flavors__track { height: 320vh; }
-  .flavors__ui { align-items: flex-end; padding-bottom: 12vh; }
+  .flavors__ui { align-items: flex-end; padding-bottom: 10vh; }
   .flavors__copy { max-width: none; }
-  .flavors__dots { right: auto; left: 50%; top: auto; bottom: 6vh; transform: translateX(-50%); flex-direction: row; }
-  .flavors__name { font-size: clamp(2.2rem, 9vw, 3rem); }
+  .flavors__copy .eyebrow { margin-bottom: .5rem; }
+  .flavors__name { font-size: clamp(1.9rem, 8vw, 2.6rem); margin-bottom: .5rem; }
+  .flavors__blurb { font-size: .92rem; margin-bottom: .9rem; }
+  /* keep the spec 2×2 and compact — a 4-row list pushed the copy up into the
+     can's slot, where the canvas paints over it */
+  .flavors .flavor-spec { grid-template-columns: repeat(2, 1fr); gap: .5rem; margin-bottom: .9rem; max-width: none; }
+  .flavors .flavor-spec li { padding: .4rem .7rem; font-size: .82rem; }
+  .flavors__word { top: 24%; left: 50%; transform: translate(-50%, -50%); }
+  .flavors__dots { right: auto; left: 50%; top: auto; bottom: 5.5vh; transform: translateX(-50%); flex-direction: row; }
+  .flavors__scrollhint { bottom: 1.4vh; }
 }
 
 /* ============================================================
@@ -566,15 +576,27 @@ body.has-cursor, body.has-cursor a, body.has-cursor button, body.has-cursor [dat
 .can-fallback { width: 100%; height: 100%; object-fit: contain; display: block; }
 body.webgl .can-fallback { visibility: hidden; }   /* the canvas draws over the slot box */
 
-.can-slot--hero { width: 100%; height: 540px; }
+.can-slot--hero { width: 100%; height: 600px; }
 .can-slot--stage {                                  /* right side — keeps the copy clear */
   position: absolute; top: 0; bottom: 0; right: 0; width: 56%;
 }
 .sku__art.can-slot { height: 172px; }
 
 @media (max-width: 940px) {
-  .can-slot--hero { height: 420px; }
-  .can-slot--stage { width: 100%; height: 58%; top: 0; bottom: auto; }
+  .can-slot--hero { height: 460px; }
+  /* stack, don't overlap: the canvas paints the can over anything inside its
+     slot box, so the copy (name, specs) must never share it — can on the top
+     40%, copy bottom-anchored below (see the flavors media block) */
+  .can-slot--stage { width: 100%; height: 40%; top: 4%; bottom: auto; }
+}
+/* short phones: even the compact copy stack needs more of the stage — shrink
+   the can band and clamp the blurb so the name and specs stay in the clear.
+   (Must sit AFTER the .can-slot--stage rule above: same specificity.) */
+@media (max-width: 940px) and (max-height: 700px) {
+  .can-slot--stage { height: 34%; top: 3%; }
+  .flavors__word { top: 20%; }
+  .flavors__blurb { display: -webkit-box; -webkit-line-clamp: 2; -webkit-box-orient: vertical; overflow: hidden; }
+  .flavors__ui { padding-bottom: 9vh; }
 }
 
 /* ============================================================
@@ -597,7 +619,7 @@ html::-webkit-scrollbar, body::-webkit-scrollbar { width: 0; height: 0; display:
 
 /* giant outlined flavour name behind the stage can */
 .flavors__word {
-  position: absolute; z-index: 0; font-family: var(--font-display); font-weight: 600;
+  position: absolute; z-index: 0; font-family: var(--font-display); font-weight: 400;
   font-size: clamp(2.4rem, 11vw, 10rem); letter-spacing: .04em; text-transform: uppercase;
   white-space: nowrap; color: transparent; user-select: none;
   -webkit-text-stroke: 1px color-mix(in srgb, var(--accent) 55%, transparent);
@@ -610,7 +632,7 @@ html::-webkit-scrollbar, body::-webkit-scrollbar { width: 0; height: 0; display:
 /* oversized wordmark cropped by the page bottom */
 .footer { overflow: hidden; }
 .footer__giant {
-  font-family: var(--font-display); font-weight: 600; text-transform: uppercase;
+  font-family: var(--font-display); font-weight: 400; text-transform: uppercase;
   font-size: 19vw; line-height: .72; text-align: center; letter-spacing: .02em;
   color: color-mix(in srgb, var(--ink) 5%, transparent);
   margin: 2.5rem 0 -0.28em; user-select: none;

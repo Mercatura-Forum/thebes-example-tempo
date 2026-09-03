@@ -42,7 +42,9 @@ function boot() {
   document.body.appendChild(canvas);
 
   const renderer = new THREE.WebGLRenderer({ canvas, antialias: true, alpha: true, powerPreference: 'high-performance' });
-  renderer.setPixelRatio(Math.min(2, window.devicePixelRatio || 1));
+  // the can IS the product shot — supersample a touch on low-dpi screens and
+  // follow retina up to 2.5×; softness here reads as a cheap render
+  renderer.setPixelRatio(Math.min(2.5, Math.max(1.5, window.devicePixelRatio || 1)));
   renderer.autoClear = false;
   renderer.toneMapping = THREE.ACESFilmicToneMapping;
   renderer.toneMappingExposure = 1.05;
@@ -74,17 +76,18 @@ function boot() {
   rig.add(splashHolder);
 
   const texLoader = new THREE.TextureLoader();
+  const maxAniso = renderer.capabilities.getMaxAnisotropy();
   const textures = {};
   ['citrus', 'berry', 'lime'].forEach((k) => {
     const t = texLoader.load('assets/label_' + k + '.png?v=5');
-    t.colorSpace = THREE.SRGBColorSpace; t.flipY = false; t.anisotropy = 8;
+    t.colorSpace = THREE.SRGBColorSpace; t.flipY = false; t.anisotropy = maxAniso;
     t.wrapS = THREE.RepeatWrapping;   // UV wraps the full circumference; keep the seam clean
     textures[k] = t;
   });
 
   let labelMat = null, current = 'citrus', ready = false;
   let targetSpin = 0, spin = 0, targetTiltX = 0, targetTiltY = 0, tiltX = 0, tiltY = 0;
-  let jTilt = 0, jSpin = 0;       // can journey (02→03): tilt + rolling spin, scroll-driven
+  let jTilt = 0, jTravel = 0;     // can journey (02→03): tilt + px of roll travel, scroll-driven
   let splash = null, splashMat = null;
   // hero slot rect in DEVICE pixels (gl_FragCoord space) for the edge feather
   const uSlot = { value: new THREE.Vector4(0, 0, 1, 1) };
@@ -141,8 +144,17 @@ function boot() {
     gltf.scene.traverse((o) => {
       if (!o.isMesh || !o.material) return;
       const m = o.material;
-      if (m.name === 'Label') { labelMat = m; m.map = textures.citrus; m.roughness = 0.42; m.metalness = 0.08; }
-      else if (m.name === 'Metal') { m.metalness = 1.0; m.roughness = 0.26; m.envMapIntensity = 1.3; m.color = new THREE.Color(0xd7d9de); }
+      if (m.name === 'Label') {
+        // printed-and-varnished: the clearcoat carries the gloss so the print
+        // itself can stay matte. side must follow the GLB's — the donor mesh
+        // only renders correctly double-sided (flipped winding, custom normals)
+        labelMat = new THREE.MeshPhysicalMaterial({
+          map: textures.citrus, roughness: 0.36, metalness: 0.1,
+          clearcoat: 0.85, clearcoatRoughness: 0.25, envMapIntensity: 1.05, side: m.side,
+        });
+        o.material = labelMat;
+      }
+      else if (m.name === 'Metal') { m.metalness = 1.0; m.roughness = 0.22; m.envMapIntensity = 1.5; m.color = new THREE.Color(0xd7d9de); }
     });
     group.add(gltf.scene);
     ready = true;
@@ -158,7 +170,7 @@ function boot() {
     window.TEMPO.can = {
       setFlavor(k) { if (textures[k]) { current = k; tintSplash(k); } },  // hero + stage follow the page
       setSpin(p) { targetSpin = p * Math.PI * 4; },        // two turns across the scrub
-      setJourney(tilt, spin) { jTilt = tilt; jSpin = spin; },
+      setJourney(tilt, travel) { jTilt = tilt; jTravel = travel; },   // travel = px the roller has moved down 03
     };
     if (window.TEMPO.__pendingFlavor) current = window.TEMPO.__pendingFlavor;
   }
@@ -213,8 +225,10 @@ function boot() {
       // where the slot aspect shrinks and width binds before height does.
       const jExtV = 2.05 * Math.cos(jTilt) + 0.72 * Math.sin(jTilt);
       const jExtH = 0.72 * Math.cos(jTilt) + 2.05 * Math.sin(jTilt);
-      const jFit = Math.max(jExtV * 1.3, (jExtH * 1.4) / (w / h)) / (2 * Math.tan(Math.PI / 15));
-      const dist = s.role === 'hero' ? 6.3 : s.role === 'stage' ? 5.0 : s.role === 'journey' ? jFit : 5.6;
+      const jExt = Math.max(jExtV * 1.3, (jExtH * 1.4) / (w / h));   // world units the slot height must hold
+      const jFit = jExt / (2 * Math.tan(Math.PI / 15));
+      // stage: the mobile band is short — dolly in so the can still carries it
+      const dist = s.role === 'hero' ? 5.6 : s.role === 'stage' ? (h < 420 ? 4.3 : 5.0) : s.role === 'journey' ? jFit : 5.6;
       const cy = s.role === 'hero' ? 1.35 : 1;
       const cx = s.role === 'hero' ? 0.2 : 0;    // leaned mass sits up-right; recenter in the slot
       camera.fov = s.role === 'journey' ? 24 : 30;
@@ -225,8 +239,14 @@ function boot() {
 
       let ry, rx = 0;
       if (s.role === 'stage') { ry = spin + tiltY + idle * 0.5; rx = tiltX * 0.5; }
-      else if (s.role === 'hero') { ry = idle * 0.8 + tiltY * 0.4; rx = tiltX * 0.25; }
-      else if (s.role === 'journey') { ry = 1.1 + jSpin; }   // rolling = spin about the lying axis
+      else if (s.role === 'hero') { ry = idle * 1.7 + tiltY * 0.45; rx = tiltX * 0.25; }
+      else if (s.role === 'journey') {
+        // true rolling, no slip: screen radius = 0.36 world · (h / jExt) px,
+        // so angle = travel / radius. The sign makes the face toward the
+        // viewer roll DOWN the page with the travel — a press roller against
+        // the page behind it; the old +spin read as rolling backwards
+        ry = 1.1 - jTravel * jExt / (0.36 * h);
+      }
       else { ry = idle * 0.9 + s.phase; }
       group.rotation.set(rx * 0.6, ry, 0);
       // hero: lift the can so it sits centered in the swirl (splash stays put)

@@ -206,12 +206,16 @@
         const ir = inner.getBoundingClientRect();
         const dist = track.offsetHeight - H;
         const RH = rollH();
-        const roller = (topY) => ({ left: ir.left, top: topY, width: ir.width, height: RH });
+        // the can owns its size: the roller box fits the lying can (≈2.85:1
+        // plus margin), centred on the column — never sized to the column it
+        // reveals, which let the slot edges shave the can's ends
+        const rw = Math.min(window.innerWidth - 16, Math.round(RH * 3.1));
+        const roller = (topY) => ({ left: ir.left + (ir.width - rw) / 2, top: topY, width: rw, height: RH });
         const hide = () => {
           list.style.clipPath = 'inset(-60px -20px 100% -20px)';
           items.forEach((el) => el.classList.remove('printed'));
         };
-        let tilt, spin = 0, clip = false;
+        let tilt, travel = 0, clip = false;
         if (tr.top > H * 0.5) {                     // A: upright at home in 02
           tilt = 0;
           apply(home.getBoundingClientRect());
@@ -231,7 +235,7 @@
         } else {                                    // C: roll down, print the years
           tilt = Math.PI / 2; clip = true;
           const p = clamp(-tr.top / dist, 0, 1);
-          spin = p * Math.PI * 6;
+          travel = p * stage.clientHeight;    // px moved — can3d turns it into a true roll
           const y = 8 + p * stage.clientHeight;     // starts fully inside — no top cut
           apply(roller(y));
           const edge = y + RH * 0.25 - ir.top - list.offsetTop;
@@ -239,7 +243,7 @@
           items.forEach((el) => el.classList.toggle('printed', el.offsetTop < edge));
         }
         slot.dataset.clipActive = clip ? '1' : '';
-        if (TEMPO.can && TEMPO.can.setJourney) TEMPO.can.setJourney(tilt, spin);
+        if (TEMPO.can && TEMPO.can.setJourney) TEMPO.can.setJourney(tilt, travel);
       });
     }
     window.addEventListener('scroll', onScroll, { passive: true });
