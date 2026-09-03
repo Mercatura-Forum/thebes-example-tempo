@@ -24,6 +24,16 @@ meshes were decimated and rescaled onto the TEMPO can's frame
 **Icons.** The UI icons are from [Tabler Icons](https://tabler.io/icons)
 (MIT), inlined in `index.html`.
 
+**Thebes SDK runtime.** `sdk/boundary.js` and `sdk/passkey.js` are unmodified
+copies of the browser runtime from the
+[Thebes SDK](https://github.com/Mercatura-Forum/thebes-sdk) (commit `9337c0c`),
+licensed under Apache-2.0.
+
+**thebes-lib.** `motoko/thebes-lib/` is an unmodified vendored copy of
+[thebes-lib](https://github.com/Mercatura-Forum/thebes-lib) (commit `15aaa13`),
+the standard Motoko backend library for Thebes apps, licensed under Apache-2.0
+(its LICENSE and NOTICE travel with it).
+
 **TEMPO** is a sample brand created solely for this demo. It is not a real
 product, company, or endorsement.
 

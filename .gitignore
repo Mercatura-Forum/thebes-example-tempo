@@ -17,3 +17,9 @@ node_modules/
 
 # local scratch (screenshots etc.)
 /image.png
+
+# motoko compile output
+build/
+
+# local scratch
+.claude/
