@@ -7,7 +7,7 @@
  */
 (function () {
   'use strict';
-  var CID = 0; // pinned to the minted contract id at deploy time
+  var CID = 148286166025860; // pinned to the minted contract id at deploy time
   var AUDIENCE = 'https://memphis.mercaturaforum.com';
 
   function B() {
