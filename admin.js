@@ -29,8 +29,15 @@
       return TempoAPI.hasOwner().then(function (owned) {
         if (!owned) return claimScreen();
         h('<aside class="adminp"><p>Signed in, but this passkey is not an admin.</p>' +
+          '<p class="adminp__who">Fetching your principal…</p>' +
+          '<p>An existing admin can add you with the principal above.</p>' +
           '<button class="adminp__x btn">Close</button></aside>');
         on('.adminp__x', 'click', close);
+        TempoAPI.whoAmI(scopedTok).then(function (pr) {
+          mount.querySelector('.adminp__who').textContent = 'Your principal: ' + (pr || '(could not verify)');
+        }).catch(function () {
+          mount.querySelector('.adminp__who').textContent = 'Your principal: (could not verify)';
+        });
       });
     });
   }
