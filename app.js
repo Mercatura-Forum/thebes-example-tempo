@@ -495,6 +495,46 @@
       renderStockists();
       renderMap();
     }).catch(() => {});
+    refreshPoll();
+  }
+
+  /* ── Next-flavour poll (on-chain; the section stays hidden without a chain) ── */
+  function renderPoll(rows, mine) {
+    if (!rows.length) return;
+    const sec = $('#poll');
+    sec.hidden = false;
+    const open = rows[0].open;
+    $('#pollGrid').innerHTML = rows.map((c) => {
+      const chosen = mine === c.id;
+      return '<button class="poll__card' + (chosen ? ' poll__card--mine' : '') + '" data-vote="' + c.id + '"' + (open ? '' : ' disabled') + '>' +
+        '<span class="poll__tally">' + c.tally + '</span>' +
+        '<span class="poll__name">' + c.name + '</span>' +
+        '<span class="poll__blurb">' + c.blurb + '</span>' +
+        (chosen ? '<span class="poll__yours">Your vote</span>' : '') +
+        '</button>';
+    }).join('');
+    $$('#pollGrid [data-vote]').forEach((btn) => {
+      btn.addEventListener('click', () => {
+        btn.classList.add('poll__card--busy');
+        TempoAPI.castVote(Number(btn.dataset.vote)).then(refreshPoll).catch((e) => {
+          btn.classList.remove('poll__card--busy');
+          showToast(e && e.mayHaveLanded ? 'Vote may still land — check back in a minute'
+            : 'Could not vote right now');
+        });
+      });
+    });
+    TempoAPI.fetchRecount().then((rc) => {
+      if (!rc.length) return;
+      const el = $('#pollRecount');
+      el.hidden = false;
+      el.textContent = 'Recomputed on-chain just now: ' + rc[0].sumTallies + ' votes across ' +
+        rc[0].distinctVoters + ' voters — the books ' + (rc[0].holds ? 'balance.' : 'DO NOT balance.');
+    }).catch(() => {});
+  }
+  function refreshPoll() {
+    if (!window.TempoAPI || !TempoAPI.cid()) return;
+    Promise.all([TempoAPI.fetchPoll(), TempoAPI.fetchMyVote().catch(() => null)])
+      .then(([rows, mine]) => renderPoll(rows, mine)).catch(() => {});
   }
 
   /* ── Boot ── */

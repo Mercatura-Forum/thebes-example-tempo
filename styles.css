@@ -376,6 +376,26 @@ img, svg { display: block; }
 .sku__price small { font-family: var(--font-body); font-size: .8rem; color: var(--ink-soft); font-weight: 600; }
 .sku__stock { font-family: var(--font-body); font-size: .68rem; font-weight: 700; letter-spacing: .08em; text-transform: uppercase; color: var(--ink-soft); vertical-align: middle; margin-inline-start: .5em; }
 .sku__stock--out { color: var(--accent-ink); }
+
+/* ============================================================
+   Next-flavour poll (on-chain)
+   ============================================================ */
+.poll { padding: clamp(4rem, 8vw, 7rem) 0; }
+.poll__head { text-align: center; margin-bottom: 2.6rem; }
+.poll__head .eyebrow { text-align: center; }
+.poll__head .section-title { margin-inline: auto; }
+.poll__sub { color: var(--ink-soft); max-width: 52ch; margin: 1rem auto 0; }
+.poll__grid { display: grid; grid-template-columns: repeat(auto-fit, minmax(220px, 1fr)); gap: 1.4rem; }
+.poll__card { background: var(--surface); border: 1px solid var(--line); border-radius: var(--radius); padding: 1.6rem; text-align: start; display: flex; flex-direction: column; gap: .45rem; cursor: pointer; font: inherit; color: inherit; transition: transform .2s, box-shadow .2s, border-color .2s; }
+.poll__card:hover:not(:disabled) { transform: translateY(-5px); box-shadow: 0 22px 40px -24px rgba(0,0,0,.4); }
+.poll__card:disabled { cursor: default; opacity: .75; }
+.poll__card--mine { border-color: var(--accent); box-shadow: 0 0 0 3px color-mix(in srgb, var(--accent) 22%, transparent); }
+.poll__card--busy { opacity: .55; pointer-events: none; }
+.poll__tally { font-family: var(--font-display); font-weight: 400; font-size: 2.6rem; line-height: 1; letter-spacing: -.01em; }
+.poll__name { font-weight: 700; font-size: 1.05rem; }
+.poll__blurb { color: var(--ink-soft); font-size: .9rem; flex: 1; }
+.poll__yours { color: var(--accent-ink); font-size: .72rem; font-weight: 700; letter-spacing: .08em; text-transform: uppercase; }
+.poll__recount { text-align: center; color: var(--ink-soft); font-size: .88rem; margin-top: 2rem; }
 .sku__buy { display: flex; gap: .6rem; margin-top: 1rem; }
 .sku__buy .btn { flex: 1; padding: .7rem 1rem; }
 .sku__sub { background: none; border: 0; color: var(--accent-ink); font-weight: 700; cursor: pointer; font-size: .72rem; letter-spacing: .1em; text-transform: uppercase; text-decoration: none; border-bottom: 1px solid currentColor; padding-bottom: 2px; margin-top: .8rem; align-self: flex-start; transition: color .3s; }
