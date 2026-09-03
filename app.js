@@ -59,9 +59,9 @@
   ];
 
   const STOCKISTS = [
-    { city: 'Cairo', meta: 'Cafés, gyms & bike shops from Zamalek to New Cairo', count: '38 spots' },
-    { city: 'Alexandria', meta: 'Run clubs & cafés along the Corniche', count: '21 spots' },
-    { city: 'El Gouna', meta: 'The tri club, marina cafés & kite beaches', count: '17 spots' },
+    { city: 'Cairo', meta: 'Cafés, gyms & bike shops from Zamalek to New Cairo', count: '38 spots', lon: 31.24, lat: 30.05 },
+    { city: 'Alexandria', meta: 'Run clubs & cafés along the Corniche', count: '21 spots', lon: 29.92, lat: 31.2 },
+    { city: 'El Gouna', meta: 'The tri club, marina cafés & kite beaches', count: '17 spots', lon: 33.68, lat: 27.39 },
   ];
 
   const SKUS = [
@@ -284,7 +284,9 @@
         '<div class="sku__art can-slot" data-can3d data-role="sku" data-flavor="' + key + '">' +
         '<img class="can-fallback" src="assets/can_' + key + '.png?v=5" alt="A can of TEMPO ' + FLAVORS[key].name + '" /></div>' +
         '<h3>' + s.h + '</h3><p class="sku__desc">' + s.desc + '</p>' +
-        '<div class="sku__price">' + s.price + ' <small>EGP ' + s.unit + '</small></div>' +
+        '<div class="sku__price">' + s.price + ' <small>EGP ' + s.unit + '</small>' +
+        (s.stock === 'out' ? ' <span class="sku__stock sku__stock--out">Sold out</span>'
+          : s.stock === 'low' ? ' <span class="sku__stock">Low stock</span>' : '') + '</div>' +
         '<div class="sku__buy"><button class="btn btn--solid" data-add="' + s.h + '" data-magnetic data-cursor="add">Add to cart</button></div>' +
         '<button class="sku__sub" data-sub="' + s.h + '">Subscribe &amp; save 15%</button></article>';
     }).join('');
@@ -307,6 +309,7 @@
     clearTimeout(toastTimer);
     toastTimer = setTimeout(() => { t.classList.remove('show'); setTimeout(() => { t.hidden = true; }, 300); }, 2600);
   }
+  TEMPO.toast = showToast;
 
   /* ── Newsletter ── */
   function initNewsletter() {
@@ -449,7 +452,7 @@
     const EG = [[24.7,31.4],[27,31.2],[28.8,30.9],[30.3,31.5],[31.2,31.6],[32.1,31.1],[33.7,31.1],
       [34.25,31.25],[34.9,29.5],[34.4,28.2],[33.9,27.75],[33.1,28.4],[32.6,29.4],[32.55,29.95],
       [32.3,29.6],[32.6,28.5],[33.4,27.4],[34.1,26.5],[35.2,24.9],[35.6,23.9],[36.9,22],[24.9,22]];
-    const CITIES = [[31.24,30.05],[29.92,31.2],[33.68,27.39]];   // Cairo, Alexandria, El Gouna
+    const CITIES = STOCKISTS.map((s) => [s.lon, s.lat]);
     const X = (lon) => (lon - 24.2) * 23, Y = (lat) => (32.1 - lat) * 23;
     const inside = (x, y) => {                                   // ray casting
       let inp = false;
@@ -470,6 +473,30 @@
     box.innerHTML = '<svg viewBox="0 0 300 240" role="img" aria-label="Map of Egypt with our three cities">' + s + '</svg>';
   }
 
+  /* ── Chain hydration: the static page is the fallback, the contract is the truth ── */
+  function hydrate() {
+    if (!window.TempoAPI || !TempoAPI.cid()) return; // not deployed yet: static site stands
+    TempoAPI.fetchSkus().then((rows) => {
+      if (!rows.length) return;
+      SKUS.length = 0;
+      rows.forEach((r) => SKUS.push({
+        h: r.name, desc: r.desc, price: String(Math.round(r.pricePiastres / 100)),
+        unit: r.unit, tag: r.tag, featured: r.featured, stock: r.stock,
+      }));
+      renderShop();
+    }).catch(() => {});
+    TempoAPI.fetchStockists().then((rows) => {
+      if (!rows.length) return;
+      STOCKISTS.length = 0;
+      rows.forEach((r) => STOCKISTS.push({
+        city: r.city, meta: r.meta, count: r.spots + ' spots',
+        lon: r.lonMilli / 1000, lat: r.latMilli / 1000,
+      }));
+      renderStockists();
+      renderMap();
+    }).catch(() => {});
+  }
+
   /* ── Boot ── */
   function init() {
     $('#year').textContent = new Date().getFullYear();
@@ -484,6 +511,7 @@
     setFlavor('citrus');
     initMobileNav(); initNewsletter(); initReveal(); initCountUp();
     initFlavorScrub(); initCanJourney(); initScrollProgress(); initCursor(); initMagnetic(); initParallax(); initNoop();
+    hydrate();
   }
   if (document.readyState === 'loading') document.addEventListener('DOMContentLoaded', init);
   else init();
