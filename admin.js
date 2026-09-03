@@ -18,30 +18,69 @@
     return r.scoped_token_hex;
   }
 
+  function afterCeremony(sessionPromise) {
+    return sessionPromise.then(function (s) {
+      return scoped(s);
+    }).then(function (tok) {
+      scopedTok = tok;
+      return TempoAPI.checkAdmin(scopedTok);
+    }).then(function (isAdmin) {
+      if (isAdmin) return panel();
+      return TempoAPI.hasOwner().then(function (owned) {
+        if (!owned) return claimScreen();
+        h('<aside class="adminp"><p>Signed in, but this passkey is not an admin.</p>' +
+          '<button class="adminp__x btn">Close</button></aside>');
+        on('.adminp__x', 'click', close);
+      });
+    });
+  }
+
   function open() {
     h('<aside class="adminp"><h3>TEMPO admin</h3><p>Sign in with your passkey. ' +
       'Works on the memphis origin only.</p>' +
-      '<input class="adminp__name" placeholder="account name" />' +
+      '<input class="adminp__name" placeholder="yourname.thebes" />' +
       '<div class="adminp__row"><button class="adminp__go btn btn--solid">Sign in</button>' +
-      '<button class="adminp__x btn">Close</button></div></aside>');
+      '<button class="adminp__x btn">Close</button></div>' +
+      '<p class="adminp__note" hidden></p></aside>');
     on('.adminp__x', 'click', close);
     on('.adminp__go', 'click', function () {
       var name = mount.querySelector('.adminp__name').value.trim();
       // No awaits before the ceremony — it must run inside the user gesture.
-      MemphisPasskey.signInOrRegister(name).then(function (s) {
-        return scoped(s);
-      }).then(function (tok) {
-        scopedTok = tok;
-        return TempoAPI.checkAdmin(scopedTok);
-      }).then(function (isAdmin) {
-        if (isAdmin) return panel();
-        return TempoAPI.hasOwner().then(function (owned) {
-          if (!owned) return claimScreen();
-          h('<aside class="adminp"><p>Signed in, but this passkey is not an admin.</p>' +
-            '<button class="adminp__x btn">Close</button></aside>');
-          on('.adminp__x', 'click', close);
-        });
-      }).catch(function (e) { toast('Sign-in failed: ' + (e && e.message)); });
+      afterCeremony(MemphisPasskey.signInOrRegister(name)).catch(function (e) {
+        if (e && e.code === 'NameNotRegistered') return offerCreate(e.nameRequested);
+        toast('Sign-in failed: ' + (e && e.message));
+      });
+    });
+  }
+
+  function offerCreate(name) {
+    var note = mount.querySelector('.adminp__note');
+    note.hidden = false;
+    note.textContent = 'No identity named ' + name + ' yet. Creating one runs THREE passkey ' +
+      'confirmations in a row — Memphis signup requires three factors.';
+    var go = mount.querySelector('.adminp__go');
+    go.textContent = 'Create it';
+    go.classList.add('adminp__create');
+    var fresh = go.cloneNode(true); // drop the sign-in listener
+    go.replaceWith(fresh);
+    fresh.addEventListener('click', function () {
+      // The granular signup ceremony: three device factors, then register.
+      // The first WebAuthn create runs inside this click's gesture.
+      var P = MemphisPasskey;
+      afterCeremony(
+        P.beginRegistrationChallenge().then(function (ch) {
+          return P.buildDeviceFactor(ch, name).then(function (f1) {
+            note.textContent = 'Factor 1 of 3 done — two more confirmations.';
+            return P.buildDeviceFactor(ch, name).then(function (f2) {
+              note.textContent = 'Factor 2 of 3 done — one more.';
+              return P.buildDeviceFactor(ch, name).then(function (f3) {
+                note.textContent = 'Registering with Memphis…';
+                return P.registerWithFactors(name, [f1, f2, f3]);
+              });
+            });
+          });
+        })
+      ).catch(function (e) { toast('Could not create it: ' + (e && e.message)); });
     });
   }
 

@@ -30,8 +30,12 @@
 
   async function call(method, argHex, opts) {
     var r;
+    opts = opts || {};
+    // Admin verbs verify the session with TWO inter-contract calls; the
+    // boundary's 10s receipt default is too tight for them on a busy chain.
+    if (opts.timeoutMs == null) opts.timeoutMs = 30000;
     try {
-      r = await B().callUpdate(CID, method, argHex, opts || {});
+      r = await B().callUpdate(CID, method, argHex, opts);
     } catch (e) {
       if (String(e && e.message).indexOf('timed out') >= 0) e.mayHaveLanded = true;
       else e.safeToRetry = true; // rejected before acceptance: no message_hash
