@@ -21,5 +21,15 @@ node_modules/
 # motoko compile output
 build/
 
-# local scratch
+# editor / assistant scratch
+.vscode/
+.idea/
 .claude/
+.cursor/
+
+# deploy tool state
+.thebes/
+
+# mops package cache + lock (machine-local paths)
+motoko/.mops/
+motoko/mops.lock
