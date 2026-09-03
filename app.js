@@ -206,10 +206,11 @@
         const ir = inner.getBoundingClientRect();
         const dist = track.offsetHeight - H;
         const RH = rollH();
-        // the can owns its size: the roller box fits the lying can (≈2.85:1
-        // plus margin), centred on the column — never sized to the column it
-        // reveals, which let the slot edges shave the can's ends
-        const rw = Math.min(window.innerWidth - 16, Math.round(RH * 3.1));
+        // the can owns its size: the roller box fits the lying can (true GLB
+        // proportions 2.0 long × 1.04 wide ≈ 1.92:1, plus margin), centred on
+        // the column — never sized to the column it reveals, which let the
+        // slot edges shave the can's ends
+        const rw = Math.min(window.innerWidth - 16, Math.round(RH * 2.3));
         const roller = (topY) => ({ left: ir.left + (ir.width - rw) / 2, top: topY, width: rw, height: RH });
         const hide = () => {
           list.style.clipPath = 'inset(-60px -20px 100% -20px)';

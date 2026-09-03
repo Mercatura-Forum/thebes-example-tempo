@@ -219,14 +219,30 @@ function boot() {
       // hero: camera rides higher so the composition sits low in the slot —
       // the splash tails must END inside the frame (top included), never get
       // sliced by the scissor edge into a hard straight cut
-      // journey camera dollies to fit the can's projected extent at the current
-      // tilt on BOTH axes (can: 2.05 long, 0.72 wide; fov 24 → tan 12°). The
-      // vertical need alone cropped the lying can's ends on narrower windows,
-      // where the slot aspect shrinks and width binds before height does.
-      const jExtV = 2.05 * Math.cos(jTilt) + 0.72 * Math.sin(jTilt);
-      const jExtH = 0.72 * Math.cos(jTilt) + 2.05 * Math.sin(jTilt);
-      const jExt = Math.max(jExtV * 1.3, (jExtH * 1.4) / (w / h));   // world units the slot height must hold
-      const jFit = jExt / (2 * Math.tan(Math.PI / 15));
+      // journey camera: EXACT per-point fit. For each rim point of the can
+      // rotated by the current tilt and the 0.11 yaw, solve the distance that
+      // keeps it inside the slot with margin: d >= z + m·|x|/(tan12°·aspect)
+      // horizontally, d >= z + m·|y|/tan12° vertically. A flat-extent formula
+      // measured the can at the focal plane only — under perspective the near
+      // end projects bigger and the slot edge shaved the can.
+      // TRUE dimensions, measured from the GLB vertex bounds (Blender):
+      // radius 0.5207, y span 0..2.0 → half-length 1.0 about the y=1 pivot.
+      // The old hardcoded 0.72×2.05 understated the diameter by 45% and was
+      // the root cause of the can getting cut at many window geometries.
+      const T12 = Math.tan(Math.PI / 15), CAN_R = 0.521, CAN_HL = 1.0;
+      let jFit = 0;
+      if (s.role === 'journey') {
+        const A = w / h, cT = Math.cos(jTilt), sT = Math.sin(jTilt);
+        for (let i = 0; i < 12; i++) {
+          const a = i * Math.PI / 6, px = CAN_R * Math.cos(a), pz = CAN_R * Math.sin(a);
+          for (const ly of [-CAN_HL, CAN_HL]) {
+            const x1 = px * cT - ly * sT, y1 = px * sT + ly * cT;   // Rz(tilt)
+            const x2 = x1 * 0.994 + pz * 0.1098, z2 = pz * 0.994 - x1 * 0.1098; // Ry(0.11)
+            jFit = Math.max(jFit, z2 + (1.16 * Math.abs(x2)) / (T12 * A),
+                                  z2 + (1.14 * Math.abs(y1)) / T12);
+          }
+        }
+      }
       // stage: the mobile band is short — dolly in so the can still carries it
       const dist = s.role === 'hero' ? 5.6 : s.role === 'stage' ? (h < 420 ? 4.3 : 5.0) : s.role === 'journey' ? jFit : 5.6;
       const cy = s.role === 'hero' ? 1.35 : 1;
@@ -241,11 +257,11 @@ function boot() {
       if (s.role === 'stage') { ry = spin + tiltY + idle * 0.5; rx = tiltX * 0.5; }
       else if (s.role === 'hero') { ry = idle * 1.7 + tiltY * 0.45; rx = tiltX * 0.25; }
       else if (s.role === 'journey') {
-        // true rolling, no slip: screen radius = 0.36 world · (h / jExt) px,
-        // so angle = travel / radius. The sign makes the face toward the
+        // true rolling, no slip: screen radius = CAN_R world · h/(2·d·tan12°)
+        // px, so angle = travel / radius. The sign makes the face toward the
         // viewer roll DOWN the page with the travel — a press roller against
         // the page behind it; the old +spin read as rolling backwards
-        ry = 1.1 - jTravel * jExt / (0.36 * h);
+        ry = 1.1 - jTravel * (2 * jFit * T12) / (CAN_R * h);
       }
       else { ry = idle * 0.9 + s.phase; }
       group.rotation.set(rx * 0.6, ry, 0);
