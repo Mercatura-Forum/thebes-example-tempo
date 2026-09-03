@@ -19,3 +19,9 @@ cid = 59257520488477
 wasm = "asset_canister.wasm"
 bundle = "dist"
 health_check_url = "/index.html"
+
+[canisters.tempo]
+type = "backend-motoko"
+cid = "auto"
+wasm = "build/tempo.wasm"
+build = 'cd motoko && mops install >/dev/null 2>&1 && mkdir -p ../build && MOC="$(ls "$HOME/.cache/mops/moc/1.4.1/moc" 2>/dev/null | head -1)" && "$MOC" $(mops sources) -o ../build/tempo.wasm main.mo'
