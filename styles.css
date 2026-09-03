@@ -396,6 +396,17 @@ img, svg { display: block; }
 .poll__blurb { color: var(--ink-soft); font-size: .9rem; flex: 1; }
 .poll__yours { color: var(--accent-ink); font-size: .72rem; font-weight: 700; letter-spacing: .08em; text-transform: uppercase; }
 .poll__recount { text-align: center; color: var(--ink-soft); font-size: .88rem; margin-top: 2rem; }
+
+/* ============================================================
+   Admin drawer (#admin)
+   ============================================================ */
+.adminp { position: fixed; inset-block: 0; inset-inline-end: 0; width: min(380px, 92vw); z-index: 350; background: var(--surface); border-inline-start: 1px solid var(--line); box-shadow: -24px 0 60px -30px rgba(0,0,0,.45); padding: 1.6rem; overflow-y: auto; display: flex; flex-direction: column; gap: 1rem; }
+.adminp h3 { font-family: var(--font-display); font-weight: 400; font-size: 1.6rem; letter-spacing: .04em; }
+.adminp__row { display: flex; align-items: center; gap: .5rem; flex-wrap: wrap; margin-block: .35rem; }
+.adminp input, .adminp select { font: inherit; padding: .45rem .6rem; border: 1px solid var(--line); border-radius: 8px; background: transparent; color: inherit; min-width: 0; }
+.adminp__name, .adminp__newadmin { width: 100%; }
+.adminp__who { color: var(--ink-soft); font-size: .8rem; word-break: break-all; }
+.adminp .btn { padding: .5rem .9rem; }
 .sku__buy { display: flex; gap: .6rem; margin-top: 1rem; }
 .sku__buy .btn { flex: 1; padding: .7rem 1rem; }
 .sku__sub { background: none; border: 0; color: var(--accent-ink); font-weight: 700; cursor: pointer; font-size: .72rem; letter-spacing: .1em; text-transform: uppercase; text-decoration: none; border-bottom: 1px solid currentColor; padding-bottom: 2px; margin-top: .8rem; align-self: flex-start; transition: color .3s; }
