@@ -189,7 +189,7 @@ img, svg { display: block; }
 .hero__stats b { font-family: var(--font-display); font-weight: 400; font-size: 2.2rem; letter-spacing: -.01em; display: block; }
 .hero__stats span { font-size: .82rem; color: var(--ink-soft); text-transform: uppercase; letter-spacing: .1em; }
 
-.hero__art { position: relative; display: grid; place-items: center; min-height: 600px; }
+.hero__art { position: relative; display: grid; place-items: center; min-height: 640px; }
 .hero__glow {
   /* cap to the viewport: an absolute glow poking past the right edge widens
      the document, and mobile Chrome zooms the whole page out to fit it */
@@ -576,7 +576,7 @@ body.has-cursor, body.has-cursor a, body.has-cursor button, body.has-cursor [dat
 .can-fallback { width: 100%; height: 100%; object-fit: contain; display: block; }
 body.webgl .can-fallback { visibility: hidden; }   /* the canvas draws over the slot box */
 
-.can-slot--hero { width: 100%; height: 600px; }
+.can-slot--hero { width: 100%; height: 640px; }
 .can-slot--stage {                                  /* right side — keeps the copy clear */
   position: absolute; top: 0; bottom: 0; right: 0; width: 56%;
 }

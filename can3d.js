@@ -132,7 +132,7 @@ function boot() {
     g.scene.traverse((o) => { if (o.isMesh) o.material = splashMat; });
     splash = g.scene;
     splash.visible = false;
-    splash.scale.setScalar(1.22);      // reads bigger than the can
+    splash.scale.setScalar(0.95);      // a tight swirl hugging the can, not engulfing it
     // no local tilt: the splash leans with the whole rig so the can and the
     // water read as one tilted composition, not a straight can in a tilted splash
     splash.rotation.y = 1.1;           // base pose — keeps the wordmark clear, even under reduced motion
@@ -244,7 +244,10 @@ function boot() {
         }
       }
       // stage: the mobile band is short — dolly in so the can still carries it
-      const dist = s.role === 'hero' ? 5.6 : s.role === 'stage' ? (h < 420 ? 4.3 : 5.0) : s.role === 'journey' ? jFit : 5.6;
+      // hero: 5.25 fills ~89% of the slot height with the leaned can on wide
+      // slots; narrow (phone) slots keep 5.6 — the lean's width already runs
+      // ~87% of a phone slot and closer would let the ends touch the edges
+      const dist = s.role === 'hero' ? (w > 560 ? 5.25 : 5.6) : s.role === 'stage' ? (h < 420 ? 4.3 : 5.0) : s.role === 'journey' ? jFit : 5.6;
       const cy = s.role === 'hero' ? 1.35 : 1;
       const cx = s.role === 'hero' ? 0.2 : 0;    // leaned mass sits up-right; recenter in the slot
       camera.fov = s.role === 'journey' ? 24 : 30;
