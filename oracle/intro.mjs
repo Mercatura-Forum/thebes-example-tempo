@@ -68,4 +68,16 @@ for (let i = 0; i <= 50; i++) {
 }
 check(ints, 'rounded counter stays in 0..100')
 
+// ── liquid fill rises with progress (the wordmark fills bottom→top) ──
+check(typeof I.fillPath === 'function', 'fillPath exposed')
+let rises = true, prevY = Infinity
+for (let p = 0; p <= 100; p += 5) {
+  const y = I.fillPath(p, 0).lineY   // phase 0 → no wave offset, pure level
+  if (y > prevY + 1e-9) rises = false // smaller y = higher liquid; must not drop
+  prevY = y
+}
+check(rises, 'fill line rises monotonically as progress climbs')
+check(I.fillPath(0, 0).lineY > I.fillPath(100, 0).lineY, 'empty sits below full')
+check(I.fillPath(100, 0).d.indexOf('NaN') === -1, 'path is well-formed (no NaN)')
+
 process.exit(failures ? 1 : 0)

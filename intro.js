@@ -1,28 +1,35 @@
 /* ============================================================
-   TEMPO — intro experience. Loader (choreographed logo fill +
-   0→100 counter + electrolyte pills) → logo zoom → cursor
-   reveal of the 3D can through the masked sheet → scroll exit.
+   TEMPO — intro experience. Loader (liquid wordmark fill +
+   0→100 counter + electrolyte pills) → logo zoom (clamped to
+   the viewport so the whole word shows) → a cursor-lit hole in
+   the wall that reveals the can behind it → a scroll that
+   slides the intro up and the landing page rises in beneath.
    The timeline is pure and exposed for the node oracle.
    ============================================================ */
 (function () {
   'use strict';
 
   const CONST = {
-    T_LOAD: 2600,        // loader choreography ms
-    T_ZOOM: 600,         // logo zoom ms
-    T_EXIT: 700,         // exit slide ms (== .intro--exit transition)
+    T_LOAD: 4600,        // loader choreography ms (slow, liquid)
+    T_ZOOM: 700,         // logo zoom ms
     T_REDUCED: 400,      // reduced-motion logo hold ms
-    ZOOM_SCALE: 7,       // final logo scale
-    MASK_R: 180,         // reveal hole radius px (== --mr)
-    FILL_W: 600,         // SVG viewBox width the fill rect grows across
-    PILL_EVERY: 280,     // ms between pill spawns
-    PILL_MAX: 9,
-    PILL_MAX_NARROW: 5,  // ≤940px spawns fewer
-    CAN_W: 240,          // intro can slot px
-    CAN_H: 420,
-    EASE_FOLLOW: 0.12,   // cursor lerp per frame
+    T_REDUCED_EXIT: 300, // reduced-motion fade-out ms
+    ZOOM_SCALE: 1.9,     // target logo scale (clamped to fit the viewport)
+    MASK_R: 190,         // reveal hole radius px (== --mr)
+    CAN_W: 250,          // intro can slot px
+    CAN_H: 440,
+    EASE_FOLLOW: 0.14,   // cursor lerp per frame
+    PILL_EVERY: 360,     // ms between pill spawns
+    PILL_MAX: 11,
+    PILL_MAX_NARROW: 6,  // ≤940px spawns fewer
   };
   const ELECTROLYTES = ['Sodium', 'Potassium', 'Magnesium', 'Chloride'];
+
+  // Wordmark fill geometry, in the SVG's own viewBox units (0 0 620 180).
+  // The liquid line rises from the glyph baseline (TEXT_BOT) to its cap top
+  // (TEXT_TOP) as progress goes 0→100, with a travelling sine meniscus.
+  const VB_W = 620, VB_H = 180, TEXT_TOP = 44, TEXT_BOT = 134;
+  const WAVE_A = 5.5, WAVE_N = 28, WAVE_CYCLES = 2.6;
 
   const easeInOutCubic = (u) => (u < 0.5 ? 4 * u * u * u : 1 - Math.pow(-2 * u + 2, 3) / 2);
   const easeOutCubic = (u) => 1 - Math.pow(1 - u, 3);
@@ -46,13 +53,30 @@
     return { phase: 'reveal', progress: 100, zoom: CONST.ZOOM_SCALE };
   }
 
-  window.TempoIntro = { CONST, timeline };
+  // The liquid clip path for a given fill fraction + wave phase. Returns the
+  // path 'd' and the current line height (exposed for the headless battery,
+  // which asserts the liquid RISES rather than trusting the counter).
+  function fillPath(progress, phase) {
+    const p = Math.max(0, Math.min(100, progress)) / 100;
+    const lineY = TEXT_BOT - (TEXT_BOT - TEXT_TOP) * p;
+    const k = (Math.PI * 2 * WAVE_CYCLES) / VB_W;
+    let d = 'M 0 ' + (lineY + WAVE_A * Math.sin(phase)).toFixed(2);
+    for (let i = 1; i <= WAVE_N; i++) {
+      const x = (VB_W * i) / WAVE_N;
+      d += ' L ' + x.toFixed(1) + ' ' + (lineY + WAVE_A * Math.sin(k * x + phase)).toFixed(2);
+    }
+    d += ' L ' + VB_W + ' ' + VB_H + ' L 0 ' + VB_H + ' Z';
+    return { d: d, lineY: lineY };
+  }
+
+  const state = { progress: 0, fillY: TEXT_BOT, phase: 'load' };
+  window.TempoIntro = { CONST, timeline, fillPath, state };
 
   function boot() {
     const root = document.getElementById('intro');
     const under = document.getElementById('introUnder');
     const sheet = document.getElementById('introSheet');
-    const fillRect = document.getElementById('introFillRect');
+    const fillEl = document.getElementById('introFillPath');
     const count = document.getElementById('introCount');
     const pillBox = document.getElementById('introPills');
     const logo = root.querySelector('.intro__logo');
@@ -61,26 +85,33 @@
     const reduced = window.matchMedia('(prefers-reduced-motion: reduce)').matches;
     const narrow = window.matchMedia('(max-width: 940px)').matches;
 
-    document.body.classList.add('intro-lock'); // proves boot to the head watchdog
+    // hole + can scale down on narrow screens so the lens isn't the whole page
+    const sf = narrow ? 0.62 : 1;
+    const maskR = Math.round(CONST.MASK_R * sf);
+    const canW = Math.round(CONST.CAN_W * sf), canH = Math.round(CONST.CAN_H * sf);
+
+    // intro-veil hides the chrome + shows the overlay (until finalize);
+    // intro-canlock keeps the 3D canvas drawing ONLY the intro can (until the
+    // slide starts and the hero can must render in beneath)
+    document.body.classList.add('intro-veil', 'intro-canlock');
     window.scrollTo(0, 0);
-    sheet.style.setProperty('--mr', CONST.MASK_R + 'px');
+    sheet.style.setProperty('--mr', maskR + 'px');
+    canSlot.style.width = canW + 'px';
+    canSlot.style.height = canH + 'px';
 
     // the same static render the shop cards fall back to
     const fb = canSlot.querySelector('.can-fallback');
     if (fb) fb.src = 'assets/can_' + (document.documentElement.dataset.flavor || 'citrus') + '.png';
 
-    const ring = document.createElement('div');
-    ring.className = 'intro__ring';
-    ring.style.width = ring.style.height = (CONST.MASK_R * 2) + 'px';
-    root.appendChild(ring);
-
-    let hasMouse = false, driftT = 0, prevFrame = 0;
-    let mx = window.innerWidth / 2, my = window.innerHeight * 0.6, tx = mx, ty = my;
+    let hasMouse = false, wavePhase = 0, prevFrame = 0;
+    let mx = window.innerWidth / 2, my = window.innerHeight * 0.55, tx = mx, ty = my;
     window.addEventListener('mousemove', function (e) {
       hasMouse = true; tx = e.clientX; ty = e.clientY;
     }, { passive: true });
 
-    let exited = false, phaseSeen = 'load', pills = 0, lastPill = 0;
+    let done = false, transitioning = false, revealed = false;
+    let phaseSeen = 'load', pills = 0, lastPill = 0, spacer = null;
+    let t0 = performance.now();
 
     function spawnPill(now) {
       const max = narrow ? CONST.PILL_MAX_NARROW : CONST.PILL_MAX;
@@ -89,68 +120,140 @@
       const el = document.createElement('span');
       el.className = 'intro__pill';
       el.textContent = ELECTROLYTES[pills % ELECTROLYTES.length];
-      el.style.left = (6 + Math.random() * 82) + 'vw';
-      el.style.top = (12 + Math.random() * 70) + 'vh';
-      el.style.setProperty('--rot', (Math.random() * 36 - 18).toFixed(1) + 'deg');
+      el.style.left = (6 + Math.random() * 80) + 'vw';
+      el.style.top = (14 + Math.random() * 66) + 'vh';
+      el.style.setProperty('--rot', (Math.random() * 34 - 17).toFixed(1) + 'deg');
       el.addEventListener('animationend', function () { el.remove(); });
       pillBox.appendChild(el);
       pills++;
     }
 
-    function exit() {
-      if (exited) return; exited = true;
-      root.classList.add('intro--exit');
-      window.scrollTo(0, 0);
+    // Once the reveal lands, the intro becomes the top screen of a scrollable
+    // page: a full-height spacer holds the landing page down, scroll is
+    // unlocked, and the user's scroll slides the intro up while the hero
+    // rises in beneath. No curtain, no separate page.
+    function enterReveal() {
+      if (revealed) return; revealed = true;
+      spacer = document.createElement('div');
+      spacer.className = 'intro__spacer';
+      spacer.style.height = window.innerHeight + 'px';
+      document.body.insertBefore(spacer, document.body.firstChild);
+      document.documentElement.classList.remove('intro-lock'); // unlock scroll; keep the veil
+      window.addEventListener('scroll', onScroll, { passive: true });
+    }
+
+    // the first scroll turns the reveal into a lift: the hole closes, the
+    // paper backdrop drops away, and the real landing page (hero can + copy)
+    // is made live so it rises in behind the sheet — not a blank page.
+    function startSlide() {
+      if (transitioning) return; transitioning = true;
+      root.classList.add('intro--sliding');   // drops the mask → opaque sheet
+      under.style.display = 'none';            // stop the backdrop covering the hero
+      document.body.classList.remove('intro-canlock'); // hero can renders now
+      document.dispatchEvent(new CustomEvent('tempo:slots-changed'));
+      var r = document.querySelectorAll('.hero .reveal');
+      for (var i = 0; i < r.length; i++) r[i].classList.add('in');
+    }
+
+    function onScroll() {
+      if (done) return;
+      const vh = window.innerHeight;
+      const y = window.scrollY;
+      if (y > 0) startSlide();
+      root.style.transform = 'translateY(' + (-y).toFixed(1) + 'px)';
+      if (y >= vh) finalize();
+    }
+
+    function finalize() {
+      if (done) return; done = true;
+      window.removeEventListener('scroll', onScroll);
+      const vh = window.innerHeight;
+      const y = window.scrollY;
+      document.documentElement.classList.remove('intro-veil', 'intro-lock');
+      document.body.classList.remove('intro-veil', 'intro-canlock');
+      root.remove();
+      under.remove();
+      if (spacer) spacer.remove();
+      // the spacer held the page down by one viewport — drop that from the
+      // scroll offset in the same tick so the hero doesn't jump
+      window.scrollTo(0, Math.max(0, y - vh));
+      document.dispatchEvent(new CustomEvent('tempo:slots-changed'));
+      document.dispatchEvent(new CustomEvent('tempo:intro-done'));
+    }
+
+    // reduced motion: no theatre — hold the filled logo briefly, fade, gone
+    function quickExit() {
+      if (done) return; done = true;
+      root.classList.add('intro--gone');
       setTimeout(function () {
-        document.documentElement.classList.remove('intro-lock');
-        document.body.classList.remove('intro-lock');
+        document.documentElement.classList.remove('intro-veil', 'intro-lock');
+        document.body.classList.remove('intro-veil', 'intro-canlock');
         root.remove();
         under.remove();
         document.dispatchEvent(new CustomEvent('tempo:slots-changed'));
         document.dispatchEvent(new CustomEvent('tempo:intro-done'));
-      }, CONST.T_EXIT);
+      }, CONST.T_REDUCED_EXIT);
     }
 
-    // impatient users may leave from ANY phase, not just the reveal
-    window.addEventListener('wheel', function () { exit(); }, { passive: true });
+    // A scroll/keypress/tap during the loader fast-forwards to the reveal;
+    // during the reveal it's the natural scroll that drives the transition.
+    function advance() {
+      if (done || transitioning) return;
+      const s = timeline(performance.now() - t0, reduced);
+      if (s.phase === 'load' || s.phase === 'zoom') {
+        t0 = performance.now() - (CONST.T_LOAD + CONST.T_ZOOM); // jump to reveal
+      }
+    }
     window.addEventListener('keydown', function (e) {
-      if (e.code === 'Space' || e.code === 'ArrowDown' || e.code === 'PageDown') exit();
+      if (e.code === 'Space' || e.code === 'ArrowDown' || e.code === 'PageDown') advance();
     });
+    scrollBtn.addEventListener('click', function () {
+      if (revealed) window.scrollTo({ top: window.innerHeight, behavior: 'smooth' });
+      else advance();
+    });
+    // during the lock a wheel/touch can't scroll — use it to skip ahead
+    window.addEventListener('wheel', function () { if (!revealed) advance(); }, { passive: true });
     let touchY = null;
     window.addEventListener('touchstart', function (e) { touchY = e.touches[0].clientY; }, { passive: true });
     window.addEventListener('touchmove', function (e) {
-      if (touchY !== null && touchY - e.touches[0].clientY > 24) exit();
+      if (!revealed && touchY !== null && touchY - e.touches[0].clientY > 24) advance();
     }, { passive: true });
-    scrollBtn.addEventListener('click', exit);
 
-    const t0 = performance.now();
     function frame(now) {
-      if (exited) return;
+      if (done) return;
       const dt = prevFrame ? now - prevFrame : 16;
       prevFrame = now;
       const s = timeline(now - t0, reduced);
-      fillRect.setAttribute('width', String(CONST.FILL_W * s.progress / 100));
+      state.phase = s.phase; state.progress = s.progress;
+
+      wavePhase += dt * 0.005;
+      const fp = fillPath(s.progress, wavePhase);
+      fillEl.setAttribute('d', fp.d);
+      state.fillY = fp.lineY;
       count.textContent = String(Math.round(s.progress));
-      logo.style.transform = 'scale(' + s.zoom + ')';
+
+      // clamp the zoom so the whole wordmark always shows and never overflows
+      const maxFit = (0.94 * window.innerWidth) / (logo.offsetWidth || 1);
+      logo.style.transform = 'scale(' + Math.min(s.zoom, maxFit).toFixed(3) + ')';
+
       if (s.phase === 'load' && !reduced) spawnPill(now);
       if (s.phase !== phaseSeen) {
         phaseSeen = s.phase;
         if (s.phase === 'zoom') root.classList.add('intro--zoom');
-        if (s.phase === 'reveal') root.classList.add('intro--reveal');
-        if (s.phase === 'done') { exit(); return; }
+        if (s.phase === 'reveal') { root.classList.add('intro--reveal'); enterReveal(); }
+        if (s.phase === 'done') { quickExit(); return; }
       }
-      if (s.phase === 'reveal') {
-        if (!hasMouse) { // touch and not-yet-moved desktop: gentle wander
-          driftT += dt;
-          tx = window.innerWidth / 2 + window.innerWidth * 0.28 * Math.sin(driftT * 0.00045);
-          ty = window.innerHeight * 0.55 + window.innerHeight * 0.20 * Math.sin(driftT * 0.00032 + 1.7);
+      // cursor-lit hole: active only while the page hasn't started sliding
+      if (s.phase === 'reveal' && !transitioning) {
+        if (!hasMouse) { // touch / not-yet-moved desktop: a gentle wander
+          tx = window.innerWidth / 2 + window.innerWidth * 0.26 * Math.sin(now * 0.00045);
+          ty = window.innerHeight * 0.52 + window.innerHeight * 0.18 * Math.sin(now * 0.00032 + 1.7);
         }
         mx += (tx - mx) * CONST.EASE_FOLLOW;
         my += (ty - my) * CONST.EASE_FOLLOW;
         sheet.style.setProperty('--mx', mx.toFixed(1) + 'px');
         sheet.style.setProperty('--my', my.toFixed(1) + 'px');
-        ring.style.transform = 'translate(' + (mx - CONST.MASK_R).toFixed(1) + 'px,' + (my - CONST.MASK_R).toFixed(1) + 'px)';
-        canSlot.style.transform = 'translate(' + (mx - CONST.CAN_W / 2).toFixed(1) + 'px,' + (my - CONST.CAN_H / 2).toFixed(1) + 'px)';
+        canSlot.style.transform = 'translate(' + (mx - canW / 2).toFixed(1) + 'px,' + (my - canH / 2).toFixed(1) + 'px)';
       }
       requestAnimationFrame(frame);
     }

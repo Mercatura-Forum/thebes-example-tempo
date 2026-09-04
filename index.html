@@ -12,17 +12,17 @@
   <link rel="preconnect" href="https://fonts.gstatic.com" crossorigin />
   <link href="https://fonts.googleapis.com/css2?family=Cairo:wght@600;700&display=swap" rel="stylesheet" />
   <script>
-    document.documentElement.classList.add('intro-lock');
+    document.documentElement.classList.add('intro-lock', 'intro-veil');
     setTimeout(function () {
-      if (!document.body || !document.body.classList.contains('intro-lock')) {
-        document.documentElement.classList.remove('intro-lock');
+      if (!document.body || !document.body.classList.contains('intro-veil')) {
+        document.documentElement.classList.remove('intro-lock', 'intro-veil');
         var n = document.getElementById('intro'); if (n) n.remove();
         n = document.getElementById('introUnder'); if (n) n.remove();
       }
     }, 6000);
   </script>
   <noscript><style>#intro, #introUnder { display: none !important; }</style></noscript>
-  <link rel="stylesheet" href="styles.css?v=22" />
+  <link rel="stylesheet" href="styles.css?v=23" />
 </head>
 <body>
   <a class="skip-link" href="#main">Skip to content</a>
@@ -34,12 +34,12 @@
       <img class="can-fallback" alt="" />
     </div>
     <div class="intro__sheet" id="introSheet" aria-hidden="true">
-      <svg class="intro__logo" viewBox="0 0 600 140">
+      <svg class="intro__logo" viewBox="0 0 620 180">
         <defs>
-          <clipPath id="introFillClip"><rect id="introFillRect" x="0" y="0" width="0" height="140" /></clipPath>
+          <clipPath id="introFillClip"><path id="introFillPath" d="M 0 180 L 620 180 L 620 180 L 0 180 Z" /></clipPath>
         </defs>
-        <text class="intro__logo-ghost" x="300" y="76">TEMPO</text>
-        <text class="intro__logo-fill" x="300" y="76" clip-path="url(#introFillClip)">TEMPO</text>
+        <text class="intro__logo-ghost" x="310" y="130">TEMPO</text>
+        <text class="intro__logo-fill" x="310" y="130" clip-path="url(#introFillClip)">TEMPO</text>
       </svg>
       <div class="intro__count" id="introCount" aria-hidden="true">0</div>
       <div class="intro__pills" id="introPills" aria-hidden="true"></div>
@@ -306,7 +306,7 @@
   <div class="toast" id="toast" role="status" aria-live="polite" hidden></div>
   <div id="adminMount"></div>
 
-  <script src="intro.js?v=1"></script>
+  <script src="intro.js?v=2"></script>
   <script src="sdk/boundary.js?v=1"></script>
   <script src="sdk/passkey.js?v=1"></script>
   <script src="tempo-api.js?v=3"></script>
@@ -320,6 +320,6 @@
     }
   }
   </script>
-  <script type="module" src="can3d.js?v=19"></script>
+  <script type="module" src="can3d.js?v=20"></script>
 </body>
 </html>

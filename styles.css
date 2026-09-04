@@ -739,29 +739,39 @@ body:not(.webgl) .can-slot--journey { display: none; }
    Intro experience (intro.js) — appended last on purpose: the
    ≤940px block below must outrank the earlier mobile blocks.
    ============================================================ */
+/* Two flags, kept distinct from the overlay's own `.intro` class so neither
+   ever matches the body/html and collapses their layout:
+     intro-lock — locks the page scroll (loader + zoom only)
+     intro-veil — shows the overlay and hides the site chrome (until the
+                  intro has fully slid away) */
 html.intro-lock { overflow: hidden; }
 /* the site chrome sits high (nav 100, scroll bar 300, grain 380, cursor 400);
    suppress it while the intro owns the screen so nothing bleeds through the
    reveal hole. The 3D can canvas (#canGlobal, z 40) is deliberately kept — it
-   is what the hole exposes, drawn between the tint (35) and the sheet. */
-html.intro-lock .nav,
-html.intro-lock .scroll-progress,
-html.intro-lock .cursor { display: none !important; }
-html.intro-lock body::after { display: none; }
-.intro__under { position: fixed; inset: 0; z-index: 35; background: var(--accent-tint); display: none; }
-html.intro-lock .intro__under { display: block; }
-.intro { position: fixed; inset: 0; z-index: 500; overflow: clip; display: none; }
-html.intro-lock .intro { display: block; }
+   is what the hole exposes, drawn between the backdrop (35) and the sheet. */
+html.intro-veil .nav,
+html.intro-veil .scroll-progress,
+html.intro-veil .cursor { display: none !important; }
+html.intro-veil body::after { display: none; }
+/* the backdrop behind the wall is the site's own paper tone, so the hole
+   reads as the white wall peeled back to the can — not a coloured disc */
+.intro__under { position: fixed; inset: 0; z-index: 35; background: var(--paper); display: none; }
+html.intro-veil .intro__under { display: block; }
+.intro { position: fixed; inset: 0; z-index: 500; overflow: clip; display: none; will-change: transform; }
+html.intro-veil .intro { display: block; }
 .intro__sheet {
   position: absolute; inset: 0; background: var(--surface); overflow: clip;
   display: grid; place-items: center;
-  --mx: 50vw; --my: 60vh; --mr: 180px; /* == CONST.MASK_R */
+  --mx: 50vw; --my: 55vh; --mr: 190px; /* == CONST.MASK_R */
 }
 .intro--reveal .intro__sheet {
-  -webkit-mask-image: radial-gradient(circle var(--mr) at var(--mx) var(--my), transparent calc(var(--mr) - 2px), #000 var(--mr));
-  mask-image: radial-gradient(circle var(--mr) at var(--mx) var(--my), transparent calc(var(--mr) - 2px), #000 var(--mr));
+  -webkit-mask-image: radial-gradient(circle var(--mr) at var(--mx) var(--my), transparent calc(var(--mr) - 1px), #000 var(--mr));
+  mask-image: radial-gradient(circle var(--mr) at var(--mx) var(--my), transparent calc(var(--mr) - 1px), #000 var(--mr));
 }
-.intro__logo { width: min(72vw, 680px); height: auto; transform-origin: center; will-change: transform; }
+/* once the lift begins the wall is whole again — the hole closes so the
+   opaque sheet slides up to reveal the live hero beneath */
+.intro--sliding .intro__sheet { -webkit-mask-image: none; mask-image: none; }
+.intro__logo { width: min(64vw, 640px); height: auto; transform-origin: center; will-change: transform; }
 .intro__logo text {
   font-family: var(--font-display); font-size: 118px; letter-spacing: .04em;
   text-anchor: middle;
@@ -773,24 +783,22 @@ html.intro-lock .intro { display: block; }
   font-family: var(--font-display); font-size: clamp(48px, 9vw, 110px); line-height: 1;
   color: var(--ink); font-variant-numeric: tabular-nums;
 }
+.intro--zoom .intro__count, .intro--reveal .intro__count { opacity: 0; transition: opacity .3s; }
 .intro__pills { position: absolute; inset: 0; pointer-events: none; }
 .intro__pill {
   position: absolute; padding: .55em 1.25em; border: 1.5px solid var(--ink);
   border-radius: 999px; background: var(--surface);
   font-size: 14px; letter-spacing: .14em; text-transform: uppercase;
   rotate: var(--rot, 0deg); opacity: 0;
-  animation: introPill 2.2s ease-out forwards;
+  animation: introPill 2.4s ease-out forwards;
 }
 @keyframes introPill {
   0% { opacity: 0; translate: 0 26px; }
   18% { opacity: 1; }
   100% { opacity: 0; translate: 0 -80px; }
 }
-.intro--zoom .intro__count, .intro--reveal .intro__count,
 .intro--zoom .intro__pills, .intro--reveal .intro__pills { opacity: 0; transition: opacity .25s; }
-.intro__can { position: absolute; left: 0; top: 0; width: 240px; height: 420px; pointer-events: none; } /* == CONST.CAN_W/H */
-.intro__ring { position: absolute; left: 0; top: 0; border: 1.5px solid var(--ink); border-radius: 50%; opacity: 0; pointer-events: none; }
-.intro--reveal .intro__ring { opacity: .35; }
+.intro__can { position: absolute; left: 0; top: 0; width: 250px; height: 440px; pointer-events: none; } /* == CONST.CAN_W/H */
 .intro__scroll {
   position: absolute; left: 50%; bottom: 26px; translate: -50%;
   display: flex; flex-direction: column; align-items: center; gap: 8px;
@@ -799,19 +807,18 @@ html.intro-lock .intro { display: block; }
   opacity: 0; pointer-events: none;
 }
 .intro--reveal .intro__scroll { opacity: 1; pointer-events: auto; transition: opacity .4s .2s; }
+.intro--sliding .intro__scroll { opacity: 0; }
 .intro__chev { width: 1.5px; height: 34px; background: var(--ink); animation: introChev 1.6s ease-in-out infinite; }
 @keyframes introChev {
   0%, 100% { scale: 1 1; translate: 0 0; opacity: 1; }
   50% { scale: 1 .55; translate: 0 10px; opacity: .5; }
 }
-.intro--exit { transform: translateY(-100%); transition: transform .7s cubic-bezier(.6, 0, .18, 1); } /* == CONST.T_EXIT */
+.intro__spacer { width: 100%; background: var(--surface); }
+.intro--gone { opacity: 0; transition: opacity .3s; } /* == CONST.T_REDUCED_EXIT */
 body:not(.webgl) .intro__can .can-fallback { display: block; width: 100%; height: 100%; object-fit: contain; }
 @media (prefers-reduced-motion: reduce) {
   .intro__pills, .intro__chev { display: none; }
-  .intro--exit { transition-duration: .3s; }
 }
 @media (max-width: 940px) {
-  .intro__logo { width: 86vw; }
   .intro__count { font-size: 64px; }
-  .intro__can { width: 190px; height: 340px; }
 }
