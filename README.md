@@ -24,6 +24,14 @@ Prices, stock badges, stockists and the poll hydrate in place when the chain
 answers; if it doesn't, the full site still works — no spinners, no blank
 states, no layout shift.
 
+**A choreographed intro that can't brick the page.** The loader (a filling
+wordmark, a 0→100 counter, drifting electrolyte pills), the logo zoom and the
+cursor-reveal of the can are pure theatre on a pure timeline
+(`window.TempoIntro`, oracle-tested) layered over the same one-canvas 3D
+pipeline as the rest of the site. No JS, a failed script, or
+`prefers-reduced-motion` all land on the plain page — the overlay only lives
+between a pre-paint class and its watchdog.
+
 ## The no-build SDK story
 
 Every other Thebes example is a React + Vite app on `@thebes/sdk`. This one
@@ -77,8 +85,18 @@ its built-in fallback content.
 
 ```sh
 node oracle/api.mjs        # the client verbs against the real runtime, scripted fetch
+node oracle/intro.mjs      # the intro timeline (pure phases: fill, zoom, reveal, reduced)
 cd motoko && mops install && \
   "$HOME/.cache/mops/moc/1.4.1/moc" -r $(mops sources) test/units.test.mo   # pure modules
+```
+
+The intro also has a headless battery — counter/fill agreement, the cursor
+chase, mobile auto-drift, the scroll exit and overflow — driven by Playwright:
+
+```sh
+python3 -m playwright install chromium         # once
+python3 -m http.server 8000 &                  # serve the site
+python3 oracle/verify-intro.py                 # exits nonzero on any failure
 ```
 
 ## Files
@@ -88,6 +106,7 @@ cd motoko && mops install && \
 | `index.html` | Page structure |
 | `styles.css` | Styling; flavour themes swap via `<html data-flavor>` |
 | `app.js` | Content, interactions, chain hydration |
+| `intro.js` | The intro experience: loader, zoom, cursor reveal, scroll exit |
 | `can3d.js` | Three.js — loads the models, renders every slot |
 | `tempo-api.js` | Typed verbs over the SDK runtime |
 | `admin.js` | The `#admin` drawer (Memphis passkey) |
