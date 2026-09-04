@@ -11,10 +11,43 @@
   <link href="https://api.fontshare.com/v2/css?f[]=tanker@400&f[]=switzer@400,500,600,700&display=swap" rel="stylesheet" />
   <link rel="preconnect" href="https://fonts.gstatic.com" crossorigin />
   <link href="https://fonts.googleapis.com/css2?family=Cairo:wght@600;700&display=swap" rel="stylesheet" />
+  <script>
+    document.documentElement.classList.add('intro');
+    setTimeout(function () {
+      if (!document.body || !document.body.classList.contains('intro')) {
+        document.documentElement.classList.remove('intro');
+        var n = document.getElementById('intro'); if (n) n.remove();
+        n = document.getElementById('introUnder'); if (n) n.remove();
+      }
+    }, 6000);
+  </script>
+  <noscript><style>#intro, #introUnder { display: none !important; }</style></noscript>
   <link rel="stylesheet" href="styles.css?v=21" />
 </head>
 <body>
   <a class="skip-link" href="#main">Skip to content</a>
+
+  <!-- ── Intro: loader → zoom → cursor reveal (intro.js) ── -->
+  <div class="intro__under" id="introUnder" aria-hidden="true"></div>
+  <div class="intro" id="intro">
+    <div class="intro__can can-slot" id="introCan" data-can3d data-role="intro" aria-hidden="true">
+      <img class="can-fallback" alt="" />
+    </div>
+    <div class="intro__sheet" id="introSheet" aria-hidden="true">
+      <svg class="intro__logo" viewBox="0 0 600 140">
+        <defs>
+          <clipPath id="introFillClip"><rect id="introFillRect" x="0" y="0" width="0" height="140" /></clipPath>
+        </defs>
+        <text class="intro__logo-ghost" x="300" y="76">TEMPO</text>
+        <text class="intro__logo-fill" x="300" y="76" clip-path="url(#introFillClip)">TEMPO</text>
+      </svg>
+      <div class="intro__count" id="introCount" aria-hidden="true">0</div>
+      <div class="intro__pills" id="introPills" aria-hidden="true"></div>
+    </div>
+    <button class="intro__scroll" id="introScroll" type="button">
+      <span>scroll</span><span class="intro__chev" aria-hidden="true"></span>
+    </button>
+  </div>
 
   <!-- scroll progress + custom "scope" cursor (hidden on touch) -->
   <div class="scroll-progress" id="scrollProgress" aria-hidden="true"></div>
@@ -273,6 +306,7 @@
   <div class="toast" id="toast" role="status" aria-live="polite" hidden></div>
   <div id="adminMount"></div>
 
+  <script src="intro.js?v=1"></script>
   <script src="sdk/boundary.js?v=1"></script>
   <script src="sdk/passkey.js?v=1"></script>
   <script src="tempo-api.js?v=3"></script>

@@ -49,8 +49,87 @@
   window.TempoIntro = { CONST, timeline };
 
   function boot() {
-    // Task 2 fills this in. Guarded so the oracle (and a stripped page)
-    // loads the script with no side effects.
+    const root = document.getElementById('intro');
+    const under = document.getElementById('introUnder');
+    const sheet = document.getElementById('introSheet');
+    const fillRect = document.getElementById('introFillRect');
+    const count = document.getElementById('introCount');
+    const pillBox = document.getElementById('introPills');
+    const logo = root.querySelector('.intro__logo');
+    const scrollBtn = document.getElementById('introScroll');
+    const canSlot = document.getElementById('introCan');
+    const reduced = window.matchMedia('(prefers-reduced-motion: reduce)').matches;
+    const narrow = window.matchMedia('(max-width: 940px)').matches;
+
+    document.body.classList.add('intro'); // proves boot to the head watchdog
+    window.scrollTo(0, 0);
+    sheet.style.setProperty('--mr', CONST.MASK_R + 'px');
+
+    // the same static render the shop cards fall back to
+    const fb = canSlot.querySelector('.can-fallback');
+    if (fb) fb.src = 'assets/can_' + (document.documentElement.dataset.flavor || 'citrus') + '.png';
+
+    let exited = false, phaseSeen = 'load', pills = 0, lastPill = 0;
+
+    function spawnPill(now) {
+      const max = narrow ? CONST.PILL_MAX_NARROW : CONST.PILL_MAX;
+      if (pills >= max || now - lastPill < CONST.PILL_EVERY) return;
+      lastPill = now;
+      const el = document.createElement('span');
+      el.className = 'intro__pill';
+      el.textContent = ELECTROLYTES[pills % ELECTROLYTES.length];
+      el.style.left = (6 + Math.random() * 82) + 'vw';
+      el.style.top = (12 + Math.random() * 70) + 'vh';
+      el.style.setProperty('--rot', (Math.random() * 36 - 18).toFixed(1) + 'deg');
+      el.addEventListener('animationend', function () { el.remove(); });
+      pillBox.appendChild(el);
+      pills++;
+    }
+
+    function exit() {
+      if (exited) return; exited = true;
+      root.classList.add('intro--exit');
+      window.scrollTo(0, 0);
+      setTimeout(function () {
+        document.documentElement.classList.remove('intro');
+        document.body.classList.remove('intro');
+        root.remove();
+        under.remove();
+        document.dispatchEvent(new CustomEvent('tempo:slots-changed'));
+        document.dispatchEvent(new CustomEvent('tempo:intro-done'));
+      }, CONST.T_EXIT);
+    }
+
+    // impatient users may leave from ANY phase, not just the reveal
+    window.addEventListener('wheel', function () { exit(); }, { passive: true });
+    window.addEventListener('keydown', function (e) {
+      if (e.code === 'Space' || e.code === 'ArrowDown' || e.code === 'PageDown') exit();
+    });
+    let touchY = null;
+    window.addEventListener('touchstart', function (e) { touchY = e.touches[0].clientY; }, { passive: true });
+    window.addEventListener('touchmove', function (e) {
+      if (touchY !== null && touchY - e.touches[0].clientY > 24) exit();
+    }, { passive: true });
+    scrollBtn.addEventListener('click', exit);
+
+    const t0 = performance.now();
+    function frame(now) {
+      if (exited) return;
+      const s = timeline(now - t0, reduced);
+      fillRect.setAttribute('width', String(CONST.FILL_W * s.progress / 100));
+      count.textContent = String(Math.round(s.progress));
+      logo.style.transform = 'scale(' + s.zoom + ')';
+      if (s.phase === 'load' && !reduced) spawnPill(now);
+      if (s.phase !== phaseSeen) {
+        phaseSeen = s.phase;
+        if (s.phase === 'zoom') root.classList.add('intro--zoom');
+        if (s.phase === 'reveal') root.classList.add('intro--reveal');
+        if (s.phase === 'done') { exit(); return; }
+      }
+      // reveal branch: Task 3 (mask + ring + can follow the cursor)
+      requestAnimationFrame(frame);
+    }
+    requestAnimationFrame(frame);
   }
 
   if (typeof document !== 'undefined' && document.getElementById('intro')) boot();
