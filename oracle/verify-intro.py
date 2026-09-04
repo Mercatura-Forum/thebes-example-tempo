@@ -50,18 +50,22 @@ with sync_playwright() as p:
           f"zoomed wordmark fully on screen (x {lg['l']:.0f}..{lg['r']:.0f} / y {lg['t']:.0f}..{lg['b']:.0f})")
     check(lg['w'] > 0.4 * lg['iw'], f"wordmark stays prominent ({lg['w']:.0f}px wide)")
 
-    # the cursor-lit hole tracks the pointer and the can rides with it
+    # the porthole tracks the pointer, but the can stays HIDDEN behind the wall
+    # at centre — it does NOT ride the cursor (only a whisper of parallax)
     page.mouse.move(430, 450)
     page.wait_for_timeout(1400)
-    m1 = page.evaluate('''() => ({ mx: parseFloat(getComputedStyle(document.getElementById('introSheet')).getPropertyValue('--mx')),
-      can: document.getElementById('introCan').getBoundingClientRect().left })''')
+    m1 = page.evaluate('''() => { const r = document.getElementById('introCan').getBoundingClientRect();
+      return { mx: parseFloat(getComputedStyle(document.getElementById('introSheet')).getPropertyValue('--mx')),
+        cc: r.left + r.width / 2, iw: innerWidth }; }''')
     page.mouse.move(1000, 450)
     page.wait_for_timeout(1400)
-    m2 = page.evaluate('''() => ({ mx: parseFloat(getComputedStyle(document.getElementById('introSheet')).getPropertyValue('--mx')),
-      can: document.getElementById('introCan').getBoundingClientRect().left })''')
+    m2 = page.evaluate('''() => { const r = document.getElementById('introCan').getBoundingClientRect();
+      return { mx: parseFloat(getComputedStyle(document.getElementById('introSheet')).getPropertyValue('--mx')),
+        cc: r.left + r.width / 2 }; }''')
     check(m1['mx'] < 600 and m2['mx'] > 840 and (m2['mx'] - m1['mx']) > 300,
-          f"hole tracks the cursor left→right ({m1['mx']:.0f} → {m2['mx']:.0f})")
-    check(m2['can'] - m1['can'] > 400, f"can rides with the cursor ({m1['can']:.0f} → {m2['can']:.0f})")
+          f"porthole tracks the cursor left→right ({m1['mx']:.0f} → {m2['mx']:.0f})")
+    check(abs(m2['cc'] - m1['cc']) < 90, f"can stays fixed behind the wall, not glued to the cursor (moved {abs(m2['cc']-m1['cc']):.0f}px)")
+    check(abs(m1['cc'] - m1['iw'] / 2) < 90, f"can sits centred behind the page (centre off by {abs(m1['cc']-m1['iw']/2):.0f}px)")
 
     # the transition is CONTINUOUS: mid-scroll the intro is still there, sliding,
     # and the live hero has risen into view beneath it (not a blank page)

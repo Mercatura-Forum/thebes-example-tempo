@@ -14,11 +14,17 @@
     T_ZOOM: 700,         // logo zoom ms
     T_REDUCED: 400,      // reduced-motion logo hold ms
     T_REDUCED_EXIT: 300, // reduced-motion fade-out ms
-    ZOOM_SCALE: 1.9,     // target logo scale (clamped to fit the viewport)
-    MASK_R: 190,         // reveal hole radius px (== --mr)
-    CAN_W: 250,          // intro can slot px
-    CAN_H: 440,
-    EASE_FOLLOW: 0.14,   // cursor lerp per frame
+    // the wordmark is rendered at its REVEAL size and only ever scaled DOWN,
+    // so the vector never upscales into a blurry raster. Loader shows it small
+    // (LOGO_LOAD); the zoom grows it to native (LOGO_REVEAL), where the
+    // transform is dropped entirely so it sits pixel-crisp.
+    LOGO_LOAD: 0.54,
+    LOGO_REVEAL: 1.0,
+    MASK_R: 300,         // reveal lens radius px, desktop (scaled on narrow)
+    CAN_W: 300,          // the fixed can hidden behind the wall
+    CAN_H: 560,
+    CAN_PARALLAX: 0.05,  // can drifts this fraction against the cursor, for depth
+    EASE_FOLLOW: 0.16,   // lens lerp per frame
     PILL_EVERY: 360,     // ms between pill spawns
     PILL_MAX: 11,
     PILL_MAX_NARROW: 6,  // ≤940px spawns fewer
@@ -40,17 +46,17 @@
   function timeline(t, reduced) {
     if (reduced) {
       return t < CONST.T_REDUCED
-        ? { phase: 'load', progress: 100, zoom: 1 }
-        : { phase: 'done', progress: 100, zoom: 1 };
+        ? { phase: 'load', progress: 100, zoom: CONST.LOGO_REVEAL }
+        : { phase: 'done', progress: 100, zoom: CONST.LOGO_REVEAL };
     }
     if (t < CONST.T_LOAD) {
-      return { phase: 'load', progress: 100 * easeInOutCubic(t / CONST.T_LOAD), zoom: 1 };
+      return { phase: 'load', progress: 100 * easeInOutCubic(t / CONST.T_LOAD), zoom: CONST.LOGO_LOAD };
     }
     if (t < CONST.T_LOAD + CONST.T_ZOOM) {
       const u = (t - CONST.T_LOAD) / CONST.T_ZOOM;
-      return { phase: 'zoom', progress: 100, zoom: 1 + (CONST.ZOOM_SCALE - 1) * easeOutCubic(u) };
+      return { phase: 'zoom', progress: 100, zoom: CONST.LOGO_LOAD + (CONST.LOGO_REVEAL - CONST.LOGO_LOAD) * easeOutCubic(u) };
     }
-    return { phase: 'reveal', progress: 100, zoom: CONST.ZOOM_SCALE };
+    return { phase: 'reveal', progress: 100, zoom: CONST.LOGO_REVEAL };
   }
 
   // The liquid clip path for a given fill fraction + wave phase. Returns the
@@ -85,9 +91,10 @@
     const reduced = window.matchMedia('(prefers-reduced-motion: reduce)').matches;
     const narrow = window.matchMedia('(max-width: 940px)').matches;
 
-    // hole + can scale down on narrow screens so the lens isn't the whole page
+    // a big porthole (drinkstill-style) that never eats the whole screen
+    const maskR = narrow ? Math.round(window.innerWidth * 0.36)
+                         : Math.min(CONST.MASK_R, Math.round(window.innerWidth * 0.24));
     const sf = narrow ? 0.62 : 1;
-    const maskR = Math.round(CONST.MASK_R * sf);
     const canW = Math.round(CONST.CAN_W * sf), canH = Math.round(CONST.CAN_H * sf);
 
     // intro-veil hides the chrome + shows the overlay (until finalize);
@@ -232,9 +239,14 @@
       state.fillY = fp.lineY;
       count.textContent = String(Math.round(s.progress));
 
-      // clamp the zoom so the whole wordmark always shows and never overflows
-      const maxFit = (0.94 * window.innerWidth) / (logo.offsetWidth || 1);
-      logo.style.transform = 'scale(' + Math.min(s.zoom, maxFit).toFixed(3) + ')';
+      // loader/zoom scale DOWN from a full-size render (never up); at reveal
+      // drop the transform entirely so the wordmark paints at native
+      // resolution (crisp). CSS width is min(85vw,1180) so it always fits.
+      if (s.phase === 'reveal' || s.phase === 'done') {
+        if (logo.style.transform) logo.style.transform = '';
+      } else {
+        logo.style.transform = 'scale(' + s.zoom.toFixed(3) + ')';
+      }
 
       if (s.phase === 'load' && !reduced) spawnPill(now);
       if (s.phase !== phaseSeen) {
@@ -243,17 +255,21 @@
         if (s.phase === 'reveal') { root.classList.add('intro--reveal'); enterReveal(); }
         if (s.phase === 'done') { quickExit(); return; }
       }
-      // cursor-lit hole: active only while the page hasn't started sliding
+      // the porthole tracks the cursor; the can stays HIDDEN behind the wall at
+      // centre (a whisper of parallax for depth), revealed only where the hole
+      // passes over it — the cursor uncovers the can from behind the page.
       if (s.phase === 'reveal' && !transitioning) {
-        if (!hasMouse) { // touch / not-yet-moved desktop: a gentle wander
-          tx = window.innerWidth / 2 + window.innerWidth * 0.26 * Math.sin(now * 0.00045);
-          ty = window.innerHeight * 0.52 + window.innerHeight * 0.18 * Math.sin(now * 0.00032 + 1.7);
+        const cx = window.innerWidth / 2, cy = window.innerHeight / 2;
+        if (!hasMouse) { // touch / not-yet-moved desktop: a gentle wander over the can
+          tx = cx + window.innerWidth * 0.24 * Math.sin(now * 0.00045);
+          ty = cy + window.innerHeight * 0.16 * Math.sin(now * 0.00032 + 1.7);
         }
         mx += (tx - mx) * CONST.EASE_FOLLOW;
         my += (ty - my) * CONST.EASE_FOLLOW;
         sheet.style.setProperty('--mx', mx.toFixed(1) + 'px');
         sheet.style.setProperty('--my', my.toFixed(1) + 'px');
-        canSlot.style.transform = 'translate(' + (mx - canW / 2).toFixed(1) + 'px,' + (my - canH / 2).toFixed(1) + 'px)';
+        const px = -(mx - cx) * CONST.CAN_PARALLAX, py = -(my - cy) * CONST.CAN_PARALLAX;
+        canSlot.style.transform = 'translate(' + (cx - canW / 2 + px).toFixed(1) + 'px,' + (cy - canH / 2 + py).toFixed(1) + 'px)';
       }
       requestAnimationFrame(frame);
     }

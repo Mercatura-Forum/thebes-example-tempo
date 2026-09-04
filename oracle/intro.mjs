@@ -20,11 +20,11 @@ globalThis.matchMedia = () => ({ matches: false })
 new Function(readFileSync(join(root, 'intro.js'), 'utf8'))()
 const I = globalThis.TempoIntro
 check(!!I && typeof I.timeline === 'function', 'TempoIntro.timeline exposed')
-const { T_LOAD, T_ZOOM, T_REDUCED, ZOOM_SCALE } = I.CONST
+const { T_LOAD, T_ZOOM, T_REDUCED, LOGO_LOAD, LOGO_REVEAL } = I.CONST
 
 // ── load phase ──
 let s = I.timeline(0, false)
-check(s.phase === 'load' && s.progress === 0 && s.zoom === 1, 't=0 is load/0/1')
+check(s.phase === 'load' && s.progress === 0 && s.zoom === LOGO_LOAD, 't=0 is load/0/LOGO_LOAD')
 let prev = -1, mono = true, sawEnd = false
 for (let i = 0; i <= 200; i++) {
   const p = I.timeline((T_LOAD * i) / 200, false).progress
@@ -40,7 +40,7 @@ check(I.timeline(T_LOAD - 1, false).phase === 'load', 'still load just before T_
 s = I.timeline(T_LOAD, false)
 check(s.phase === 'zoom' && s.progress === 100, 'T_LOAD flips to zoom at full fill')
 const zMid = I.timeline(T_LOAD + T_ZOOM / 2, false).zoom
-check(zMid > 1 && zMid < ZOOM_SCALE, 'zoom rises through the phase')
+check(zMid > LOGO_LOAD && zMid < LOGO_REVEAL, 'zoom grows from loader to native through the phase')
 prev = 0; mono = true
 for (let i = 0; i <= 100; i++) {
   const z = I.timeline(T_LOAD + (T_ZOOM * i) / 100, false).zoom
@@ -51,12 +51,12 @@ check(mono, 'zoom is monotonic')
 
 // ── reveal ──
 s = I.timeline(T_LOAD + T_ZOOM, false)
-check(s.phase === 'reveal' && s.zoom === ZOOM_SCALE, 'reveal holds ZOOM_SCALE')
+check(s.phase === 'reveal' && s.zoom === LOGO_REVEAL, 'reveal holds native scale')
 check(I.timeline(T_LOAD + T_ZOOM + 60000, false).phase === 'reveal', 'reveal is unbounded')
 
 // ── reduced motion ──
 s = I.timeline(0, true)
-check(s.phase === 'load' && s.progress === 100 && s.zoom === 1, 'reduced shows the filled logo at once')
+check(s.phase === 'load' && s.progress === 100 && s.zoom === LOGO_REVEAL, 'reduced shows the filled logo at once')
 check(I.timeline(T_REDUCED - 1, true).phase === 'load', 'reduced holds through T_REDUCED')
 check(I.timeline(T_REDUCED, true).phase === 'done', 'reduced skips straight to done')
 
