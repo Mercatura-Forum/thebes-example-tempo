@@ -204,7 +204,7 @@ function boot() {
 
     // while the intro overlay is up, its slot is the only can on stage —
     // the hero can must not photobomb the reveal hole
-    const introOnly = document.body.classList.contains('intro');
+    const introOnly = document.body.classList.contains('intro-lock');
     for (const s of slots) {
       if (introOnly && s.role !== 'intro') continue;
       const r = s.el.getBoundingClientRect();

@@ -61,7 +61,7 @@
     const reduced = window.matchMedia('(prefers-reduced-motion: reduce)').matches;
     const narrow = window.matchMedia('(max-width: 940px)').matches;
 
-    document.body.classList.add('intro'); // proves boot to the head watchdog
+    document.body.classList.add('intro-lock'); // proves boot to the head watchdog
     window.scrollTo(0, 0);
     sheet.style.setProperty('--mr', CONST.MASK_R + 'px');
 
@@ -102,8 +102,8 @@
       root.classList.add('intro--exit');
       window.scrollTo(0, 0);
       setTimeout(function () {
-        document.documentElement.classList.remove('intro');
-        document.body.classList.remove('intro');
+        document.documentElement.classList.remove('intro-lock');
+        document.body.classList.remove('intro-lock');
         root.remove();
         under.remove();
         document.dispatchEvent(new CustomEvent('tempo:slots-changed'));

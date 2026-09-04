@@ -12,10 +12,10 @@
   <link rel="preconnect" href="https://fonts.gstatic.com" crossorigin />
   <link href="https://fonts.googleapis.com/css2?family=Cairo:wght@600;700&display=swap" rel="stylesheet" />
   <script>
-    document.documentElement.classList.add('intro');
+    document.documentElement.classList.add('intro-lock');
     setTimeout(function () {
-      if (!document.body || !document.body.classList.contains('intro')) {
-        document.documentElement.classList.remove('intro');
+      if (!document.body || !document.body.classList.contains('intro-lock')) {
+        document.documentElement.classList.remove('intro-lock');
         var n = document.getElementById('intro'); if (n) n.remove();
         n = document.getElementById('introUnder'); if (n) n.remove();
       }
