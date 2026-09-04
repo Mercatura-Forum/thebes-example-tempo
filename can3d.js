@@ -202,7 +202,11 @@ function boot() {
     renderer.clear(true, true, true);
     renderer.setScissorTest(true);
 
+    // while the intro overlay is up, its slot is the only can on stage —
+    // the hero can must not photobomb the reveal hole
+    const introOnly = document.body.classList.contains('intro');
     for (const s of slots) {
+      if (introOnly && s.role !== 'intro') continue;
       const r = s.el.getBoundingClientRect();
       if (r.width < 2 || r.height < 2 || r.bottom <= 0 || r.top >= H || r.right <= 0 || r.left >= W) continue;
       const w = r.width, h = r.height, left = r.left, bottom = H - r.bottom;

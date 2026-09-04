@@ -69,6 +69,17 @@
     const fb = canSlot.querySelector('.can-fallback');
     if (fb) fb.src = 'assets/can_' + (document.documentElement.dataset.flavor || 'citrus') + '.png';
 
+    const ring = document.createElement('div');
+    ring.className = 'intro__ring';
+    ring.style.width = ring.style.height = (CONST.MASK_R * 2) + 'px';
+    root.appendChild(ring);
+
+    let hasMouse = false, driftT = 0, prevFrame = 0;
+    let mx = window.innerWidth / 2, my = window.innerHeight * 0.6, tx = mx, ty = my;
+    window.addEventListener('mousemove', function (e) {
+      hasMouse = true; tx = e.clientX; ty = e.clientY;
+    }, { passive: true });
+
     let exited = false, phaseSeen = 'load', pills = 0, lastPill = 0;
 
     function spawnPill(now) {
@@ -115,6 +126,8 @@
     const t0 = performance.now();
     function frame(now) {
       if (exited) return;
+      const dt = prevFrame ? now - prevFrame : 16;
+      prevFrame = now;
       const s = timeline(now - t0, reduced);
       fillRect.setAttribute('width', String(CONST.FILL_W * s.progress / 100));
       count.textContent = String(Math.round(s.progress));
@@ -126,7 +139,19 @@
         if (s.phase === 'reveal') root.classList.add('intro--reveal');
         if (s.phase === 'done') { exit(); return; }
       }
-      // reveal branch: Task 3 (mask + ring + can follow the cursor)
+      if (s.phase === 'reveal') {
+        if (!hasMouse) { // touch and not-yet-moved desktop: gentle wander
+          driftT += dt;
+          tx = window.innerWidth / 2 + window.innerWidth * 0.28 * Math.sin(driftT * 0.00045);
+          ty = window.innerHeight * 0.55 + window.innerHeight * 0.20 * Math.sin(driftT * 0.00032 + 1.7);
+        }
+        mx += (tx - mx) * CONST.EASE_FOLLOW;
+        my += (ty - my) * CONST.EASE_FOLLOW;
+        sheet.style.setProperty('--mx', mx.toFixed(1) + 'px');
+        sheet.style.setProperty('--my', my.toFixed(1) + 'px');
+        ring.style.transform = 'translate(' + (mx - CONST.MASK_R).toFixed(1) + 'px,' + (my - CONST.MASK_R).toFixed(1) + 'px)';
+        canSlot.style.transform = 'translate(' + (mx - CONST.CAN_W / 2).toFixed(1) + 'px,' + (my - CONST.CAN_H / 2).toFixed(1) + 'px)';
+      }
       requestAnimationFrame(frame);
     }
     requestAnimationFrame(frame);
