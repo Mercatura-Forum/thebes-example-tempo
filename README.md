@@ -108,6 +108,7 @@ python3 oracle/verify-intro.py                 # exits nonzero on any failure
 | `app.js` | Content, interactions, chain hydration |
 | `intro.js` | The intro experience: loader, zoom, cursor reveal, scroll exit |
 | `can3d.js` | Three.js — loads the models, renders every slot |
+| `scroll.js` | Wheel-damped page glide — flicks are velocity-capped so models and reveals get their time |
 | `tempo-api.js` | Typed verbs over the SDK runtime |
 | `admin.js` | The `#admin` drawer (Memphis passkey) |
 | `sdk/` | Vendored SDK runtime scripts (see NOTICE.md) |

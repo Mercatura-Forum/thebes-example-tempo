@@ -175,6 +175,7 @@
     // is made live so it rises in behind the sheet — not a blank page.
     function startSlide() {
       if (transitioning) return; transitioning = true;
+      state.scrollLimit = window.innerHeight; // the damped scroll (scroll.js) honours the exit pin
       root.classList.add('intro--sliding');   // drops the mask → opaque sheet
       under.style.display = 'none';            // stop the backdrop covering the hero
       document.body.classList.remove('intro-canlock'); // hero can renders now
@@ -195,6 +196,7 @@
 
     function finalize() {
       if (done) return; done = true;
+      state.scrollLimit = null;
       window.removeEventListener('scroll', onScroll);
       const vh = window.innerHeight;
       const y = window.scrollY;

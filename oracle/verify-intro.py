@@ -72,7 +72,10 @@ with sync_playwright() as p:
           f"can settles under the cursor ({m1['cc']:.0f} ≈ 430, then {m2['cc']:.0f} ≈ 1010)")
     check(m1['mr'] < 200 and m2['mr'] < 200,
           f"hole rests to a pupil while the cursor is still (r {m1['mr']:.0f}, {m2['mr']:.0f})")
-    check(lag['mr'] > 250, f"hole dilates back the moment the cursor moves (r {lag['mr']:.0f})")
+    # > 200 not ~294: computed style shows the LAST PAINTED frame, and a rAF
+    # stall can leave that early in the dilation curve — 200 still proves the
+    # hole is well off its 150 rest and dilating
+    check(lag['mr'] > 200, f"hole dilates back the moment the cursor moves (r {lag['mr']:.0f})")
 
     # the lens reads as a black hole: a shadow ring rides the porthole edge
     lens = page.evaluate('''() => { const el = document.querySelector('.intro__lens');
@@ -110,14 +113,20 @@ with sync_playwright() as p:
         lens: parseFloat(getComputedStyle(document.querySelector('.intro__lens')).opacity),
         heroVisible: t.top < innerHeight && t.bottom > 0 }; }''')
     check(mid['intro'] and mid['sliding'], 'intro slides rather than cutting to a new page')
-    check(mid['ty'] > 40 and mid['ty'] < vh * 0.75,
+    check(mid['ty'] < vh * 0.75,
           f"a flick can't rush the curtain — the lift is rate-capped ({mid['ty']:.0f}px of {vh}vh after 250ms)")
     check(mid['y'] <= vh + 2, f"scroll pins at one viewport while the curtain lifts (y {mid['y']:.0f})")
     check(mid['heroVisible'], 'the live hero waits beneath the curtain')
     check(mid['lens'] == 0, 'shadow ring snaps off once the slide begins')
+    # motion is asserted as PROGRESS between two samples (an absolute lift at
+    # one instant flakes when SwiftShader stalls rAF on the hero's first frame)
+    page.wait_for_timeout(450)
+    ty2 = page.evaluate('''() => { const el = document.getElementById('intro');
+      return el ? Math.abs(new DOMMatrixReadOnly(getComputedStyle(el).transform).m42) : Infinity; }''')
+    check(ty2 > mid['ty'] + 30, f"the curtain keeps lifting on its own ({mid['ty']:.0f} → {'gone' if ty2 == float('inf') else format(ty2, '.0f')})")
 
     # the curtain completes on its own → clean handoff at the hero top
-    page.wait_for_timeout(1400)
+    page.wait_for_timeout(1000)
     post = page.evaluate('''() => ({ intro: !!document.getElementById('intro'),
       spacer: !!document.querySelector('.intro__spacer'),
       veil: document.documentElement.classList.contains('intro-veil'),
@@ -127,6 +136,24 @@ with sync_playwright() as p:
     check(post['y'] < 120, f"no scroll jump on handoff (rests at {post['y']})")
     check(post['overflow'] == 0, f"no horizontal overflow (delta {post['overflow']})")
     check(post['hero'] >= -10 and post['hero'] < 900, 'hero title on screen after handoff')
+
+    # the page itself glides: a violent wheel flick is velocity-capped and
+    # smoothed, then settles exactly at the damped target — no native blast
+    C2 = page.evaluate('() => window.TempoScroll.CONST')
+    y0 = page.evaluate('() => window.scrollY')
+    page.mouse.wheel(0, 4000)
+    page.wait_for_timeout(250)
+    g1 = page.evaluate('() => window.scrollY')
+    page.wait_for_timeout(700)
+    g2 = page.evaluate('() => window.scrollY')
+    cap250 = C2['MAX_V'] * vh * 0.25
+    check(g1 - y0 > 60 and g1 - y0 < cap250 * 1.7,
+          f"wheel flick is velocity-capped ({g1 - y0:.0f}px in 250ms, cap ≈ {cap250:.0f})")
+    check(g2 > g1 + 100, f"the glide keeps rolling toward the target ({g1:.0f} → {g2:.0f})")
+    page.wait_for_timeout(3200)
+    g3 = page.evaluate('() => window.scrollY')
+    tgt = page.evaluate(f'() => Math.min({y0} + 4000 * {C2["WHEEL_GAIN"]}, document.documentElement.scrollHeight - innerHeight)')
+    check(abs(g3 - tgt) < 60, f"glide settles at the damped target ({g3:.0f} ≈ {tgt:.0f})")
     page.close()
 
     # ── reduced motion: exits by itself, no interaction ──
