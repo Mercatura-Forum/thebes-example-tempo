@@ -97,24 +97,27 @@ with sync_playwright() as p:
     check(xr and xr['fill'] == 'none' and xr['stroke'] != 'none',
           'x-ray wordmark is a skeleton — stroke outline, no ink')
 
-    # the transition is CONTINUOUS: mid-scroll the intro is still there, sliding,
-    # and the live hero has risen into view beneath it (not a blank page)
+    # the exit cannot be rushed: a violent flick pins the page at one viewport
+    # while the curtain lifts at its own capped pace, hero waiting beneath
     vh = page.evaluate('() => innerHeight')
-    page.evaluate(f'() => window.scrollTo(0, {int(vh*0.5)})')
-    page.wait_for_timeout(300)
-    mid = page.evaluate('''() => { const t = document.querySelector('.hero__title').getBoundingClientRect();
-      return { intro: !!document.getElementById('intro'),
-        sliding: !!document.querySelector('.intro--sliding'),
-        heroTop: t.top, ih: innerHeight,
+    page.evaluate(f'() => window.scrollTo(0, {vh + 300})')   # hard flick past the spacer
+    page.wait_for_timeout(250)
+    mid = page.evaluate('''() => { const el = document.getElementById('intro');
+      const t = document.querySelector('.hero__title').getBoundingClientRect();
+      const ty = el ? Math.abs(new DOMMatrixReadOnly(getComputedStyle(el).transform).m42) : 1e9;
+      return { intro: !!el, sliding: !!document.querySelector('.intro--sliding'),
+        ty: ty, y: window.scrollY,
+        lens: parseFloat(getComputedStyle(document.querySelector('.intro__lens')).opacity),
         heroVisible: t.top < innerHeight && t.bottom > 0 }; }''')
     check(mid['intro'] and mid['sliding'], 'intro slides rather than cutting to a new page')
-    check(mid['heroVisible'], f"the live hero rises in during the slide (title top {mid['heroTop']:.0f})")
-    check(page.evaluate("() => parseFloat(getComputedStyle(document.querySelector('.intro__lens')).opacity)") == 0,
-          'shadow ring snaps off once the slide begins')
+    check(mid['ty'] > 40 and mid['ty'] < vh * 0.75,
+          f"a flick can't rush the curtain — the lift is rate-capped ({mid['ty']:.0f}px of {vh}vh after 250ms)")
+    check(mid['y'] <= vh + 2, f"scroll pins at one viewport while the curtain lifts (y {mid['y']:.0f})")
+    check(mid['heroVisible'], 'the live hero waits beneath the curtain')
+    check(mid['lens'] == 0, 'shadow ring snaps off once the slide begins')
 
-    # finish the scroll → clean handoff: intro + spacer gone, page at the hero, no jump/overflow
-    page.evaluate(f'() => window.scrollTo(0, {vh + 40})')
-    page.wait_for_timeout(500)
+    # the curtain completes on its own → clean handoff at the hero top
+    page.wait_for_timeout(1400)
     post = page.evaluate('''() => ({ intro: !!document.getElementById('intro'),
       spacer: !!document.querySelector('.intro__spacer'),
       veil: document.documentElement.classList.contains('intro-veil'),

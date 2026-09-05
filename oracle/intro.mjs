@@ -94,4 +94,12 @@ check(I.lensTarget(0, 300, 150) === 300 && I.lensTarget(I.CONST.IDLE_AFTER - 1, 
   'hole holds full size while the cursor moves')
 check(I.lensTarget(I.CONST.IDLE_AFTER, 300, 150) === 150, 'hole rests to the pupil once the cursor stills')
 
+// ── the exit curtain: rate-capped down, instant up, never past the scroll ──
+check(typeof I.slideStep === 'function', 'slideStep exposed')
+check(I.slideStep(0, 5000, I.CONST.EXIT_MIN, 1000) === 1000, 'a full lift takes EXIT_MIN however hard the flick')
+check(Math.abs(I.slideStep(I.slideStep(0, 800, 16, 1000), 800, 16, 1000) - I.slideStep(0, 800, 32, 1000)) < 1e-9,
+  'curtain rate is framerate-independent')
+check(I.slideStep(500, 200, 16, 1000) === 200, 'scrolling back up is followed instantly')
+check(I.slideStep(100, 120, 500, 1000) === 120, 'curtain never lifts past the real scroll')
+
 process.exit(failures ? 1 : 0)

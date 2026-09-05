@@ -29,6 +29,7 @@
     REST_R: 0.5,         // idle pupil — fraction of the full lens radius
     IDLE_AFTER: 400,     // ms of cursor stillness before the hole relaxes
     REST_TAU: 320,       // ms time constant — contraction is lazier than the dilate
+    EXIT_MIN: 900,       // ms — the fastest the exit curtain may complete, however hard the flick
     PILL_EVERY: 360,     // ms between pill spawns
     PILL_MAX: 11,
     PILL_MAX_NARROW: 6,  // ≤940px spawns fewer
@@ -50,6 +51,10 @@
   // Pure: the hole is a pupil — full radius while the cursor moves, resting
   // to a smaller one once the cursor has been still for IDLE_AFTER ms.
   const lensTarget = (sinceMove, full, rest) => (sinceMove < CONST.IDLE_AFTER ? full : rest);
+  // Pure: the exit curtain's lift for one frame — follows the scroll DOWN at a
+  // capped rate (the full lift takes at least EXIT_MIN however hard the flick),
+  // follows it UP instantly (no gap ever opens), never lifts past the scroll.
+  const slideStep = (shown, y, dt, vh) => (y < shown ? y : Math.min(y, shown + (vh * dt) / CONST.EXIT_MIN));
 
   // Pure: elapsed ms (+ reduced-motion flag) → what the screen shows.
   // 'done' only occurs on the reduced path; the normal reveal waits for
@@ -87,7 +92,7 @@
   }
 
   const state = { progress: 0, fillY: TEXT_BOT, phase: 'load' };
-  window.TempoIntro = { CONST, timeline, fillPath, followK, lensTarget, state };
+  window.TempoIntro = { CONST, timeline, fillPath, followK, lensTarget, slideStep, state };
 
   function boot() {
     const root = document.getElementById('intro');
@@ -133,7 +138,7 @@
     }, { passive: true });
 
     let done = false, transitioning = false, revealed = false;
-    let phaseSeen = 'load', pills = 0, lastPill = 0, spacer = null;
+    let phaseSeen = 'load', pills = 0, lastPill = 0, spacer = null, shown = 0;
     let t0 = performance.now();
 
     function spawnPill(now) {
@@ -178,13 +183,14 @@
       for (var i = 0; i < r.length; i++) r[i].classList.add('in');
     }
 
+    // the lift itself is driven from frame() at a capped pace; here we only
+    // start the slide and pin the page at one viewport until the curtain is
+    // done — so a hard flick can't skip past the hero
     function onScroll() {
       if (done) return;
+      if (window.scrollY > 0) startSlide();
       const vh = window.innerHeight;
-      const y = window.scrollY;
-      if (y > 0) startSlide();
-      root.style.transform = 'translateY(' + (-y).toFixed(1) + 'px)';
-      if (y >= vh) finalize();
+      if (window.scrollY > vh) window.scrollTo({ top: vh, behavior: 'instant' });
     }
 
     function finalize() {
@@ -199,8 +205,9 @@
       under.remove();
       if (spacer) spacer.remove();
       // the spacer held the page down by one viewport — drop that from the
-      // scroll offset in the same tick so the hero doesn't jump
-      window.scrollTo(0, Math.max(0, y - vh));
+      // scroll offset in the same tick so the hero doesn't jump ('instant'
+      // sidesteps the page's scroll-behavior:smooth, which would animate this)
+      window.scrollTo({ top: Math.max(0, y - vh), behavior: 'instant' });
       document.dispatchEvent(new CustomEvent('tempo:slots-changed'));
       document.dispatchEvent(new CustomEvent('tempo:intro-done'));
     }
@@ -295,6 +302,14 @@
         canX += (tx - canX) * kCan;
         canY += (ty - canY) * kCan;
         canSlot.style.transform = 'translate(' + (canX - canW / 2).toFixed(1) + 'px,' + (canY - canH / 2).toFixed(1) + 'px)';
+      }
+      // the exit is deliberate: the curtain follows a slow scroll 1:1 but a
+      // hard flick just pins and waits — the lift completes at its own pace
+      if (transitioning) {
+        const vh = window.innerHeight;
+        shown = slideStep(shown, Math.min(window.scrollY, vh), dt, vh);
+        root.style.transform = 'translateY(' + (-shown).toFixed(1) + 'px)';
+        if (shown >= vh - 0.5) { finalize(); return; }
       }
       requestAnimationFrame(frame);
     }
