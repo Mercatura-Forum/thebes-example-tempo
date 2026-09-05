@@ -53,7 +53,8 @@ with sync_playwright() as p:
     # the porthole tracks the pointer fast; the can CHASES the cursor — slow
     # and a beat behind, so a jump leaves it trailing before it settles in
     SAMPLE = '''() => { const r = document.getElementById('introCan').getBoundingClientRect();
-      return { mx: parseFloat(getComputedStyle(document.getElementById('introSheet')).getPropertyValue('--mx')),
+      const cs = getComputedStyle(document.getElementById('introSheet'));
+      return { mx: parseFloat(cs.getPropertyValue('--mx')), mr: parseFloat(cs.getPropertyValue('--mr')),
         cc: r.left + r.width / 2 }; }'''
     page.mouse.move(430, 450)
     page.wait_for_timeout(2200)
@@ -69,6 +70,9 @@ with sync_playwright() as p:
           f"can trails a beat behind the hole after a jump (gap {lag['mx'] - lag['cc']:.0f}px)")
     check(abs(m1['cc'] - 430) < 80 and abs(m2['cc'] - 1010) < 80,
           f"can settles under the cursor ({m1['cc']:.0f} ≈ 430, then {m2['cc']:.0f} ≈ 1010)")
+    check(m1['mr'] < 200 and m2['mr'] < 200,
+          f"hole rests to a pupil while the cursor is still (r {m1['mr']:.0f}, {m2['mr']:.0f})")
+    check(lag['mr'] > 250, f"hole dilates back the moment the cursor moves (r {lag['mr']:.0f})")
 
     # the lens reads as a black hole: a shadow ring rides the porthole edge
     lens = page.evaluate('''() => { const el = document.querySelector('.intro__lens');

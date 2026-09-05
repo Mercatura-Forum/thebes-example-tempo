@@ -26,6 +26,9 @@
     CAN_H: 560,
     LENS_TAU: 95,        // ms time constant — the hole snaps to the cursor
     CAN_TAU: 500,        // ms time constant — the can arrives a lazy beat later
+    REST_R: 0.5,         // idle pupil — fraction of the full lens radius
+    IDLE_AFTER: 400,     // ms of cursor stillness before the hole relaxes
+    REST_TAU: 320,       // ms time constant — contraction is lazier than the dilate
     PILL_EVERY: 360,     // ms between pill spawns
     PILL_MAX: 11,
     PILL_MAX_NARROW: 6,  // ≤940px spawns fewer
@@ -44,6 +47,9 @@
   // Framerate independent — two 16ms steps land where one 32ms step does —
   // and always in (0,1), so the chase can never overshoot the cursor.
   const followK = (dt, tau) => 1 - Math.exp(-dt / tau);
+  // Pure: the hole is a pupil — full radius while the cursor moves, resting
+  // to a smaller one once the cursor has been still for IDLE_AFTER ms.
+  const lensTarget = (sinceMove, full, rest) => (sinceMove < CONST.IDLE_AFTER ? full : rest);
 
   // Pure: elapsed ms (+ reduced-motion flag) → what the screen shows.
   // 'done' only occurs on the reduced path; the normal reveal waits for
@@ -81,7 +87,7 @@
   }
 
   const state = { progress: 0, fillY: TEXT_BOT, phase: 'load' };
-  window.TempoIntro = { CONST, timeline, fillPath, followK, state };
+  window.TempoIntro = { CONST, timeline, fillPath, followK, lensTarget, state };
 
   function boot() {
     const root = document.getElementById('intro');
@@ -120,8 +126,10 @@
     let hasMouse = false, wavePhase = 0, prevFrame = 0;
     let mx = window.innerWidth / 2, my = window.innerHeight * 0.55, tx = mx, ty = my;
     let canX = window.innerWidth / 2, canY = window.innerHeight / 2;
+    let lensR = maskR, lastMove = 0;
     window.addEventListener('mousemove', function (e) {
       hasMouse = true; tx = e.clientX; ty = e.clientY;
+      lastMove = performance.now();
     }, { passive: true });
 
     let done = false, transitioning = false, revealed = false;
@@ -279,6 +287,11 @@
         my += (ty - my) * kLens;
         lensVars.setProperty('--mx', mx.toFixed(1) + 'px');
         lensVars.setProperty('--my', my.toFixed(1) + 'px');
+        // the pupil: full while the cursor moves (dilate fast), resting once it
+        // stills (contract lazily). The wander never rests — it never stops.
+        const rT = hasMouse ? lensTarget(now - lastMove, maskR, maskR * CONST.REST_R) : maskR;
+        lensR += (rT - lensR) * followK(dt, rT > lensR ? CONST.LENS_TAU : CONST.REST_TAU);
+        lensVars.setProperty('--mr', lensR.toFixed(1) + 'px');
         canX += (tx - canX) * kCan;
         canY += (ty - canY) * kCan;
         canSlot.style.transform = 'translate(' + (canX - canW / 2).toFixed(1) + 'px,' + (canY - canH / 2).toFixed(1) + 'px)';

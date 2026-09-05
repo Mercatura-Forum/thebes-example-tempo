@@ -88,4 +88,10 @@ check(Math.abs(two - stepTo(0, 32, 500)) < 1e-9, 'two 16ms steps land where one 
 check(I.followK(16, 500) > 0 && I.followK(16, 500) < 1, 'k stays in (0,1) — the chase never overshoots')
 check(I.followK(16, I.CONST.CAN_TAU) < I.followK(16, I.CONST.LENS_TAU), 'the can (slow tau) trails the lens (fast tau)')
 
+// ── the hole is a pupil: full while the cursor moves, resting when it stills ──
+check(typeof I.lensTarget === 'function', 'lensTarget exposed')
+check(I.lensTarget(0, 300, 150) === 300 && I.lensTarget(I.CONST.IDLE_AFTER - 1, 300, 150) === 300,
+  'hole holds full size while the cursor moves')
+check(I.lensTarget(I.CONST.IDLE_AFTER, 300, 150) === 150, 'hole rests to the pupil once the cursor stills')
+
 process.exit(failures ? 1 : 0)
