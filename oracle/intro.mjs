@@ -80,4 +80,12 @@ check(rises, 'fill line rises monotonically as progress climbs')
 check(I.fillPath(0, 0).lineY > I.fillPath(100, 0).lineY, 'empty sits below full')
 check(I.fillPath(100, 0).d.indexOf('NaN') === -1, 'path is well-formed (no NaN)')
 
+// ── the chase easing is framerate-independent exponential smoothing ──
+check(typeof I.followK === 'function', 'followK exposed')
+const stepTo = (x, dt, tau) => x + (100 - x) * I.followK(dt, tau)
+let two = stepTo(stepTo(0, 16, 500), 16, 500)
+check(Math.abs(two - stepTo(0, 32, 500)) < 1e-9, 'two 16ms steps land where one 32ms step does')
+check(I.followK(16, 500) > 0 && I.followK(16, 500) < 1, 'k stays in (0,1) — the chase never overshoots')
+check(I.followK(16, I.CONST.CAN_TAU) < I.followK(16, I.CONST.LENS_TAU), 'the can (slow tau) trails the lens (fast tau)')
+
 process.exit(failures ? 1 : 0)

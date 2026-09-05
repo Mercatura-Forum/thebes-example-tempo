@@ -50,22 +50,34 @@ with sync_playwright() as p:
           f"zoomed wordmark fully on screen (x {lg['l']:.0f}..{lg['r']:.0f} / y {lg['t']:.0f}..{lg['b']:.0f})")
     check(lg['w'] > 0.4 * lg['iw'], f"wordmark stays prominent ({lg['w']:.0f}px wide)")
 
-    # the porthole tracks the pointer, but the can stays HIDDEN behind the wall
-    # at centre — it does NOT ride the cursor (only a whisper of parallax)
+    # the porthole tracks the pointer fast; the can CHASES the cursor — slow
+    # and a beat behind, so a jump leaves it trailing before it settles in
+    SAMPLE = '''() => { const r = document.getElementById('introCan').getBoundingClientRect();
+      return { mx: parseFloat(getComputedStyle(document.getElementById('introSheet')).getPropertyValue('--mx')),
+        cc: r.left + r.width / 2 }; }'''
     page.mouse.move(430, 450)
-    page.wait_for_timeout(1400)
-    m1 = page.evaluate('''() => { const r = document.getElementById('introCan').getBoundingClientRect();
-      return { mx: parseFloat(getComputedStyle(document.getElementById('introSheet')).getPropertyValue('--mx')),
-        cc: r.left + r.width / 2, iw: innerWidth }; }''')
-    page.mouse.move(1000, 450)
-    page.wait_for_timeout(1400)
-    m2 = page.evaluate('''() => { const r = document.getElementById('introCan').getBoundingClientRect();
-      return { mx: parseFloat(getComputedStyle(document.getElementById('introSheet')).getPropertyValue('--mx')),
-        cc: r.left + r.width / 2 }; }''')
+    page.wait_for_timeout(2200)
+    m1 = page.evaluate(SAMPLE)
+    page.mouse.move(1010, 450)
+    page.wait_for_timeout(260)
+    lag = page.evaluate(SAMPLE)          # right after the jump: hole ahead, can behind
+    page.wait_for_timeout(2400)
+    m2 = page.evaluate(SAMPLE)           # settled: can caught up under the cursor
     check(m1['mx'] < 600 and m2['mx'] > 840 and (m2['mx'] - m1['mx']) > 300,
           f"porthole tracks the cursor left→right ({m1['mx']:.0f} → {m2['mx']:.0f})")
-    check(abs(m2['cc'] - m1['cc']) < 90, f"can stays fixed behind the wall, not glued to the cursor (moved {abs(m2['cc']-m1['cc']):.0f}px)")
-    check(abs(m1['cc'] - m1['iw'] / 2) < 90, f"can sits centred behind the page (centre off by {abs(m1['cc']-m1['iw']/2):.0f}px)")
+    check(lag['mx'] - lag['cc'] > 150,
+          f"can trails a beat behind the hole after a jump (gap {lag['mx'] - lag['cc']:.0f}px)")
+    check(abs(m1['cc'] - 430) < 80 and abs(m2['cc'] - 1010) < 80,
+          f"can settles under the cursor ({m1['cc']:.0f} ≈ 430, then {m2['cc']:.0f} ≈ 1010)")
+
+    # the lens reads as a black hole: a shadow ring rides the porthole edge
+    lens = page.evaluate('''() => { const el = document.querySelector('.intro__lens');
+      if (!el) return null;
+      const cs = getComputedStyle(el), r = el.getBoundingClientRect();
+      return { shadow: cs.boxShadow !== 'none', op: parseFloat(cs.opacity), x: r.left + r.width / 2 }; }''')
+    check(lens and lens['shadow'] and lens['op'] > 0.9, 'black-hole shadow ring is live during the reveal')
+    check(lens and abs(lens['x'] - m2['mx']) < 8,
+          f"shadow ring rides the porthole (ring {lens['x']:.0f} vs hole {m2['mx']:.0f})" if lens else 'shadow ring rides the porthole')
 
     # the transition is CONTINUOUS: mid-scroll the intro is still there, sliding,
     # and the live hero has risen into view beneath it (not a blank page)
@@ -79,6 +91,8 @@ with sync_playwright() as p:
         heroVisible: t.top < innerHeight && t.bottom > 0 }; }''')
     check(mid['intro'] and mid['sliding'], 'intro slides rather than cutting to a new page')
     check(mid['heroVisible'], f"the live hero rises in during the slide (title top {mid['heroTop']:.0f})")
+    check(page.evaluate("() => parseFloat(getComputedStyle(document.querySelector('.intro__lens')).opacity)") == 0,
+          'shadow ring snaps off once the slide begins')
 
     # finish the scroll → clean handoff: intro + spacer gone, page at the hero, no jump/overflow
     page.evaluate(f'() => window.scrollTo(0, {vh + 40})')

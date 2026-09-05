@@ -1,8 +1,9 @@
 /* ============================================================
    TEMPO — intro experience. Loader (liquid wordmark fill +
    0→100 counter + electrolyte pills) → logo zoom (clamped to
-   the viewport so the whole word shows) → a cursor-lit hole in
-   the wall that reveals the can behind it → a scroll that
+   the viewport so the whole word shows) → a black-hole lens
+   that rides the cursor while the can chases it, a lazy beat
+   behind, through the dark recess → a scroll that
    slides the intro up and the landing page rises in beneath.
    The timeline is pure and exposed for the node oracle.
    ============================================================ */
@@ -21,10 +22,10 @@
     LOGO_LOAD: 0.54,
     LOGO_REVEAL: 1.0,
     MASK_R: 300,         // reveal lens radius px, desktop (scaled on narrow)
-    CAN_W: 300,          // the fixed can hidden behind the wall
+    CAN_W: 300,          // the can that chases the cursor behind the wall
     CAN_H: 560,
-    CAN_PARALLAX: 0.05,  // can drifts this fraction against the cursor, for depth
-    EASE_FOLLOW: 0.16,   // lens lerp per frame
+    LENS_TAU: 95,        // ms time constant — the hole snaps to the cursor
+    CAN_TAU: 500,        // ms time constant — the can arrives a lazy beat later
     PILL_EVERY: 360,     // ms between pill spawns
     PILL_MAX: 11,
     PILL_MAX_NARROW: 6,  // ≤940px spawns fewer
@@ -39,6 +40,10 @@
 
   const easeInOutCubic = (u) => (u < 0.5 ? 4 * u * u * u : 1 - Math.pow(-2 * u + 2, 3) / 2);
   const easeOutCubic = (u) => 1 - Math.pow(1 - u, 3);
+  // Pure: exponential-smoothing gain for a dt-ms step toward a target.
+  // Framerate independent — two 16ms steps land where one 32ms step does —
+  // and always in (0,1), so the chase can never overshoot the cursor.
+  const followK = (dt, tau) => 1 - Math.exp(-dt / tau);
 
   // Pure: elapsed ms (+ reduced-motion flag) → what the screen shows.
   // 'done' only occurs on the reduced path; the normal reveal waits for
@@ -76,12 +81,11 @@
   }
 
   const state = { progress: 0, fillY: TEXT_BOT, phase: 'load' };
-  window.TempoIntro = { CONST, timeline, fillPath, state };
+  window.TempoIntro = { CONST, timeline, fillPath, followK, state };
 
   function boot() {
     const root = document.getElementById('intro');
     const under = document.getElementById('introUnder');
-    const sheet = document.getElementById('introSheet');
     const fillEl = document.getElementById('introFillPath');
     const count = document.getElementById('introCount');
     const pillBox = document.getElementById('introPills');
@@ -102,7 +106,10 @@
     // slide starts and the hero can must render in beneath)
     document.body.classList.add('intro-veil', 'intro-canlock');
     window.scrollTo(0, 0);
-    sheet.style.setProperty('--mr', maskR + 'px');
+    // the lens vars live on <html> — the sheet mask, the black-hole shadow
+    // ring and the dark recess beneath all read the same hole
+    const lensVars = document.documentElement.style;
+    lensVars.setProperty('--mr', maskR + 'px');
     canSlot.style.width = canW + 'px';
     canSlot.style.height = canH + 'px';
 
@@ -112,6 +119,7 @@
 
     let hasMouse = false, wavePhase = 0, prevFrame = 0;
     let mx = window.innerWidth / 2, my = window.innerHeight * 0.55, tx = mx, ty = my;
+    let canX = window.innerWidth / 2, canY = window.innerHeight / 2;
     window.addEventListener('mousemove', function (e) {
       hasMouse = true; tx = e.clientX; ty = e.clientY;
     }, { passive: true });
@@ -178,6 +186,7 @@
       const y = window.scrollY;
       document.documentElement.classList.remove('intro-veil', 'intro-lock');
       document.body.classList.remove('intro-veil', 'intro-canlock');
+      lensVars.removeProperty('--mx'); lensVars.removeProperty('--my'); lensVars.removeProperty('--mr');
       root.remove();
       under.remove();
       if (spacer) spacer.remove();
@@ -195,6 +204,7 @@
       setTimeout(function () {
         document.documentElement.classList.remove('intro-veil', 'intro-lock');
         document.body.classList.remove('intro-veil', 'intro-canlock');
+        lensVars.removeProperty('--mx'); lensVars.removeProperty('--my'); lensVars.removeProperty('--mr');
         root.remove();
         under.remove();
         document.dispatchEvent(new CustomEvent('tempo:slots-changed'));
@@ -255,21 +265,23 @@
         if (s.phase === 'reveal') { root.classList.add('intro--reveal'); enterReveal(); }
         if (s.phase === 'done') { quickExit(); return; }
       }
-      // the porthole tracks the cursor; the can stays HIDDEN behind the wall at
-      // centre (a whisper of parallax for depth), revealed only where the hole
-      // passes over it — the cursor uncovers the can from behind the page.
+      // the porthole snaps to the cursor; the can CHASES the same target on a
+      // much slower time constant, so it trails a lazy beat behind the hole
+      // and drifts into the darkness wherever the lens waits for it.
       if (s.phase === 'reveal' && !transitioning) {
         const cx = window.innerWidth / 2, cy = window.innerHeight / 2;
         if (!hasMouse) { // touch / not-yet-moved desktop: a gentle wander over the can
           tx = cx + window.innerWidth * 0.24 * Math.sin(now * 0.00045);
           ty = cy + window.innerHeight * 0.16 * Math.sin(now * 0.00032 + 1.7);
         }
-        mx += (tx - mx) * CONST.EASE_FOLLOW;
-        my += (ty - my) * CONST.EASE_FOLLOW;
-        sheet.style.setProperty('--mx', mx.toFixed(1) + 'px');
-        sheet.style.setProperty('--my', my.toFixed(1) + 'px');
-        const px = -(mx - cx) * CONST.CAN_PARALLAX, py = -(my - cy) * CONST.CAN_PARALLAX;
-        canSlot.style.transform = 'translate(' + (cx - canW / 2 + px).toFixed(1) + 'px,' + (cy - canH / 2 + py).toFixed(1) + 'px)';
+        const kLens = followK(dt, CONST.LENS_TAU), kCan = followK(dt, CONST.CAN_TAU);
+        mx += (tx - mx) * kLens;
+        my += (ty - my) * kLens;
+        lensVars.setProperty('--mx', mx.toFixed(1) + 'px');
+        lensVars.setProperty('--my', my.toFixed(1) + 'px');
+        canX += (tx - canX) * kCan;
+        canY += (ty - canY) * kCan;
+        canSlot.style.transform = 'translate(' + (canX - canW / 2).toFixed(1) + 'px,' + (canY - canH / 2).toFixed(1) + 'px)';
       }
       requestAnimationFrame(frame);
     }

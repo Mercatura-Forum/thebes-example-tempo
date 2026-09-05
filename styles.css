@@ -753,11 +753,14 @@ html.intro-veil .nav,
 html.intro-veil .scroll-progress,
 html.intro-veil .cursor { display: none !important; }
 html.intro-veil body::after { display: none; }
-/* behind the wall is a dark recess the can is hidden in — so the porthole
-   reads as peering THROUGH the page to the can, not a coloured disc on top */
+/* the lens geometry lives on <html> so the sheet mask, the shadow ring and
+   the recess beneath all read the same hole (JS overwrites these inline) */
+html.intro-veil { --mx: 50vw; --my: 55vh; --mr: 190px; /* == CONST.MASK_R */ }
+/* behind the wall is a dark pit that RIDES the lens — wherever the porthole
+   looks, it looks into blackness, and the can drifts lazily into it */
 .intro__under {
   position: fixed; inset: 0; z-index: 35; display: none;
-  background: radial-gradient(circle at 50% 50%, #17140f 0%, #17140f 24%, #2c2620 50%, var(--paper) 84%);
+  background: radial-gradient(circle at var(--mx) var(--my), #17140f 0%, #17140f 24%, #2c2620 50%, var(--paper) 84%);
 }
 html.intro-veil .intro__under { display: block; }
 .intro { position: fixed; inset: 0; z-index: 500; overflow: clip; display: none; will-change: transform; }
@@ -765,7 +768,6 @@ html.intro-veil .intro { display: block; }
 .intro__sheet {
   position: absolute; inset: 0; background: var(--surface); overflow: clip;
   display: grid; place-items: center;
-  --mx: 50vw; --my: 55vh; --mr: 190px; /* == CONST.MASK_R */
 }
 .intro--reveal .intro__sheet {
   -webkit-mask-image: radial-gradient(circle var(--mr) at var(--mx) var(--my), transparent calc(var(--mr) - 1px), #000 var(--mr));
@@ -774,6 +776,20 @@ html.intro-veil .intro { display: block; }
 /* once the lift begins the wall is whole again — the hole closes so the
    opaque sheet slides up to reveal the live hero beneath */
 .intro--sliding .intro__sheet { -webkit-mask-image: none; mask-image: none; }
+/* the black hole: an event-horizon shadow ringing the porthole — a dark rim
+   feathering inward over whatever the hole exposes, a faint corona outside */
+.intro__lens {
+  position: absolute; left: 0; top: 0;
+  width: calc(var(--mr) * 2); height: calc(var(--mr) * 2);
+  translate: calc(var(--mx) - var(--mr)) calc(var(--my) - var(--mr));
+  border-radius: 50%; pointer-events: none; opacity: 0;
+  box-shadow:
+    0 0 34px 10px rgba(23, 20, 15, .30),
+    inset 0 0 22px 8px rgba(23, 20, 15, .70),
+    inset 0 0 70px 34px rgba(23, 20, 15, .38);
+}
+.intro--reveal .intro__lens { opacity: 1; transition: opacity .35s; }
+.intro--sliding .intro__lens { opacity: 0; transition: none; } /* off with the mask, no lingering ring */
 /* rendered at the REVEAL size and only scaled DOWN by JS (never up) so the
    vector stays crisp; at reveal the transform is dropped for a native paint */
 .intro__logo { width: min(85vw, 1180px); height: auto; transform-origin: center; will-change: transform; }
