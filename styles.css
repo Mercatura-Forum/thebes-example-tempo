@@ -759,10 +759,15 @@ html.intro-veil { --mx: 50vw; --my: 55vh; --mr: 190px; /* == CONST.MASK_R */ }
 /* behind the wall is a dark pit that RIDES the lens — wherever the porthole
    looks, it looks into blackness, and the can drifts lazily into it */
 .intro__under {
-  position: fixed; inset: 0; z-index: 35; display: none;
+  position: fixed; inset: 0; z-index: 35; display: none; place-items: center;
   background: radial-gradient(circle at var(--mx) var(--my), #17140f 0%, #17140f 24%, #2c2620 50%, var(--paper) 84%);
 }
-html.intro-veil .intro__under { display: block; }
+html.intro-veil .intro__under { display: grid; }
+/* the lens goes through the INK too: the wordmark's x-ray twin floats in the
+   recess, pixel-under the sheet's wordmark (same .intro__logo box in the same
+   full-viewport grid), behind the can (z35 < canvas 40) — the hole shows the
+   letters' bones where the paper letters are cut away */
+.intro__logo-xray { fill: none; stroke: var(--paper); stroke-width: 2; opacity: .45; }
 .intro { position: fixed; inset: 0; z-index: 500; overflow: clip; display: none; will-change: transform; }
 html.intro-veil .intro { display: block; }
 .intro__sheet {

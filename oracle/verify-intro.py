@@ -83,6 +83,20 @@ with sync_playwright() as p:
     check(lens and abs(lens['x'] - m2['mx']) < 8,
           f"shadow ring rides the porthole (ring {lens['x']:.0f} vs hole {m2['mx']:.0f})" if lens else 'shadow ring rides the porthole')
 
+    # the lens goes THROUGH the logo: an x-ray twin of the wordmark sits in the
+    # dark recess, pixel-aligned under the sheet's wordmark, outline not ink
+    xr = page.evaluate('''() => { const a = document.querySelector('.intro__sheet .intro__logo');
+      const b = document.querySelector('.intro__under .intro__logo');
+      if (!a || !b) return null;
+      const ra = a.getBoundingClientRect(), rb = b.getBoundingClientRect();
+      const cs = getComputedStyle(document.querySelector('.intro__logo-xray'));
+      return { dx: Math.abs(ra.left - rb.left), dy: Math.abs(ra.top - rb.top),
+        dw: Math.abs(ra.width - rb.width), fill: cs.fill, stroke: cs.stroke }; }''')
+    check(xr and xr['dx'] < 1.5 and xr['dy'] < 1.5 and xr['dw'] < 1.5,
+          f"x-ray wordmark aligns under the sheet wordmark (dx {xr['dx']:.1f} dy {xr['dy']:.1f} dw {xr['dw']:.1f})" if xr else 'x-ray wordmark present + aligned')
+    check(xr and xr['fill'] == 'none' and xr['stroke'] != 'none',
+          'x-ray wordmark is a skeleton — stroke outline, no ink')
+
     # the transition is CONTINUOUS: mid-scroll the intro is still there, sliding,
     # and the live hero has risen into view beneath it (not a blank page)
     vh = page.evaluate('() => innerHeight')
