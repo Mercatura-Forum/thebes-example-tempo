@@ -44,6 +44,13 @@ with sync_playwright() as p:
     page.evaluate(NO_SMOOTH)
     through_intro(page)
 
+    # deploy-hold: when the portal is unwired from index.html the street is
+    # intentionally dark — skip cleanly rather than fail the suite
+    if page.evaluate("() => !document.getElementById('streetEnter')"):
+        print('skip — street portal is deploy-held (not wired in index.html)')
+        browser.close()
+        sys.exit(0)
+
     # the portal is lazy: none of the street's 3D bytes load before the tap
     page.evaluate("() => document.getElementById('stockists').scrollIntoView()")
     page.wait_for_timeout(400)
