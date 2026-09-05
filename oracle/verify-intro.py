@@ -150,8 +150,14 @@ with sync_playwright() as p:
     check(g1 - y0 > 60 and g1 - y0 < cap250 * 1.7,
           f"wheel flick is velocity-capped ({g1 - y0:.0f}px in 250ms, cap ≈ {cap250:.0f})")
     check(g2 > g1 + 100, f"the glide keeps rolling toward the target ({g1:.0f} → {g2:.0f})")
-    page.wait_for_timeout(3200)
-    g3 = page.evaluate('() => window.scrollY')
+    # poll until the glide STOPS (scrollY stable across 300ms) — a fixed wait
+    # races the velocity cap when the box is loaded
+    g3 = prev_y = -1
+    for _ in range(30):
+        page.wait_for_timeout(300)
+        g3 = page.evaluate('() => window.scrollY')
+        if g3 == prev_y: break
+        prev_y = g3
     tgt = page.evaluate(f'() => Math.min({y0} + 4000 * {C2["WHEEL_GAIN"]}, document.documentElement.scrollHeight - innerHeight)')
     check(abs(g3 - tgt) < 60, f"glide settles at the damped target ({g3:.0f} ≈ {tgt:.0f})")
     page.close()

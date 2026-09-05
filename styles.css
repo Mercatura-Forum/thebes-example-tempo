@@ -848,3 +848,54 @@ body:not(.webgl) .intro__can .can-fallback { display: block; width: 100%; height
 @media (max-width: 940px) {
   .intro__count { font-size: 64px; }
 }
+
+/* ============================================================
+   The Cairo street (street.js) — portal card, stage, HUD.
+   Appended last: its ≤940px block must outrank earlier ones.
+   ============================================================ */
+.street-portal {
+  margin-top: 1.6rem; border: 1.5px solid var(--ink); background: var(--surface);
+  display: grid; overflow: clip;
+}
+.street-portal__poster { display: block; width: 100%; aspect-ratio: 16 / 9; object-fit: cover; }
+.street-portal__meta { padding: 1.1rem 1.2rem 1.3rem; display: grid; gap: .55rem; justify-items: start; }
+.street-portal__meta h3 { font-family: var(--font-display); font-size: 1.5rem; }
+.street-portal__meta p { color: var(--ink-soft); max-width: 42ch; }
+html.street-lock { overflow: hidden; }
+html.street-lock .cursor { display: none !important; }
+.street-stage { position: fixed; inset: 0; z-index: 450; background: #ead7b7; }
+.street-canvas { position: absolute; inset: 0; width: 100%; height: 100%; }
+/* tilt-shift vignette — the diorama sits in a soft pool of attention */
+.street-stage::after {
+  content: ''; position: absolute; inset: 0; pointer-events: none;
+  background: radial-gradient(ellipse 72% 62% at 50% 46%, transparent 58%, rgba(26, 23, 19, .32) 100%);
+}
+.street-leave {
+  position: absolute; top: 22px; right: 24px; z-index: 3;
+}
+.street-hint {
+  position: absolute; left: 50%; bottom: 26px; translate: -50%; z-index: 3;
+  font-size: 12px; letter-spacing: .22em; text-transform: uppercase; color: var(--ink);
+  background: color-mix(in srgb, var(--paper) 78%, transparent);
+  border: 1px solid var(--ink); border-radius: 999px; padding: .6em 1.4em;
+  white-space: nowrap;
+}
+.street-joy {
+  position: absolute; z-index: 3; width: 112px; height: 112px; border-radius: 50%;
+  border: 1.5px solid var(--ink); background: color-mix(in srgb, var(--paper) 45%, transparent);
+  translate: -50% -50%; display: none; pointer-events: none;
+}
+.street-joy.on { display: grid; place-items: center; }
+.street-joy__thumb { width: 44px; height: 44px; border-radius: 50%; background: var(--ink); }
+.street-flat {
+  position: absolute; inset: 0; display: grid; place-content: center; gap: 1rem;
+  justify-items: center; padding: 2rem; text-align: center;
+}
+.street-flat__poster { width: min(82vw, 640px); border: 1.5px solid var(--ink); }
+.street-flat__title { font-family: var(--font-display); font-size: 1.4rem; }
+.street-flat__row { display: flex; gap: .8rem; flex-wrap: wrap; justify-content: center; }
+.street-flat__row .btn { text-transform: capitalize; }
+@media (max-width: 940px) {
+  .street-leave { top: 14px; right: 14px; }
+  .street-hint { bottom: 18px; font-size: 10px; max-width: 92vw; white-space: normal; text-align: center; }
+}

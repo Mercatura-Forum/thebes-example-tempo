@@ -101,6 +101,7 @@
     TEMPO.__pendingFlavor = key;               // in case the 3D model is still loading
     if (TEMPO.can && TEMPO.can.setFlavor) TEMPO.can.setFlavor(key);
   }
+  TEMPO.setFlavor = setFlavor;                 // the street's shelf hands a flavor to the shop
 
   function updateFlavorCopy() {
     const f = FLAVORS[state.flavor];
@@ -370,7 +371,11 @@
         const p = clamp((window.scrollY - top) / dist, 0, 1);
         const idx = Math.min(FLAVOR_ORDER.length - 1, Math.floor(p * FLAVOR_ORDER.length));
         const key = FLAVOR_ORDER[idx];
-        if (key !== state.flavor) setFlavor(key);
+        // the scrub owns the flavour only NEAR its own track — past it, an
+        // explicit pick (shop dots, the street's shelf) must survive the
+        // next scroll tick instead of being stomped back to the clamp
+        const near = window.scrollY > top - window.innerHeight && window.scrollY < top + dist + window.innerHeight * 0.5;
+        if (near && key !== state.flavor) setFlavor(key);
         if (TEMPO.can && TEMPO.can.setSpin) TEMPO.can.setSpin(p);
         if (hint) hint.classList.toggle('hide', p > 0.03 || window.scrollY < top - window.innerHeight);
       });

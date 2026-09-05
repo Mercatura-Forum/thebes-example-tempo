@@ -22,7 +22,7 @@
     }, 6000);
   </script>
   <noscript><style>#intro, #introUnder { display: none !important; }</style></noscript>
-  <link rel="stylesheet" href="styles.css?v=26" />
+  <link rel="stylesheet" href="styles.css?v=27" />
 </head>
 <body>
   <a class="skip-link" href="#main">Skip to content</a>
@@ -224,6 +224,14 @@
           <h2 class="section-title reveal">On the shelf near you.</h2>
           <p class="reveal">Three cities to start. More every season — the newsletter gets the map first.</p>
           <div class="stockists__map reveal" id="egyptMap" aria-hidden="true"></div>
+          <div class="street-portal reveal" id="streetPortal">
+            <img class="street-portal__poster" src="assets/street/poster.webp" alt="A little Cairo street corner with a koshk" loading="lazy" />
+            <div class="street-portal__meta">
+              <h3>Or walk there yourself</h3>
+              <p>A little Cairo corner — find the koshk, browse the shelf, take a flavor home.</p>
+              <button class="btn btn--solid" id="streetEnter" type="button">Step into the street</button>
+            </div>
+          </div>
         </div>
         <div class="stockists__grid" id="stockistGrid"></div>
       </div>
@@ -312,11 +320,11 @@
   <div id="adminMount"></div>
 
   <script src="intro.js?v=7"></script>
-  <script src="scroll.js?v=1"></script>
+  <script src="scroll.js?v=2"></script>
   <script src="sdk/boundary.js?v=1"></script>
   <script src="sdk/passkey.js?v=1"></script>
   <script src="tempo-api.js?v=3"></script>
-  <script src="app.js?v=23"></script>
+  <script src="app.js?v=24"></script>
   <script src="admin.js?v=5" defer></script>
   <script type="importmap">
   {
@@ -327,5 +335,6 @@
   }
   </script>
   <script type="module" src="can3d.js?v=20"></script>
+  <script type="module" src="street.js?v=1"></script>
 </body>
 </html>

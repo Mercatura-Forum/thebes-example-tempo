@@ -109,6 +109,9 @@ python3 oracle/verify-intro.py                 # exits nonzero on any failure
 | `intro.js` | The intro experience: loader, zoom, cursor reveal, scroll exit |
 | `can3d.js` | Three.js — loads the models, renders every slot |
 | `scroll.js` | Wheel-damped page glide — flicks are velocity-capped so models and reveals get their time |
+| `street.js` | The Cairo street (section 05): opt-in walkable koshk diorama; shelf cans open the shop |
+| `street-sim.js` | Pure street simulation — movement, collision, focus state machine (oracle-shared) |
+| `assets/street/` | Street GLB + portal poster + layout, built by `src-model/tools/build_street.py` |
 | `tempo-api.js` | Typed verbs over the SDK runtime |
 | `admin.js` | The `#admin` drawer (Memphis passkey) |
 | `sdk/` | Vendored SDK runtime scripts (see NOTICE.md) |

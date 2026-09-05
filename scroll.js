@@ -76,7 +76,8 @@
 
     window.addEventListener('wheel', function (e) {
       if (e.ctrlKey || e.defaultPrevented) return;  // pinch zoom stays native
-      if (document.documentElement.classList.contains('intro-lock')) return; // page locked; intro owns the wheel
+      const hcl = document.documentElement.classList;
+      if (hcl.contains('intro-lock') || hcl.contains('street-lock')) return; // page locked; someone else owns the wheel
       let dy = e.deltaY;
       if (!dy) return;
       if (e.deltaMode === 1) dy *= 16; else if (e.deltaMode === 2) dy *= window.innerHeight;
