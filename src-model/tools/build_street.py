@@ -2,7 +2,7 @@
 # Run: blender -b -P src-model/tools/build_street.py
 # Reads street_layout.json (single source of truth shared with street-sim),
 # exports assets/street/street.glb and renders assets/street/poster.webp.
-import bpy, bmesh, json, math, os, struct, sys
+import bpy, bmesh, json, math, os, sys
 
 HERE = os.path.dirname(os.path.abspath(__file__))
 ROOT = os.path.abspath(os.path.join(HERE, '..', '..'))
@@ -325,7 +325,7 @@ def export_glb():
     os.makedirs(os.path.dirname(OUT_GLB), exist_ok=True)
     # the runtime fetches the same layout the sim and this build were made from
     with open(os.path.join(ROOT, 'assets', 'street', 'layout.json'), 'w') as f:
-        json.dump(LAYOUT, f)
+        json.dump(LAYOUT, f, indent=2)
     kwargs = dict(filepath=OUT_GLB, export_format='GLB', export_yup=True, export_apply=True)
     try:
         bpy.ops.export_scene.gltf(**kwargs, export_draco_mesh_compression_enable=True)
