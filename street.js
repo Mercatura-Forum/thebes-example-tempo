@@ -175,6 +175,7 @@ async function boot3d() {
   const mixer = new THREE.AnimationMixer(runner);
   const actions = {};
   for (const clip of runnerGlb.animations) actions[clip.name] = mixer.clipAction(clip);
+  if (!actions.Idle || !actions.Walk || !actions.Run) throw new Error('runner.glb missing a gait clip: ' + Object.keys(actions).join(','));
   actions.Idle.play();
   state.anim = 'Idle';
 
