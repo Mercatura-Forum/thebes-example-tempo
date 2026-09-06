@@ -6,6 +6,8 @@ asset_canister.wasm
 # — but our original rework pipeline under src-model/tools/ IS tracked
 src-model/*
 !src-model/tools/
+!src-model/vendor/
+src-model/vendor/**/*.zip
 src-model/tools/out/
 *.rar
 
