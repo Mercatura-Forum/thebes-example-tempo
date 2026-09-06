@@ -73,9 +73,11 @@ with sync_playwright() as p:
     page.keyboard.down('KeyW')
     page.wait_for_timeout(900)
     pmid = page.evaluate('() => ({...window.TempoStreet.state.player})')
+    check(page.evaluate("() => ['Walk','Run'].includes(window.TempoStreet.state.anim)"), 'the runner strides while W is held')
     page.wait_for_timeout(900)
     page.keyboard.up('KeyW')
     p1 = page.evaluate('() => ({...window.TempoStreet.state.player})')
+    check(wait_for(page, "() => window.TempoStreet.state.anim === 'Idle'", 4000), 'the runner settles to Idle at rest')
     d1 = abs(pmid['x'] - p0['x']) + abs(pmid['z'] - p0['z'])
     d2 = abs(p1['x'] - pmid['x']) + abs(p1['z'] - pmid['z'])
     # total progress, not per-window — the first window can eat a scene

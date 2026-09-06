@@ -11,11 +11,11 @@
 import * as THREE from 'three';
 import { GLTFLoader } from 'three/addons/loaders/GLTFLoader.js';
 import { DRACOLoader } from 'three/addons/loaders/DRACOLoader.js';
-import { CONST, followK, joyVec, stepMover, nextMode } from './street-sim.js';
+import { CONST, followK, joyVec, stepMover, nextMode, animFor } from './street-sim.js';
 
 const DRACO_PATH = 'https://cdn.jsdelivr.net/npm/three@0.169.0/examples/jsm/libs/draco/gltf/';
 const FLAVOR_BY_SHELF = ['lime', 'berry', 'citrus']; // bottom → top
-const state = { entered: false, ready: false, disposed: false, mode: 'roam', player: { x: 0, z: 0 } };
+const state = { entered: false, ready: false, disposed: false, mode: 'roam', player: { x: 0, z: 0 }, anim: 'Idle' };
 window.TempoStreet = { CONST, state, warp: null, canScreenPoints: null };
 
 function el(tag, cls, parent, html) {
@@ -93,10 +93,11 @@ async function boot3d() {
   const joyBase = el('div', 'street-joy', stage);
   const joyThumb = el('div', 'street-joy__thumb', joyBase);
 
-  const [layout, streetGlb, canGlb] = await Promise.all([
-    fetch('assets/street/layout.json?v=1').then((r) => r.json()),
-    loadGlb('assets/street/street.glb?v=1', true),
+  const [layout, streetGlb, canGlb, runnerGlb] = await Promise.all([
+    fetch('assets/street/layout.json?v=2').then((r) => r.json()),
+    loadGlb('assets/street/street.glb?v=2', true),
     loadGlb('assets/tempo-can.glb?v=4', false),
+    loadGlb('assets/street/runner.glb?v=1', true),
   ]);
   if (!stage) return; // left while loading
 
@@ -168,19 +169,14 @@ async function boot3d() {
   });
   scene.add(cans);
 
-  // the runner — a paper mannequin with the accent stripe
-  const runner = new THREE.Group();
-  const mPaper = new THREE.MeshStandardMaterial({ color: 0xece5d8, roughness: 0.8 });
-  const mInk = new THREE.MeshStandardMaterial({ color: 0x1a1713, roughness: 0.6 });
-  const mAcc = new THREE.MeshStandardMaterial({ color: 0xff7a1a, roughness: 0.5 });
-  const body = new THREE.Mesh(new THREE.CapsuleGeometry(0.21, 0.5, 3, 10), mPaper);
-  body.position.y = 0.62;
-  const band = new THREE.Mesh(new THREE.CylinderGeometry(0.215, 0.215, 0.1, 12), mAcc);
-  band.position.y = 0.72;
-  const head = new THREE.Mesh(new THREE.SphereGeometry(0.15, 12, 10), mInk);
-  head.position.y = 1.18;
-  runner.add(body, band, head);
+  // the runner — the KayKit body in TEMPO paper and ink, three gaits
+  const runner = runnerGlb.scene;
   scene.add(runner);
+  const mixer = new THREE.AnimationMixer(runner);
+  const actions = {};
+  for (const clip of runnerGlb.animations) actions[clip.name] = mixer.clipAction(clip);
+  actions.Idle.play();
+  state.anim = 'Idle';
 
   // input: keys + touch joystick, mapped through the fixed camera basis
   const off = layout.camera.roamOffset;
@@ -253,7 +249,7 @@ async function boot3d() {
   let vel = { x: 0, z: 0 };
   let camPos = new THREE.Vector3(pos.x + off[0], off[1], pos.z + off[2]);
   let camLook = new THREE.Vector3(pos.x, 1.0, pos.z);
-  let prev = 0, phase = 0;
+  let prev = 0;
   window.TempoStreet.warp = (x, z) => { pos.x = x; pos.z = z; };
   window.TempoStreet.canScreenPoints = () => cans.children.map((can) => {
     const v = can.position.clone(); v.y += 0.08;
@@ -281,9 +277,17 @@ async function boot3d() {
     ({ pos, vel } = stepMover(pos, vel, input, dt, layout.colliders, layout.bounds));
     state.player.x = pos.x; state.player.z = pos.z;
     const speed = Math.hypot(vel.x, vel.z);
-    phase += dt * 0.012 * Math.min(1, speed / CONST.SPEED);
-    runner.position.set(pos.x, Math.abs(Math.sin(phase)) * 0.06 * Math.min(1, speed / CONST.SPEED), pos.z);
+    runner.position.set(pos.x, 0, pos.z);
     if (speed > 0.3) runner.rotation.y = Math.atan2(vel.x, vel.z);
+    const want = animFor(state.anim, speed);
+    if (want !== state.anim) {
+      actions[state.anim].fadeOut(0.2);
+      actions[want].reset().fadeIn(0.2).play();
+      state.anim = want;
+    }
+    // tie the stride to the ground speed so feet don't slide
+    if (want !== 'Idle') actions[want].timeScale = Math.max(0.6, Math.min(1.6, speed / (want === 'Run' ? 3.4 : 1.4)));
+    mixer.update(dt / 1000);
 
     const wasMode = state.mode;
     state.mode = nextMode(state.mode, pos, K.trigger, false);
@@ -310,6 +314,7 @@ async function boot3d() {
 
   cleanup.push(() => {
     renderer.setAnimationLoop(null);
+    mixer.stopAllAction(); mixer.uncacheRoot(runner);
     scene.traverse((o) => {
       if (o.isMesh) {
         o.geometry.dispose();
