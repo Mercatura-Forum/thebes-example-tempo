@@ -210,31 +210,211 @@ def bake_in_place(trio):
 
 def retint_materials(char_mesh_objects):
     """
-    Assign runnerPaper / runnerInk / runnerAccent by object name heuristic.
-    Slot mapping (controller-ruled 2026-09-06):
-      Rogue_Head              → runnerInk    (head/hair)
-      Rogue_ArmLeft/Right     → runnerAccent (smallest distinct surface — brand accent band)
-      Rogue_LegLeft/Right     → runnerPaper  (paper legs, not orange trousers)
-      Rogue_Body              → runnerPaper  (paper body)
-    Brand spec: paper body, accent stripe (arms), ink head.
-    No separate belt/strap/waist or boots object exists on this mesh; arms are
-    the smallest distinct non-head surface, chosen per brief fallback rule.
+    Assign runnerPaper / runnerInk / runnerAccent.
+    Brand spec: paper body, accent STRIPE (one narrow surface), ink head.
+    Arms → runnerPaper, Legs → runnerPaper, Head → runnerInk.
+
+    Priority ladder (first rung that applies fires):
+      0. Log all original material slot names for each kept object.
+      1. If Body has a slot matching belt|strap|trim and that slot's faces are
+         < 15% of the body face count: per-slot retint (slot → accent, rest → paper).
+      2. Else if any leg/foot object or slot matches boot|foot|shoe: that surface → accent.
+      3. Else (fallback): waist face-band — append runnerAccent slot to body mesh
+         and assign it to faces whose world-space center height falls in
+         [0.44, 0.49] × total mesh height (a thin ring, ~5% of total height).
     """
-    slot_map = {}
+    import bmesh as _bmesh
+
+    # ── Step 0: log every kept object's original slot names ──────────────────
+    print('[runner] material slot inventory (before retint):')
     for o in char_mesh_objects:
-        if re.search(r'Head', o.name, re.I):
-            target = 'runnerInk'
-        elif re.search(r'Arm', o.name, re.I):
-            target = 'runnerAccent'
-        else:
-            # Body, LegLeft, LegRight → paper
-            target = 'runnerPaper'
-        slot_map[o.name] = target
-        print(f'[runner] retint: {o.name!r} → {target}')
-        # Replace all material slots with the target material
+        slots = [s.material.name if s.material else '<none>'
+                 for s in o.material_slots]
+        print(f'[runner]   {o.name}: {slots}')
+
+    # Separate head from body meshes for initial pass
+    head_objects = [o for o in char_mesh_objects if re.search(r'Head', o.name, re.I)]
+    arm_objects  = [o for o in char_mesh_objects if re.search(r'Arm', o.name, re.I)]
+    leg_objects  = [o for o in char_mesh_objects if re.search(r'Leg', o.name, re.I)]
+    body_objects = [o for o in char_mesh_objects
+                    if not re.search(r'Head|Arm|Leg', o.name, re.I)]
+
+    # Arms → always paper (review finding: orange arms failed spec)
+    # Legs → always paper
+    # Head → always ink
+    # Accent landing decided by ladder below
+
+    rung_fired = None
+    accent_applied = False   # will be set True once accent lands somewhere
+
+    # ── Rung 1: belt|strap|trim slot on body, face share < 15% ──────────────
+    trim_pattern = re.compile(r'belt|strap|trim', re.I)
+    for o in body_objects:
+        for slot_idx, slot in enumerate(o.material_slots):
+            slot_name = slot.material.name if slot.material else ''
+            if not trim_pattern.search(slot_name):
+                continue
+            # Count faces assigned to this slot vs total
+            mesh = o.data
+            total_faces = len(mesh.polygons)
+            slot_faces  = sum(1 for p in mesh.polygons if p.material_index == slot_idx)
+            share = slot_faces / total_faces if total_faces else 1.0
+            print(f'[runner] Rung-1 candidate: {o.name!r} slot[{slot_idx}]={slot_name!r} '
+                  f'faces={slot_faces}/{total_faces} ({share:.1%})')
+            if share < 0.15:
+                # Per-slot retint: keep slot structure, remap colors
+                print(f'[runner] Rung 1 FIRES — per-slot retint on {o.name!r}')
+                rung_fired = 1
+                slot_count = len(o.material_slots)
+                for i, sl in enumerate(o.material_slots):
+                    sn = sl.material.name if sl.material else ''
+                    if trim_pattern.search(sn):
+                        sl.material = mat('runnerAccent')
+                        print(f'[runner]   slot[{i}] {sn!r} → runnerAccent')
+                    else:
+                        sl.material = mat('runnerPaper')
+                        print(f'[runner]   slot[{i}] {sn!r} → runnerPaper')
+                accent_applied = True
+                break
+        if rung_fired:
+            break
+
+    # ── Rung 2: boot|foot|shoe on any leg/foot object or slot ────────────────
+    if not rung_fired:
+        boot_pattern = re.compile(r'boot|foot|shoe', re.I)
+        for o in leg_objects + body_objects:
+            # Check object name
+            if boot_pattern.search(o.name):
+                print(f'[runner] Rung 2 FIRES — boot object {o.name!r} → runnerAccent')
+                rung_fired = 2
+                o.data.materials.clear()
+                o.data.materials.append(mat('runnerAccent'))
+                accent_applied = True
+                break
+            # Check slot names
+            for slot_idx, slot in enumerate(o.material_slots):
+                sn = slot.material.name if slot.material else ''
+                if boot_pattern.search(sn):
+                    total_faces = len(o.data.polygons)
+                    slot_faces  = sum(1 for p in o.data.polygons
+                                      if p.material_index == slot_idx)
+                    print(f'[runner] Rung 2 FIRES — boot slot {sn!r} on {o.name!r} '
+                          f'({slot_faces}/{total_faces} faces) → runnerAccent')
+                    rung_fired = 2
+                    # Per-slot: boot slot → accent, rest → paper
+                    for i, sl in enumerate(o.material_slots):
+                        s = sl.material.name if sl.material else ''
+                        sl.material = mat('runnerAccent') if boot_pattern.search(s) \
+                                      else mat('runnerPaper')
+                    accent_applied = True
+                    break
+            if rung_fired:
+                break
+
+    # ── Rung 3 (fallback): waist face-band on body mesh ──────────────────────
+    if not rung_fired:
+        print('[runner] Rung 3 FIRES — waist face-band on body mesh')
+        rung_fired = 3
+        # Work on first body object (should be Rogue_Body)
+        body_obj = body_objects[0] if body_objects else None
+        if body_obj is None and char_mesh_objects:
+            body_obj = [o for o in char_mesh_objects
+                        if not re.search(r'Head', o.name, re.I)][0]
+
+        if body_obj:
+            # Clear body slots, reset to single paper slot first
+            body_obj.data.materials.clear()
+            body_obj.data.materials.append(mat('runnerPaper'))   # slot 0
+            body_obj.data.materials.append(mat('runnerAccent'))  # slot 1
+
+            # Compute world-space Z bounds of the body mesh
+            mw = body_obj.matrix_world
+            all_z = [(mw @ v.co).z for v in body_obj.data.vertices]
+            z_min, z_max = min(all_z), max(all_z)
+            total_h = z_max - z_min
+
+            band_lo = z_min + 0.44 * total_h
+            band_hi = z_min + 0.49 * total_h
+            print(f'[runner] Rung-3 band: z=[{band_lo:.3f}, {band_hi:.3f}] '
+                  f'(total_h={total_h:.3f})')
+
+            bm = _bmesh.new()
+            bm.from_mesh(body_obj.data)
+            accent_count = 0
+            for face in bm.faces:
+                # World-space face center Z
+                face_z = (mw @ face.calc_center_median()).z
+                if band_lo <= face_z <= band_hi:
+                    face.material_index = 1   # runnerAccent
+                    accent_count += 1
+                else:
+                    face.material_index = 0   # runnerPaper
+            bm.to_mesh(body_obj.data)
+            bm.free()
+            body_obj.data.update()
+            total_faces = len(body_obj.data.polygons)
+            print(f'[runner] Rung-3: {accent_count}/{total_faces} faces → runnerAccent '
+                  f'({accent_count/total_faces:.1%} of body)')
+            accent_applied = True
+
+    # ── Assign all non-rung-managed objects ──────────────────────────────────
+    # Track which objects were fully handled by the rung so we don't overwrite them
+    rung_handled = set()  # object names already retinted by the rung
+
+    if rung_fired == 1:
+        # The body object that had the trim slot was handled in-place above;
+        # record all body objects as handled (there is only one body mesh, Rogue_Body)
+        rung_handled.update(o.name for o in body_objects)
+
+    if rung_fired == 2:
+        # The leg/body object that matched boot|foot|shoe was handled above
+        # Track it by checking which objects now have runnerAccent as slot 0
+        boot_handled_pattern = re.compile(r'boot|foot|shoe', re.I)
+        for o in leg_objects + body_objects:
+            if boot_handled_pattern.search(o.name):
+                rung_handled.add(o.name)
+            elif any(boot_handled_pattern.search(sl.material.name if sl.material else '')
+                     for sl in o.material_slots):
+                rung_handled.add(o.name)
+
+    if rung_fired == 3:
+        # body_obj (body_objects[0]) was handled in-place — mark it
+        if body_objects:
+            rung_handled.add(body_objects[0].name)
+
+    # Head → ink always (never rung-managed)
+    for o in head_objects:
+        print(f'[runner] retint: {o.name!r} → runnerInk')
         o.data.materials.clear()
-        o.data.materials.append(mat(target))
-    return slot_map
+        o.data.materials.append(mat('runnerInk'))
+
+    # Arms → paper always (brief spec: paper limbs)
+    for o in arm_objects:
+        print(f'[runner] retint: {o.name!r} → runnerPaper')
+        o.data.materials.clear()
+        o.data.materials.append(mat('runnerPaper'))
+
+    # Legs → paper (unless rung already handled this object)
+    for o in leg_objects:
+        if o.name in rung_handled:
+            print(f'[runner] retint: {o.name!r} → (already set by Rung {rung_fired})')
+        else:
+            print(f'[runner] retint: {o.name!r} → runnerPaper')
+            o.data.materials.clear()
+            o.data.materials.append(mat('runnerPaper'))
+
+    # Body → paper (unless rung already handled this object)
+    for o in body_objects:
+        if o.name in rung_handled:
+            print(f'[runner] retint: {o.name!r} → (already set by Rung {rung_fired})')
+        else:
+            print(f'[runner] retint: {o.name!r} → runnerPaper')
+            o.data.materials.clear()
+            o.data.materials.append(mat('runnerPaper'))
+
+    print(f'[runner] retint complete — Rung {rung_fired} fired, '
+          f'accent_applied={accent_applied}')
+    return rung_fired
 
 
 def normalize_height(char_arm):
