@@ -182,7 +182,22 @@
         -4.75,
         -4.25
       ]
+    },
+    {
+      "x": [
+        5.55,
+        6.25
+      ],
+      "z": [
+        -0.2,
+        0.6
+      ]
     }
+  ],
+  "vendorProps": [
+    { "name": "canFridge", "ref": "vendor:quaternius/can_fridge.glb",
+      "x": 5.9, "z": 0.2, "ry": 2.62, "height": 1.9,
+      "tints": { "glass": "paper", "*": "metal" }, "tris": 2800 }
   ],
   "props": {
     "crates": [

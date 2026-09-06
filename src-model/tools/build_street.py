@@ -2,11 +2,12 @@
 # Run: blender -b -P src-model/tools/build_street.py
 # Reads street_layout.json (single source of truth shared with street-sim),
 # exports assets/street/street.glb and renders assets/street/poster.webp.
-import bpy, bmesh, json, math, os, sys
+import bpy, bmesh, json, math, os, struct, sys
 
 HERE = os.path.dirname(os.path.abspath(__file__))
 ROOT = os.path.abspath(os.path.join(HERE, '..', '..'))
 LAYOUT = json.load(open(os.path.join(HERE, 'street_layout.json')))
+VENDOR = os.path.join(ROOT, 'src-model', 'vendor')
 OUT_GLB = os.path.join(ROOT, 'assets', 'street', 'street.glb')
 OUT_POSTER_PNG = os.path.join(HERE, 'out', 'street_poster.png')
 
@@ -87,6 +88,65 @@ def join(objs, name):
     obj = bpy.context.active_object
     obj.name = name
     return obj
+
+def import_vendor(ref):
+    # ref: "vendor:<dir>/<relpath>" — resolves under src-model/vendor/
+    path = os.path.join(VENDOR, ref.split(':', 1)[1])
+    before = set(bpy.data.objects)
+    ext = os.path.splitext(path)[1].lower()
+    if ext in ('.glb', '.gltf'): bpy.ops.import_scene.gltf(filepath=path)
+    elif ext == '.fbx': bpy.ops.import_scene.fbx(filepath=path)
+    elif ext == '.obj': bpy.ops.wm.obj_import(filepath=path)
+    else: raise ValueError('unsupported vendor format: ' + path)
+    new = [o for o in set(bpy.data.objects) - before if o.type == 'MESH']
+    for o in set(bpy.data.objects) - before:      # imported empties/armatures: flatten
+        if o.type != 'MESH':
+            for c in list(o.children): c.parent = None
+            bpy.data.objects.remove(o)
+    return new
+
+def palette_strip(objs, tints):
+    # every source material dies here; the palette is the only survivor
+    for o in objs:
+        names = [s.material.name.split('.')[0] if s.material else '' for s in o.material_slots]
+        o.data.materials.clear()
+        keys = [next((v for k, v in tints.items() if k != '*' and k.lower() in n.lower()),
+                     tints.get('*', 'paper')) for n in names] or [tints.get('*', 'paper')]
+        for key in keys: o.data.materials.append(mat(key))
+        if len(keys) > 1:   # faces keep their slot index; reindex clamp
+            for p in o.data.polygons: p.material_index = min(p.material_index, len(keys) - 1)
+
+def normalize_height(objs, name, height):
+    obj = join(objs, name) if len(objs) > 1 else objs[0]
+    obj.name = name
+    bpy.context.view_layer.objects.active = obj
+    bpy.ops.object.transform_apply(location=False, rotation=True, scale=True)
+    lo = min((obj.matrix_world @ v.co).z for v in obj.data.vertices)
+    hi = max((obj.matrix_world @ v.co).z for v in obj.data.vertices)
+    s = height / max(1e-6, hi - lo)
+    obj.scale = (s, s, s)
+    bpy.ops.object.transform_apply(scale=True)
+    obj.location.z -= min((obj.matrix_world @ v.co).z for v in obj.data.vertices)  # feet on the ground
+    return obj
+
+def decimate_to(obj, tris):
+    cur = sum(len(p.vertices) - 2 for p in obj.data.polygons)
+    if cur <= tris: return
+    m = obj.modifiers.new('dec', 'DECIMATE')
+    m.ratio = tris / cur
+    bpy.context.view_layer.objects.active = obj
+    bpy.ops.object.modifier_apply(modifier='dec')
+
+def build_vendor_props():
+    for vp in LAYOUT.get('vendorProps', []):
+        objs = import_vendor(vp['ref'])
+        palette_strip(objs, vp.get('tints', {'*': 'paper'}))
+        obj = normalize_height(objs, vp['name'], vp['height'])
+        decimate_to(obj, vp.get('tris', 3000))
+        obj.location = P(vp['x'], vp.get('y', 0), vp['z'])
+        obj.rotation_euler = (obj.rotation_euler.x, obj.rotation_euler.y, vp.get('ry', 0))
+        print('[street] vendor prop', vp['name'],
+              sum(len(p.vertices) - 2 for p in obj.data.polygons), 'tris')
 
 def build_ground():
     site_box('ground', 'ground', 0, -0.05, -0.25, 27, 0.1, 16.5)
@@ -316,6 +376,7 @@ build_awnings()
 build_mashrabiya()
 build_koshk()
 build_props()
+build_vendor_props()
 build_string_lights()
 build_minaret()
 export_glb()
