@@ -14,6 +14,7 @@ export const CONST = {
   DEADZONE: 0.16,    // joystick: fraction of max throw that counts as rest
   FOCUS_EXIT: 1.25,  // hysteresis — leave focus only past trigger.r * this
   SUB_H: 8,          // ms — fixed integration quantum (no tunneling, exact dt-splits)
+  ANIM: { WALK_IN: 0.25, WALK_OUT: 0.15, RUN_IN: 2.4, RUN_OUT: 2.0 },
 };
 
 export const followK = (dt, tau) => 1 - Math.exp(-dt / tau);
@@ -83,4 +84,15 @@ export function nextMode(mode, p, trigger, wantLeave) {
   const d = Math.hypot(p.x - trigger.x, p.z - trigger.z);
   if (mode === 'focus') return wantLeave || d > trigger.r * CONST.FOCUS_EXIT ? 'roam' : 'focus';
   return d < trigger.r ? 'focus' : 'roam';
+}
+
+// Speed (m/s) → animation action, with hysteresis bands at both boundaries
+// so the mixer never flickers when the runner hovers at a threshold.
+export function animFor(prev, speed) {
+  const A = CONST.ANIM;
+  if (speed >= A.RUN_IN) return 'Run';
+  if (prev === 'Run' && speed >= A.RUN_OUT) return 'Run';
+  if (speed >= A.WALK_IN) return 'Walk';
+  if (prev !== 'Idle' && speed >= A.WALK_OUT) return 'Walk';
+  return 'Idle';
 }

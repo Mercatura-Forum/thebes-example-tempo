@@ -3,7 +3,7 @@
 import { readFileSync } from 'node:fs'
 import { fileURLToPath } from 'node:url'
 import { dirname, join } from 'node:path'
-import { CONST, followK, joyVec, resolveCollision, stepMover, nextMode } from '../street-sim.js'
+import { CONST, followK, joyVec, resolveCollision, stepMover, nextMode, animFor } from '../street-sim.js'
 
 const root = join(dirname(fileURLToPath(import.meta.url)), '..')
 let failures = 0
@@ -60,5 +60,17 @@ check(nextMode('focus', { x: 0.5, z: 0 }, T, true) === 'roam', 'an explicit leav
 
 // ── followK sanity (shared discipline with the intro) ──
 check(followK(16, 120) > 0 && followK(16, 120) < 1, 'followK stays in (0,1)')
+
+// ── animFor: action selection never flickers at a boundary ──
+check(animFor('Idle', 0) === 'Idle', 'standing still is Idle')
+check(animFor('Idle', 0.2) === 'Idle', 'below WALK_IN stays Idle')
+check(animFor('Idle', 0.3) === 'Walk', 'past WALK_IN engages Walk')
+check(animFor('Walk', 0.2) === 'Walk', 'hysteresis: Walk holds between WALK_OUT and WALK_IN')
+check(animFor('Walk', 0.1) === 'Idle', 'below WALK_OUT releases to Idle')
+check(animFor('Walk', 2.5) === 'Run', 'past RUN_IN engages Run')
+check(animFor('Run', 2.2) === 'Run', 'hysteresis: Run holds between RUN_OUT and RUN_IN')
+check(animFor('Run', 1.8) === 'Walk', 'below RUN_OUT releases to Walk')
+check(animFor('Idle', CONST.SPEED) === 'Run', 'full pace from rest is Run in one call')
+check(animFor('Run', 0) === 'Idle', 'a dead stop from Run is Idle in one call')
 
 process.exit(failures ? 1 : 0)
