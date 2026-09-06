@@ -184,6 +184,19 @@ def zero_xz_fcurves(action, bone_name):
     for fc in to_remove:
         action.fcurves.remove(fc)
     print(f'[runner] {action.name}: removed {len(to_remove)} XZ fcurves from {bone_name}')
+    # Brief Step 2: re-verify XZ displacement after removal (must be < 0.01m)
+    dp_check = f'pose.bones["{bone_name}"].location'
+    post_disp = 0.0
+    for fc in action.fcurves:
+        if fc.data_path == dp_check and fc.array_index in (0, 2):
+            vals = [kp.co[1] for kp in fc.keyframe_points]
+            d = max(abs(v) for v in vals) if vals else 0.0
+            post_disp = max(post_disp, d)
+    clip = action.name
+    print(f'[runner] {clip} post-bake XZ displacement: {post_disp:.4f}m')
+    if post_disp >= 0.01:
+        print(f'ERROR: post-bake XZ displacement {post_disp:.4f}m >= 0.01m for {clip} / {bone_name}')
+        sys.exit(1)
 
 
 def bake_in_place(trio):
@@ -198,18 +211,23 @@ def bake_in_place(trio):
 def retint_materials(char_mesh_objects):
     """
     Assign runnerPaper / runnerInk / runnerAccent by object name heuristic.
-    Slot mapping:
-      Rogue_Head            → runnerInk   (head/hair)
-      Rogue_LegLeft/Right   → runnerAccent (leg trim acts as accent band)
-      everything else       → runnerPaper  (body, arms)
+    Slot mapping (controller-ruled 2026-09-06):
+      Rogue_Head              → runnerInk    (head/hair)
+      Rogue_ArmLeft/Right     → runnerAccent (smallest distinct surface — brand accent band)
+      Rogue_LegLeft/Right     → runnerPaper  (paper legs, not orange trousers)
+      Rogue_Body              → runnerPaper  (paper body)
+    Brand spec: paper body, accent stripe (arms), ink head.
+    No separate belt/strap/waist or boots object exists on this mesh; arms are
+    the smallest distinct non-head surface, chosen per brief fallback rule.
     """
     slot_map = {}
     for o in char_mesh_objects:
         if re.search(r'Head', o.name, re.I):
             target = 'runnerInk'
-        elif re.search(r'Leg', o.name, re.I):
+        elif re.search(r'Arm', o.name, re.I):
             target = 'runnerAccent'
         else:
+            # Body, LegLeft, LegRight → paper
             target = 'runnerPaper'
         slot_map[o.name] = target
         print(f'[runner] retint: {o.name!r} → {target}')
@@ -342,7 +360,8 @@ def render_check(char_arm):
 # ══════════════════════════════════════════════════════════════════════════════
 
 print('[runner] starting')
-clean()
+# Brief Step 1: factory-clean scene first (required by spec)
+bpy.ops.wm.read_factory_settings(use_empty=True)
 
 # ── Step 1: import character ───────────────────────────────────────────────────
 print('[runner] importing character:', CHAR_GLB)
