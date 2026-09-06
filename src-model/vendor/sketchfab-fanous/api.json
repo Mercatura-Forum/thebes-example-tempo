@@ -1,0 +1,187 @@
+{
+    "animationCount": 0,
+    "categories": [
+        {
+            "uid": "e56c5de1e9344241909de76c5886f551",
+            "name": "Art & Abstract",
+            "slug": "art-abstract",
+            "uri": "https://api.sketchfab.com/v3/categories/e56c5de1e9344241909de76c5886f551",
+            "icon": "https://static.sketchfab.com/static/builds/web/dist/static/assets/images/icons/categories/876106eddb2a54aa1391eb2f4db0acb2-v2.svg",
+            "thumbnails": [
+                {
+                    "width": "512",
+                    "height": "288",
+                    "url": "https://static.sketchfab.com/categories/e56c5de1e9344241909de76c5886f551/512x288.png"
+                },
+                {
+                    "width": "800",
+                    "height": "450",
+                    "url": "https://static.sketchfab.com/categories/e56c5de1e9344241909de76c5886f551/800x450.png"
+                }
+            ]
+        }
+    ],
+    "commentCount": 0,
+    "createdAt": "2022-05-15T10:12:05.277009",
+    "embedUrl": "https://sketchfab.com/models/ba9aa25872674d1d932dfda062f1adda/embed",
+    "faceCount": 1692,
+    "isAgeRestricted": false,
+    "license": {
+        "uri": "https://api.sketchfab.com/v3/licenses/322a749bcfa841b29dff1e8a1bb74b0b",
+        "label": "CC Attribution",
+        "fullName": "Creative Commons Attribution",
+        "requirements": "Author must be credited. Commercial use is allowed.",
+        "url": "http://creativecommons.org/licenses/by/4.0/",
+        "slug": "by"
+    },
+    "likeCount": 3,
+    "name": "Ramadan Lantern Model",
+    "publishedAt": "2022-05-15T10:12:35.854379",
+    "soundCount": 0,
+    "staffpickedAt": null,
+    "tags": [
+        {
+            "name": "lantern",
+            "slug": "lantern",
+            "uri": "https://api.sketchfab.com/v3/tags/lantern"
+        },
+        {
+            "name": "islamic",
+            "slug": "islamic",
+            "uri": "https://api.sketchfab.com/v3/tags/islamic"
+        },
+        {
+            "name": "ramadan",
+            "slug": "ramadan",
+            "uri": "https://api.sketchfab.com/v3/tags/ramadan"
+        },
+        {
+            "name": "model",
+            "slug": "model",
+            "uri": "https://api.sketchfab.com/v3/tags/model"
+        },
+        {
+            "name": "cinema4d",
+            "slug": "cinema4d",
+            "uri": "https://api.sketchfab.com/v3/tags/cinema4d"
+        },
+        {
+            "name": "fanous",
+            "slug": "fanous",
+            "uri": "https://api.sketchfab.com/v3/tags/fanous"
+        },
+        {
+            "name": "fanus",
+            "slug": "fanus",
+            "uri": "https://api.sketchfab.com/v3/tags/fanus"
+        },
+        {
+            "name": "fnws",
+            "slug": "fnws",
+            "uri": "https://api.sketchfab.com/v3/tags/fnws"
+        },
+        {
+            "name": "rmdn",
+            "slug": "rmdn",
+            "uri": "https://api.sketchfab.com/v3/tags/rmdn"
+        }
+    ],
+    "thumbnails": {
+        "images": [
+            {
+                "uid": "4d002660c6d4435488ae2325a2a5be18",
+                "width": 1920,
+                "height": 1080,
+                "size": 73082,
+                "url": "https://media.sketchfab.com/models/ba9aa25872674d1d932dfda062f1adda/thumbnails/8d5b8b08186b4302b4e9ede300516ff3/a9d810bae31d4a878354e1aeaaf9b1ba.jpeg"
+            },
+            {
+                "uid": "5ef3a7c635d34c7db50554168602ff32",
+                "width": 1024,
+                "height": 576,
+                "size": 23557,
+                "url": "https://media.sketchfab.com/models/ba9aa25872674d1d932dfda062f1adda/thumbnails/8d5b8b08186b4302b4e9ede300516ff3/ed4f182523b44eb1b4650d230950bffb.jpeg"
+            },
+            {
+                "uid": "b92fb285f07a49d6a451906a6167a617",
+                "width": 720,
+                "height": 405,
+                "size": 13591,
+                "url": "https://media.sketchfab.com/models/ba9aa25872674d1d932dfda062f1adda/thumbnails/8d5b8b08186b4302b4e9ede300516ff3/6a52f62183924809a541be0e8a8440ff.jpeg"
+            },
+            {
+                "uid": "b1581fdf46ae4d688eba4a6599f7382a",
+                "width": 256,
+                "height": 144,
+                "size": 3011,
+                "url": "https://media.sketchfab.com/models/ba9aa25872674d1d932dfda062f1adda/thumbnails/8d5b8b08186b4302b4e9ede300516ff3/4ecbc24a4a714ab5b910f463ccf4ca7a.jpeg"
+            },
+            {
+                "uid": "13438eede90a4ae4b0f571b7862f8e8f",
+                "width": 64,
+                "height": 36,
+                "size": 904,
+                "url": "https://media.sketchfab.com/models/ba9aa25872674d1d932dfda062f1adda/thumbnails/8d5b8b08186b4302b4e9ede300516ff3/166b9c5d28024401a779c2a8b45f2c36.jpeg"
+            }
+        ]
+    },
+    "uid": "ba9aa25872674d1d932dfda062f1adda",
+    "uri": "https://api.sketchfab.com/v3/models/ba9aa25872674d1d932dfda062f1adda",
+    "user": {
+        "uid": "8cdd610ca2ae426e917a3ac20f07929c",
+        "username": "ahmed.mohsin.atia",
+        "displayName": "Ahmed Mohsin",
+        "account": "basic",
+        "profileUrl": "https://sketchfab.com/ahmed.mohsin.atia",
+        "avatar": {
+            "uid": "702d7a3b9bd04fafbe86fba8c0da8d64",
+            "uri": "https://api.sketchfab.com/v3/avatars/702d7a3b9bd04fafbe86fba8c0da8d64",
+            "images": [
+                {
+                    "width": 32,
+                    "height": 32,
+                    "size": 993,
+                    "url": "https://media.sketchfab.com/avatars/702d7a3b9bd04fafbe86fba8c0da8d64/a8c2d0c012a34a5d9452912b1db4a284.jpeg"
+                },
+                {
+                    "width": 48,
+                    "height": 48,
+                    "size": 1325,
+                    "url": "https://media.sketchfab.com/avatars/702d7a3b9bd04fafbe86fba8c0da8d64/a9885888455348f2a3ba8138991f9f2d.jpeg"
+                },
+                {
+                    "width": 90,
+                    "height": 90,
+                    "size": 2654,
+                    "url": "https://media.sketchfab.com/avatars/702d7a3b9bd04fafbe86fba8c0da8d64/a33ac1f3a7044d46b3bc2f64fb6ada03.jpeg"
+                },
+                {
+                    "width": 100,
+                    "height": 100,
+                    "size": 2970,
+                    "url": "https://media.sketchfab.com/avatars/702d7a3b9bd04fafbe86fba8c0da8d64/28db91d7986240d4babc72475a75defc.jpeg"
+                }
+            ]
+        },
+        "uri": "https://api.sketchfab.com/v3/users/8cdd610ca2ae426e917a3ac20f07929c"
+    },
+    "vertexCount": 1100,
+    "viewCount": 529,
+    "viewerUrl": "https://sketchfab.com/3d-models/ramadan-lantern-model-ba9aa25872674d1d932dfda062f1adda",
+    "isDownloadable": true,
+    "isProtected": false,
+    "description": "",
+    "price": null,
+    "downloadCount": 155,
+    "editorUrl": "https://sketchfab.com/models/ba9aa25872674d1d932dfda062f1adda/edit",
+    "status": {
+        "warning": {},
+        "processing": "SUCCEEDED"
+    },
+    "source": "cinema4d",
+    "hasCommentsDisabled": false,
+    "updatedAt": "2023-02-09T11:08:31.902660",
+    "pbrType": null,
+    "textureCount": 3,
+    "materialCount": 5
+}

@@ -1,0 +1,142 @@
+{
+    "animationCount": 0,
+    "categories": [],
+    "commentCount": 0,
+    "createdAt": "2025-01-02T03:22:49.867492",
+    "embedUrl": "https://sketchfab.com/models/a49323aa1e0f450db9ff8b813864379f/embed",
+    "faceCount": 13978,
+    "isAgeRestricted": false,
+    "license": {
+        "uri": "https://api.sketchfab.com/v3/licenses/322a749bcfa841b29dff1e8a1bb74b0b",
+        "label": "CC Attribution",
+        "fullName": "Creative Commons Attribution",
+        "requirements": "Author must be credited. Commercial use is allowed.",
+        "url": "http://creativecommons.org/licenses/by/4.0/",
+        "slug": "by"
+    },
+    "likeCount": 6,
+    "name": "Arab House(low poly)",
+    "publishedAt": "2025-01-02T03:32:16.173761",
+    "soundCount": 0,
+    "staffpickedAt": null,
+    "tags": [
+        {
+            "name": "gameassets",
+            "slug": "gameassets",
+            "uri": "https://api.sketchfab.com/v3/tags/gameassets"
+        },
+        {
+            "name": "arabic_architecture",
+            "slug": "arabic_architecture",
+            "uri": "https://api.sketchfab.com/v3/tags/arabic_architecture"
+        },
+        {
+            "name": "game",
+            "slug": "game",
+            "uri": "https://api.sketchfab.com/v3/tags/game"
+        },
+        {
+            "name": "war",
+            "slug": "war",
+            "uri": "https://api.sketchfab.com/v3/tags/war"
+        }
+    ],
+    "thumbnails": {
+        "images": [
+            {
+                "uid": "23f9524a99214b3d8490dd70fc8cc48c",
+                "width": 1920,
+                "height": 1080,
+                "size": 480894,
+                "url": "https://media.sketchfab.com/models/a49323aa1e0f450db9ff8b813864379f/thumbnails/7196495693184038b3fd616aba1ef5d1/03429cf110cb42258371eac73d9188ef.jpeg"
+            },
+            {
+                "uid": "9c1736c65b6a4dc29f2a40589403db7e",
+                "width": 1024,
+                "height": 576,
+                "size": 130241,
+                "url": "https://media.sketchfab.com/models/a49323aa1e0f450db9ff8b813864379f/thumbnails/7196495693184038b3fd616aba1ef5d1/8936189f4de945c09449175b23936b45.jpeg"
+            },
+            {
+                "uid": "9d3c890c84cd4dfab7decbaf84e809b6",
+                "width": 720,
+                "height": 405,
+                "size": 72213,
+                "url": "https://media.sketchfab.com/models/a49323aa1e0f450db9ff8b813864379f/thumbnails/7196495693184038b3fd616aba1ef5d1/d30d86340a9d49218e3aeee71b7ba08f.jpeg"
+            },
+            {
+                "uid": "d6adc650a0054d77966c9a4f48d40e0f",
+                "width": 256,
+                "height": 144,
+                "size": 12078,
+                "url": "https://media.sketchfab.com/models/a49323aa1e0f450db9ff8b813864379f/thumbnails/7196495693184038b3fd616aba1ef5d1/17307c19312f47e09372949b79a30c0f.jpeg"
+            },
+            {
+                "uid": "ff8c8b749c8f4788a7861a3f54fe07e2",
+                "width": 64,
+                "height": 36,
+                "size": 1650,
+                "url": "https://media.sketchfab.com/models/a49323aa1e0f450db9ff8b813864379f/thumbnails/7196495693184038b3fd616aba1ef5d1/7b4ddcec11d94f46b67a2f8e7ffde20c.jpeg"
+            }
+        ]
+    },
+    "uid": "a49323aa1e0f450db9ff8b813864379f",
+    "uri": "https://api.sketchfab.com/v3/models/a49323aa1e0f450db9ff8b813864379f",
+    "user": {
+        "uid": "9171a5b9a645437bad3b6c3e0e9b2d4d",
+        "username": "Legorook",
+        "displayName": "Legorook",
+        "account": "basic",
+        "profileUrl": "https://sketchfab.com/Legorook",
+        "avatar": {
+            "uid": "e071e7cdb7334a61ae2252038381be70",
+            "uri": "https://api.sketchfab.com/v3/avatars/e071e7cdb7334a61ae2252038381be70",
+            "images": [
+                {
+                    "width": 32,
+                    "height": 32,
+                    "size": 1956,
+                    "url": "https://media.sketchfab.com/avatars/e071e7cdb7334a61ae2252038381be70/ea33dadfc13e4d7e8cb58ac9b94deb0f.png"
+                },
+                {
+                    "width": 48,
+                    "height": 48,
+                    "size": 3548,
+                    "url": "https://media.sketchfab.com/avatars/e071e7cdb7334a61ae2252038381be70/ab15438b8f264f8daedfb244d79a9cd3.png"
+                },
+                {
+                    "width": 90,
+                    "height": 90,
+                    "size": 9088,
+                    "url": "https://media.sketchfab.com/avatars/e071e7cdb7334a61ae2252038381be70/e3a72bc3c05c4e308e3c956478dfd197.png"
+                },
+                {
+                    "width": 100,
+                    "height": 100,
+                    "size": 10628,
+                    "url": "https://media.sketchfab.com/avatars/e071e7cdb7334a61ae2252038381be70/bc41867331424284a495276711881692.png"
+                }
+            ]
+        },
+        "uri": "https://api.sketchfab.com/v3/users/9171a5b9a645437bad3b6c3e0e9b2d4d"
+    },
+    "vertexCount": 7312,
+    "viewCount": 432,
+    "viewerUrl": "https://sketchfab.com/3d-models/arab-houselow-poly-a49323aa1e0f450db9ff8b813864379f",
+    "isDownloadable": true,
+    "isProtected": false,
+    "description": "An Arabic-themed house featuring traditional architecture, ornate patterns, and cultural design elements. Most suitable in creating or adding details in an arab war games.",
+    "price": null,
+    "downloadCount": 94,
+    "editorUrl": "https://sketchfab.com/models/a49323aa1e0f450db9ff8b813864379f/edit",
+    "status": {
+        "warning": {},
+        "processing": "SUCCEEDED"
+    },
+    "source": "website",
+    "hasCommentsDisabled": false,
+    "updatedAt": "2025-01-02T03:46:19.353901",
+    "pbrType": null,
+    "textureCount": 4,
+    "materialCount": 5
+}

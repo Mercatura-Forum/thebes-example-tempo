@@ -1,0 +1,211 @@
+{
+    "animationCount": 0,
+    "categories": [
+        {
+            "uid": "22a2f677efad4d7bbca5ad45f9b5868e",
+            "name": "Cars & Vehicles",
+            "slug": "cars-vehicles",
+            "uri": "https://api.sketchfab.com/v3/categories/22a2f677efad4d7bbca5ad45f9b5868e",
+            "icon": "https://static.sketchfab.com/static/builds/web/dist/static/assets/images/icons/categories/45dd0cc0860ac57fcd63bde1cc3f2b7c-v2.svg",
+            "thumbnails": [
+                {
+                    "width": "512",
+                    "height": "288",
+                    "url": "https://static.sketchfab.com/categories/22a2f677efad4d7bbca5ad45f9b5868e/512x288.png"
+                },
+                {
+                    "width": "800",
+                    "height": "450",
+                    "url": "https://static.sketchfab.com/categories/22a2f677efad4d7bbca5ad45f9b5868e/800x450.png"
+                }
+            ]
+        },
+        {
+            "uid": "d7cebaeca8604ebab1480e413404b679",
+            "name": "Electronics & Gadgets",
+            "slug": "electronics-gadgets",
+            "uri": "https://api.sketchfab.com/v3/categories/d7cebaeca8604ebab1480e413404b679",
+            "icon": "https://static.sketchfab.com/static/builds/web/dist/static/assets/images/icons/categories/336c224334b7e53e277d236a8355e90a-v2.svg",
+            "thumbnails": [
+                {
+                    "width": "512",
+                    "height": "288",
+                    "url": "https://static.sketchfab.com/categories/d7cebaeca8604ebab1480e413404b679/512x288.png"
+                },
+                {
+                    "width": "800",
+                    "height": "450",
+                    "url": "https://static.sketchfab.com/categories/d7cebaeca8604ebab1480e413404b679/800x450.png"
+                }
+            ]
+        }
+    ],
+    "commentCount": 0,
+    "createdAt": "2026-04-16T15:33:15.568712",
+    "embedUrl": "https://sketchfab.com/models/16a3330edde14cb7b56626ede007067f/embed",
+    "faceCount": 3582,
+    "isAgeRestricted": false,
+    "license": {
+        "uri": "https://api.sketchfab.com/v3/licenses/322a749bcfa841b29dff1e8a1bb74b0b",
+        "label": "CC Attribution",
+        "fullName": "Creative Commons Attribution",
+        "requirements": "Author must be credited. Commercial use is allowed.",
+        "url": "http://creativecommons.org/licenses/by/4.0/",
+        "slug": "by"
+    },
+    "likeCount": 15,
+    "name": "Low Poly Delivery Electric Scooter",
+    "publishedAt": "2026-04-16T15:42:11.076936",
+    "soundCount": 0,
+    "staffpickedAt": null,
+    "tags": [
+        {
+            "name": "scooter",
+            "slug": "scooter",
+            "uri": "https://api.sketchfab.com/v3/tags/scooter"
+        },
+        {
+            "name": "delivery",
+            "slug": "delivery",
+            "uri": "https://api.sketchfab.com/v3/tags/delivery"
+        },
+        {
+            "name": "electric-car",
+            "slug": "electric-car",
+            "uri": "https://api.sketchfab.com/v3/tags/electric-car"
+        },
+        {
+            "name": "futuristic-vehicle",
+            "slug": "futuristic-vehicle",
+            "uri": "https://api.sketchfab.com/v3/tags/futuristic-vehicle"
+        },
+        {
+            "name": "electric-vehicle",
+            "slug": "electric-vehicle",
+            "uri": "https://api.sketchfab.com/v3/tags/electric-vehicle"
+        },
+        {
+            "name": "low-poly",
+            "slug": "low-poly",
+            "uri": "https://api.sketchfab.com/v3/tags/low-poly"
+        },
+        {
+            "name": "lowpoly",
+            "slug": "lowpoly",
+            "uri": "https://api.sketchfab.com/v3/tags/lowpoly"
+        },
+        {
+            "name": "kindacool",
+            "slug": "kindacool",
+            "uri": "https://api.sketchfab.com/v3/tags/kindacool"
+        },
+        {
+            "name": "psx-style",
+            "slug": "psx-style",
+            "uri": "https://api.sketchfab.com/v3/tags/psx-style"
+        },
+        {
+            "name": "delivery-scooter",
+            "slug": "delivery-scooter",
+            "uri": "https://api.sketchfab.com/v3/tags/delivery-scooter"
+        }
+    ],
+    "thumbnails": {
+        "images": [
+            {
+                "uid": "7695d3ba9ae14263afba9b9e539e00a8",
+                "width": 1920,
+                "height": 1080,
+                "size": 102920,
+                "url": "https://media.sketchfab.com/models/16a3330edde14cb7b56626ede007067f/thumbnails/4e4154aea26e410b8a5fc22bd89940a5/a0b136da1d484275942f595455beae9a.jpeg"
+            },
+            {
+                "uid": "2dd4c237d74e465998fb8922db20709c",
+                "width": 1024,
+                "height": 576,
+                "size": 39480,
+                "url": "https://media.sketchfab.com/models/16a3330edde14cb7b56626ede007067f/thumbnails/4e4154aea26e410b8a5fc22bd89940a5/740d3a49acc04bba9788eb609426dc6a.jpeg"
+            },
+            {
+                "uid": "4f7e2f19ba8849928c6c384a78ea60f8",
+                "width": 720,
+                "height": 405,
+                "size": 24740,
+                "url": "https://media.sketchfab.com/models/16a3330edde14cb7b56626ede007067f/thumbnails/4e4154aea26e410b8a5fc22bd89940a5/c08c94756df549eebd876a7823423a26.jpeg"
+            },
+            {
+                "uid": "ca06f5c8ae144461ab345dd526ce5675",
+                "width": 256,
+                "height": 144,
+                "size": 5950,
+                "url": "https://media.sketchfab.com/models/16a3330edde14cb7b56626ede007067f/thumbnails/4e4154aea26e410b8a5fc22bd89940a5/8506995462e641aca465b7faaa462aa2.jpeg"
+            },
+            {
+                "uid": "3263b678faf94572a766c11847292ab6",
+                "width": 64,
+                "height": 36,
+                "size": 1301,
+                "url": "https://media.sketchfab.com/models/16a3330edde14cb7b56626ede007067f/thumbnails/4e4154aea26e410b8a5fc22bd89940a5/969d47aafecf4530a9b9aec5a320ffc1.jpeg"
+            }
+        ]
+    },
+    "uid": "16a3330edde14cb7b56626ede007067f",
+    "uri": "https://api.sketchfab.com/v3/models/16a3330edde14cb7b56626ede007067f",
+    "user": {
+        "uid": "532011a2f8b84c20a101b5c3c53b8c06",
+        "username": "spartanmelon",
+        "displayName": "ramdom_sp",
+        "account": "basic",
+        "profileUrl": "https://sketchfab.com/spartanmelon",
+        "avatar": {
+            "uid": "5b6b7a5ea4094b6dbb502261429c6673",
+            "uri": "https://api.sketchfab.com/v3/avatars/5b6b7a5ea4094b6dbb502261429c6673",
+            "images": [
+                {
+                    "width": 32,
+                    "height": 32,
+                    "size": 2157,
+                    "url": "https://media.sketchfab.com/avatars/5b6b7a5ea4094b6dbb502261429c6673/0768be57abf64ca29c6d0f6613b12589.png"
+                },
+                {
+                    "width": 48,
+                    "height": 48,
+                    "size": 4037,
+                    "url": "https://media.sketchfab.com/avatars/5b6b7a5ea4094b6dbb502261429c6673/0bc3c56b958a42e98ab5e07ef27d7fae.png"
+                },
+                {
+                    "width": 90,
+                    "height": 90,
+                    "size": 10663,
+                    "url": "https://media.sketchfab.com/avatars/5b6b7a5ea4094b6dbb502261429c6673/21aeb33a5a3d4228a9e1560ba018eecc.png"
+                },
+                {
+                    "width": 100,
+                    "height": 100,
+                    "size": 12586,
+                    "url": "https://media.sketchfab.com/avatars/5b6b7a5ea4094b6dbb502261429c6673/d6bf8432225b4b278e493e1e79fda0c6.png"
+                }
+            ]
+        },
+        "uri": "https://api.sketchfab.com/v3/users/532011a2f8b84c20a101b5c3c53b8c06"
+    },
+    "vertexCount": 2393,
+    "viewCount": 592,
+    "viewerUrl": "https://sketchfab.com/3d-models/low-poly-delivery-electric-scooter-16a3330edde14cb7b56626ede007067f",
+    "isDownloadable": true,
+    "isProtected": false,
+    "description": "I recreated the \"Delivery Electric Scooter\" (https://skfb.ly/ooyUn) by Neakster is licensed under Creative Commons Attribution (http://creativecommons.org/licenses/by/4.0/).\n\nthis time i didnt make psx textures, just used materials, but i think is low poly enough to be in a psx style game",
+    "price": null,
+    "downloadCount": 108,
+    "editorUrl": "https://sketchfab.com/models/16a3330edde14cb7b56626ede007067f/edit",
+    "status": {
+        "warning": {},
+        "processing": "SUCCEEDED"
+    },
+    "source": "website",
+    "hasCommentsDisabled": false,
+    "updatedAt": "2026-04-16T15:42:11.189378",
+    "pbrType": null,
+    "textureCount": 0,
+    "materialCount": 7
+}
