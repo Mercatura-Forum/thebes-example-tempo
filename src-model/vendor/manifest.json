@@ -262,7 +262,33 @@
         "ac_unit.glb",
         "clay_pots.glb",
         "market_stall.glb"
-      ]
+      ],
+      "models": {
+        "can_fridge.glb": {
+          "title": "Can Fridge",
+          "url": "https://poly.pizza/m/8OHbykvREu"
+        },
+        "cat.glb": {
+          "title": "Cat",
+          "url": "https://poly.pizza/m/2f54vbV0In"
+        },
+        "crate.glb": {
+          "title": "Crate",
+          "url": "https://poly.pizza/m/3OEFd1AWfa"
+        },
+        "ac_unit.glb": {
+          "title": "Air Conditioner",
+          "url": "https://poly.pizza/m/amFuyE3IF6"
+        },
+        "clay_pots.glb": {
+          "title": "Pot",
+          "url": "https://poly.pizza/m/Olu4b0aiiY"
+        },
+        "market_stall.glb": {
+          "title": "Market Stalls",
+          "url": "https://poly.pizza/m/PUZZ5F91OE"
+        }
+      }
     },
     "kaykit-props": {
       "license": "CC0",
