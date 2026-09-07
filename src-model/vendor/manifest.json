@@ -309,6 +309,66 @@
       "files": [
         "wooden_sign.glb"
       ]
+    },
+    "sketchfab-arab-house": {
+      "license": "CC-BY-4.0",
+      "title": "Arab House(low poly)",
+      "author": "Legorook",
+      "url": "https://sketchfab.com/3d-models/arab-houselow-poly-a49323aa1e0f450db9ff8b813864379f",
+      "licenseUrl": "http://creativecommons.org/licenses/by/4.0/",
+      "files": [
+        "arab_house.glb"
+      ]
+    },
+    "sketchfab-minaret": {
+      "license": "CC-BY-4.0",
+      "title": "The Minaret of Samarra, Iraq",
+      "author": "Chenzoss",
+      "url": "https://sketchfab.com/3d-models/the-minaret-of-samarra-iraq-d8ebe7c756f2414bb70768d936f2d137",
+      "licenseUrl": "http://creativecommons.org/licenses/by/4.0/",
+      "files": [
+        "minaret.glb"
+      ]
+    },
+    "sketchfab-tuktuk": {
+      "license": "CC-BY-4.0",
+      "title": "Tuk Tuk Auto Rikshaw Lowpoly",
+      "author": "maanzart",
+      "url": "https://sketchfab.com/3d-models/tuk-tuk-auto-rikshaw-lowpoly-2124df89548644278c6d4d1b1b0ad92a",
+      "licenseUrl": "http://creativecommons.org/licenses/by/4.0/",
+      "files": [
+        "tuktuk.glb"
+      ]
+    },
+    "sketchfab-scooter": {
+      "license": "CC-BY-4.0",
+      "title": "Low Poly Delivery Electric Scooter",
+      "author": "ramdom_sp",
+      "url": "https://sketchfab.com/3d-models/low-poly-delivery-electric-scooter-16a3330edde14cb7b56626ede007067f",
+      "licenseUrl": "http://creativecommons.org/licenses/by/4.0/",
+      "files": [
+        "scooter.glb"
+      ]
+    },
+    "sketchfab-chair": {
+      "license": "CC-BY-4.0",
+      "title": "Monoblok low poly Garden Chair plastic",
+      "author": "The Latest Shit",
+      "url": "https://sketchfab.com/3d-models/monoblok-low-poly-garden-chair-plastic-898f2dc1ef244f1b8785fbb508b6a339",
+      "licenseUrl": "http://creativecommons.org/licenses/by/4.0/",
+      "files": [
+        "chair.glb"
+      ]
+    },
+    "sketchfab-mashrabiya": {
+      "license": "CC-BY-4.0",
+      "title": "mashrabiya",
+      "author": "Mennat Allah Salama",
+      "url": "https://sketchfab.com/3d-models/mashrabiya-a60e4d5f34aa4a6280343a8f15bb1c13",
+      "licenseUrl": "http://creativecommons.org/licenses/by/4.0/",
+      "files": [
+        "mashrabiya.glb"
+      ]
     }
   }
 }

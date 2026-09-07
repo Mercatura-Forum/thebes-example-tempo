@@ -20,8 +20,8 @@ variant (898f2dc1) is the correct pick for this scene.
 
 ## Status
 
-Model files pending user download (account-gated). Download the "Autoconverted format (glTF)"
-zip from the model page above and drop the extracted glTF/GLB + textures into this directory.
+Downloaded 2026-09-07 by the user (Sketchfab account-gated GLB download), delivered via
+`src-model/vendor/uploaded/` and filed here as `chair.glb`.
 
 ## Attribution requirement
 
