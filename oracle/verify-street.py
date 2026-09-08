@@ -88,7 +88,8 @@ with sync_playwright() as p:
       const tick = () => { n++; if (performance.now() - t0 < 2000) requestAnimationFrame(tick); else res(n / 2); };
       requestAnimationFrame(tick);
     })""")
-    check(fps >= 10, f"walk holds a headless-SwiftShader floor of 10fps (measured {fps:.0f})")
+    load1 = open('/proc/loadavg').read().split()[0]
+    check(fps >= 10, f"walk holds a headless-SwiftShader floor of 10fps (measured {fps:.0f}, box load {load1})")
 
     # to the koshk: warp inside the trigger → focus engages, camera settles
     page.evaluate('() => window.TempoStreet.warp(6.8, 0.3)')

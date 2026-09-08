@@ -111,7 +111,7 @@ python3 oracle/verify-intro.py                 # exits nonzero on any failure
 | `scroll.js` | Wheel-damped page glide — flicks are velocity-capped so models and reveals get their time |
 | `street.js` | The Cairo street (section 05): opt-in walkable koshk diorama; shelf cans open the shop |
 | `street-sim.js` | Pure street simulation — movement, collision, focus state machine (oracle-shared) |
-| `assets/street/` | Street GLB + portal poster + layout, built by `src-model/tools/build_street.py` |
+| `assets/street/` | Street + runner GLBs, portal poster, layout — built by `src-model/tools/build_street.py` / `build_runner.py` from license-verified vendored assets (provenance: `src-model/vendor/manifest.json`, credits: NOTICE.md) |
 | `tempo-api.js` | Typed verbs over the SDK runtime |
 | `admin.js` | The `#admin` drawer (Memphis passkey) |
 | `sdk/` | Vendored SDK runtime scripts (see NOTICE.md) |
@@ -119,6 +119,7 @@ python3 oracle/verify-intro.py                 # exits nonzero on any failure
 | `oracle/` | Node test scripts |
 | `assets/` | Can + splash models, labels, fallback renders |
 | `src-model/tools/` | Pipeline that builds the models, labels and renders (see its README) |
+| `src-model/vendor/` | Vendored third-party assets with per-source receipts + license manifest |
 | `dist/` | Plain copy of the site files — this is what deploys |
 
 ## Deploy

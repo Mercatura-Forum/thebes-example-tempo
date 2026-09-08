@@ -95,7 +95,7 @@
         "antenna": "ink",
         "*": "plasterRose"
       },
-      "tris": 9000
+      "tris": 5500
     },
     {
       "name": "b3",
@@ -258,7 +258,7 @@
         "glass": "paper",
         "*": "metal"
       },
-      "tris": 2800
+      "tris": 1500
     },
     {
       "name": "cat",
@@ -272,7 +272,7 @@
         "eye_white": "paper",
         "*": "ink"
       },
-      "tris": 1900
+      "tris": 900
     },
     {
       "name": "tuktuk",
@@ -285,7 +285,7 @@
         "lambert4": "ink",
         "*": "awningA"
       },
-      "tris": 3800
+      "tris": 2200
     },
     {
       "name": "ahwaChair1",
@@ -336,7 +336,7 @@
         "light": "paper",
         "*": "ink"
       },
-      "tris": 3600
+      "tris": 2000
     },
     {
       "name": "clayPots",
@@ -362,7 +362,7 @@
       "tints": {
         "*": "woodLight"
       },
-      "tris": 1100
+      "tris": 500
     },
     {
       "name": "woodenSign",
@@ -484,7 +484,7 @@
       "tints": {
         "*": "plasterSand"
       },
-      "tris": 6000
+      "tris": 2500
     }
   }
 }
