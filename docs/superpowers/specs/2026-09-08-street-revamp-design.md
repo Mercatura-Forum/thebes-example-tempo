@@ -82,3 +82,22 @@ Ambient audio (decided silent), real-device touch pass (needs a device),
 renderer shadow maps (SwiftShader fps risk not worth it against baked blobs),
 new vendored assets (everything here is procedural and palette-native — no
 NOTICE.md changes).
+
+## Addendum — the street takes its own colors (same day, user call)
+
+The flat palette-strip read as "no textures whatsoever" in close-up (user,
+with screenshots). Decision reversed by the user: vendor assets now keep
+their SHIPPED materials — the arab house and minaret their real texture maps
+(downscaled to 512², exported WEBP inside the GLB), the tuk-tuk / chairs /
+scooter / cat / fridge / table / sign their native liveries. The hand-built
+geometry gets seeded Pillow textures (plaster ×3, wood grain ×2, asphalt ×2,
+pavement, dirt, clay, a woven rug) mapped by world-space projection, one tile
+per two metres. The RUNNER stays brand paper/ink — it is the mannequin — and
+the cans keep their label art. The street palette name-lock gate retired in
+favour of texture budgets (all images ≤512px, street.glb ≤2.9MB, wire ≤5MB);
+the runner's brand lock stands. Composition fixed in the same pass: chairs
+ring the table facing it, crates stack aligned on the koshk flank, the fridge
+turns its glass to the street, the palm trunk is one lofted mesh, the koshk
+grew corner posts, fascia, counter-top and shelf lips. Clay pots recolored
+terracotta (their shipped material was near-black — the one native tone that
+didn't survive daylight).

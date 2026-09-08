@@ -37,6 +37,7 @@ PALETTE = {
     'asphaltOld':  (0.52, 0.48, 0.43, 1),
     'foliage':     (0.30, 0.42, 0.32, 1),
     'clay':        (0.62, 0.38, 0.24, 1),
+    'rug':         (0.25, 0.35, 0.33, 1),
 }
 EMISSIVE = {
     'bulb':   ((1.0, 0.75, 0.4, 1), 6.0),
@@ -51,6 +52,14 @@ def clean():
         for d in list(coll):
             coll.remove(d)
 
+TEXTURED = {
+    'ground': 'ground.png', 'sidewalk': 'sidewalk.png',
+    'plasterSand': 'plaster_sand.png', 'plasterRose': 'plaster_rose.png',
+    'plasterOchre': 'plaster_ochre.png', 'wood': 'wood.png',
+    'woodLight': 'wood_light.png', 'asphalt': 'asphalt.png',
+    'asphaltOld': 'asphalt_old.png', 'clay': 'clay.png', 'rug': 'rug.png',
+}
+
 MATS = {}
 def mat(name):
     if name in MATS: return MATS[name]
@@ -63,6 +72,15 @@ def mat(name):
         b.inputs['Roughness'].default_value = 1.0
         m.blend_method = 'BLEND'
         m.diffuse_color = (0.06, 0.05, 0.05, 0.28)
+        MATS[name] = m
+        return m
+    if name in TEXTURED:
+        img = bpy.data.images.load(os.path.join(HERE, 'out', 'textures', TEXTURED[name]))
+        t = m.node_tree.nodes.new('ShaderNodeTexImage')
+        t.image = img
+        m.node_tree.links.new(t.outputs['Color'], b.inputs['Base Color'])
+        b.inputs['Roughness'].default_value = 0.9
+        m.diffuse_color = PALETTE.get(name, (0.7, 0.6, 0.5, 1))
         MATS[name] = m
         return m
     if name in EMISSIVE:
@@ -134,11 +152,20 @@ def join(objs, name):
     obj.name = name
     return obj
 
+def shrink_new_images(before):
+    for img in set(bpy.data.images) - before:
+        w, h = img.size
+        if max(w, h) > 512:
+            f = 512 / max(w, h)
+            img.scale(max(1, round(w * f)), max(1, round(h * f)))
+            print('[street] image shrunk', img.name, f'{w}x{h} -> {img.size[0]}x{img.size[1]}')
+
 def import_vendor(ref, drop=()):
     # ref: "vendor:<dir>/<relpath>" — resolves under src-model/vendor/
     # drop: object-name prefixes to discard (ground planes riding along in the file)
     path = os.path.join(VENDOR, ref.split(':', 1)[1])
     before = set(bpy.data.objects)
+    before_imgs = set(bpy.data.images)
     ext = os.path.splitext(path)[1].lower()
     if ext in ('.glb', '.gltf'): bpy.ops.import_scene.gltf(filepath=path)
     elif ext == '.fbx': bpy.ops.import_scene.fbx(filepath=path)
@@ -154,6 +181,7 @@ def import_vendor(ref, drop=()):
         for m in list(o.modifiers): o.modifiers.remove(m)   # armatures die below; bind pose stays
     for o in new:
         if o.type != 'MESH': bpy.data.objects.remove(o)
+    shrink_new_images(before_imgs)
     kept = []
     for o in meshes:
         hidden = o.hide_viewport or not o.visible_get()
@@ -163,21 +191,6 @@ def import_vendor(ref, drop=()):
         else:
             kept.append(o)
     return kept
-
-def palette_strip(objs, tints):
-    # every source material dies here; the palette is the only survivor
-    for o in objs:
-        names = [s.material.name.split('.')[0] if s.material else '' for s in o.material_slots]
-        idx = [p.material_index for p in o.data.polygons]   # materials.clear() resets these to 0
-        o.data.materials.clear()
-        while o.data.uv_layers:             # flat palette colors never sample UVs
-            o.data.uv_layers.remove(o.data.uv_layers[0])
-        keys = [next((v for k, v in tints.items() if k != '*' and k.lower() in n.lower()),
-                     tints.get('*', 'paper')) for n in names] or [tints.get('*', 'paper')]
-        for key in keys: o.data.materials.append(mat(key))
-        if len(keys) > 1:   # restore per-face slots, clamped
-            for p, i in zip(o.data.polygons, idx):
-                p.material_index = min(i, len(keys) - 1)
 
 def normalize_height(objs, name, height):
     obj = join(objs, name) if len(objs) > 1 else objs[0]
@@ -202,7 +215,7 @@ def normalize_height(objs, name, height):
 
 def decimate_to(obj, tris):
     cur = sum(len(p.vertices) - 2 for p in obj.data.polygons)
-    if cur <= tris: return
+    if cur <= tris * 1.5: return
     m = obj.modifiers.new('dec', 'DECIMATE')
     m.ratio = tris / cur
     bpy.context.view_layer.objects.active = obj
@@ -211,7 +224,14 @@ def decimate_to(obj, tris):
 def build_vendor_props():
     for vp in LAYOUT.get('vendorProps', []):
         objs = import_vendor(vp['ref'], drop=vp.get('drop', ()))
-        palette_strip(objs, vp.get('tints', {'*': 'paper'}))
+        if vp.get('recolor'):
+            # a vendor material whose shipped tone doesn't survive daylight
+            col = tuple(vp['recolor']) + (1,)
+            for o in objs:
+                for sl in o.material_slots:
+                    if sl.material and sl.material.use_nodes:
+                        sl.material.node_tree.nodes['Principled BSDF'].inputs['Base Color'].default_value = col
+                        sl.material.diffuse_color = col
         obj = normalize_height(objs, vp['name'], vp['height'])
         decimate_to(obj, vp.get('tris', 3000))
         obj.location = P(vp['x'], vp.get('y', 0), vp['z'])
@@ -232,7 +252,6 @@ def build_buildings():
         if b.get('ref'):
             # vendored facade: the asset brings its own detail — no parapet/windows
             objs = import_vendor(b['ref'], drop=b.get('drop', ()))
-            palette_strip(objs, b.get('tints', {'*': b['mat']}))
             obj = normalize_height(objs, 'bld_' + b['name'], h)
             decimate_to(obj, b.get('tris', 9000))
             ws = [obj.matrix_world @ v.co for v in obj.data.vertices]
@@ -319,7 +338,14 @@ def build_koshk():
         kbox('k_shelf', 'woodLight', 0, y + 0.38, K['shelves']['slotZ'], 2.5, 0.05, 0.55)
     # counter + sign board
     kbox('k_counter', 'woodLight', 0, 0.55, -0.85, 2.9, 0.5, 0.35)
+    kbox('k_countertop', 'wood', 0, 0.83, -0.85, 3.05, 0.06, 0.5)
     kbox('k_signboard', 'ink', 0, 2.85, -0.6, 3.2, 0.5, 0.1)
+    # trim: corner posts, fascia, shelf lips — the koshk stops being a raw box
+    kbox('k_post_l', 'wood', -1.55, 1.25, -0.85, 0.12, 2.5, 0.12)
+    kbox('k_post_r', 'wood', 1.55, 1.25, -0.85, 0.12, 2.5, 0.12)
+    kbox('k_fascia', 'woodLight', 0, 2.60, -0.98, 3.35, 0.16, 0.07)
+    for y in K['shelves']['ys']:
+        kbox('k_lip', 'wood', 0, y + 0.43, -0.76, 2.5, 0.06, 0.05)
     join(parts, 'koshk')
     # the hand-painted "cold drinks" strip across the counter front
     c, s = math.cos(ry), math.sin(ry)
@@ -390,7 +416,6 @@ def build_minaret():
     if mn.get('ref'):
         # the Samarra spiral — the silhouette against the sky is the whole point
         objs = import_vendor(mn['ref'])
-        palette_strip(objs, mn.get('tints', {'*': 'plasterSand'}))
         obj = normalize_height(objs, 'minaret', mn['h'])
         decimate_to(obj, mn.get('tris', 6000))
         obj.location = P(mn['x'], 0, mn['z'])
@@ -415,10 +440,14 @@ def build_signage():
     vp = next((v for v in LAYOUT.get('vendorProps', []) if v['name'] == 'woodenSign'), None)
     obj = bpy.data.objects.get('woodenSign')
     if not vp or not obj: return
+    # native vendor materials now — find the board face by its shipped name
     slot = next((i for i, sl in enumerate(obj.material_slots)
-                 if sl.material and sl.material.name == 'woodLight'), None)
+                 if sl.material and 'light wood' in sl.material.name.lower()), None)
     if slot is None:
-        print('[street] build_signage: no woodLight slot on the sign — plaque skipped')
+        slot = next((i for i, sl in enumerate(obj.material_slots)
+                     if sl.material and 'wood' in sl.material.name.lower()), None)
+    if slot is None:
+        print('[street] build_signage: no wood slot on the sign — plaque skipped')
         return
     # measure in the sign's LOCAL frame (mesh data is normalized; the object
     # carries rotation + location) so the thin axis is found honestly
@@ -513,18 +542,30 @@ def build_cart():
 def build_palms():
     for pi, pm in enumerate(LAYOUT['props']['palms']):
         x, z, h, lean, ry = pm['x'], pm['z'], pm['h'], pm['lean'], pm.get('ry', 0)
-        segs = 6
         parts = []
-        for i in range(segs):
-            t = i / (segs - 1)
-            r = 0.15 - 0.06 * t
+        rings, sides = 7, 8
+        verts, faces = [], []
+        for i in range(rings):
+            t = i / (rings - 1)
+            r = 0.16 - 0.08 * t
             off = lean * (t ** 2) * 2.2
-            wx = x + off * math.cos(ry); wz = z - off * math.sin(ry)
-            bpy.ops.mesh.primitive_cylinder_add(vertices=8, radius=r, depth=h / segs + 0.06,
-                                                location=P(wx, (i + 0.5) * h / segs, wz))
-            o = bpy.context.active_object
-            o.data.materials.append(mat('wood'))
-            parts.append(o)
+            cx = x + off * math.cos(ry); cz = z - off * math.sin(ry)
+            for k in range(sides):
+                a = 2 * math.pi * k / sides
+                verts.append(P(cx + r * math.cos(a), t * h, cz + r * math.sin(a)))
+        for i in range(rings - 1):
+            for k in range(sides):
+                a0 = i * sides + k; a1 = i * sides + (k + 1) % sides
+                faces.append((a0, a1, a1 + sides, a0 + sides))
+        faces.append(tuple(range(sides)))
+        faces.append(tuple(range((rings - 1) * sides, rings * sides))[::-1])
+        me = bpy.data.meshes.new('palm_trunk')
+        me.from_pydata(verts, [], faces)
+        me.update()
+        o = bpy.data.objects.new('palm_trunk', me)
+        bpy.context.collection.objects.link(o)
+        o.data.materials.append(mat('wood'))
+        parts.append(o)
         top_off = lean * 2.2
         tx = x + top_off * math.cos(ry); tz = z - top_off * math.sin(ry)
         bpy.ops.mesh.primitive_ico_sphere_add(subdivisions=1, radius=0.24, location=P(tx, h + 0.05, tz))
@@ -603,8 +644,7 @@ def build_dishes():
 
 def build_rug():
     r = LAYOUT['props']['rug']
-    site_box('rug_border', 'paper', r['x'], 0.012, r['z'], r['w'], 0.008, r['d'], ry=r.get('ry', 0))
-    site_box('rug', 'awningB', r['x'], 0.02, r['z'], r['w'] - 0.24, 0.008, r['d'] - 0.24, ry=r.get('ry', 0))
+    site_box('rug', 'rug', r['x'], 0.02, r['z'], r['w'], 0.008, r['d'], ry=r.get('ry', 0))
 
 def build_east_crates():
     for i, cr in enumerate(LAYOUT['props']['eastCrates']):
@@ -621,14 +661,14 @@ def build_blob_shadows():
         (V['tuktuk']['x'], V['tuktuk']['z'], 1.75, 0.85, V['tuktuk']['ry']),
         (V['scooter']['x'], V['scooter']['z'], 0.95, 0.5, V['scooter']['ry']),
         (ct['x'], ct['z'], 1.15, 0.85, ct['ry']),
-        (-9.55, 0.4, 1.7, 1.5, 0),                     # ahwa cluster
+        (-9.95, 0.4, 1.75, 1.6, 0),                    # ahwa cluster
         (V['canFridge']['x'], V['canFridge']['z'], 0.55, 0.55, 0),
         (6.45, -2.6, 0.78, 0.78, 0),                   # koshk crates
         (V['clayPots']['x'], V['clayPots']['z'], 0.5, 0.5, 0),
         (V['woodenSign']['x'], V['woodenSign']['z'], 0.5, 0.5, 0),
         (pms[0]['x'], pms[0]['z'], 0.85, 0.85, 0),
         (pms[1]['x'], pms[1]['z'], 0.75, 0.75, 0),
-        (10.0, 1.6, 0.85, 1.1, 0),                     # east crate stack
+        (9.9, 1.35, 0.85, 1.05, 0),                    # east crate stack
     ]
     for i, (x, z, rx, rz, ry) in enumerate(blobs):
         bpy.ops.mesh.primitive_circle_add(vertices=16, radius=1, fill_type='TRIFAN',
@@ -638,18 +678,44 @@ def build_blob_shadows():
         o.name = 'blob_%d' % i
         o.data.materials.append(mat('shadow'))
 
+def uv_world_project(tile=2.0):
+    # built geometry is textured now: project UVs from WORLD coords along each
+    # face's dominant axis so one texture tile spans `tile` metres everywhere
+    from mathutils import Vector
+    bpy.context.view_layer.update()
+    for obj in bpy.data.objects:
+        if obj.type != 'MESH': continue
+        names = {sl.material.name.split('.')[0] for sl in obj.material_slots if sl.material}
+        if not (names & set(TEXTURED)): continue
+        me = obj.data
+        if not me.uv_layers: me.uv_layers.new(name='UVMap')
+        uv = me.uv_layers.active.data
+        mw = obj.matrix_world
+        for poly in me.polygons:
+            n = (mw.to_3x3() @ poly.normal)
+            ax, ay, az = abs(n.x), abs(n.y), abs(n.z)
+            for li in poly.loop_indices:
+                co = mw @ me.vertices[me.loops[li].vertex_index].co
+                if az >= ax and az >= ay: u, v = co.x, co.y
+                elif ax >= ay:            u, v = co.y, co.z
+                else:                     u, v = co.x, co.z
+                uv[li].uv = (u / tile, v / tile)
+
 def export_glb():
     os.makedirs(os.path.dirname(OUT_GLB), exist_ok=True)
     # the runtime fetches the same layout the sim and this build were made from
     with open(os.path.join(ROOT, 'assets', 'street', 'layout.json'), 'w') as f:
         json.dump(LAYOUT, f, indent=2)
     kwargs = dict(filepath=OUT_GLB, export_format='GLB', export_yup=True, export_apply=True)
-    try:
-        bpy.ops.export_scene.gltf(**kwargs, export_draco_mesh_compression_enable=True)
-        print('[street] exported with draco')
-    except Exception as e:
-        print('[street] draco unavailable (%s), plain export' % e)
-        bpy.ops.export_scene.gltf(**kwargs)
+    for extra in (dict(export_draco_mesh_compression_enable=True, export_image_format='WEBP', export_image_quality=72),
+                  dict(export_draco_mesh_compression_enable=True),
+                  dict()):
+        try:
+            bpy.ops.export_scene.gltf(**kwargs, **extra)
+            print('[street] exported with', sorted(extra) or ['plain'])
+            break
+        except Exception as e:
+            print('[street] export retry (%s)' % e)
     print('[street] glb bytes:', os.path.getsize(OUT_GLB))
 
 def render_poster():
@@ -708,6 +774,7 @@ build_dishes()
 build_rug()
 build_east_crates()
 build_blob_shadows()
+uv_world_project()
 export_glb()
 render_poster()
 print('[street] done')

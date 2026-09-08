@@ -17,16 +17,10 @@ STREET = os.path.join(ROOT, 'assets', 'street', 'street.glb')
 RUNNER = os.path.join(ROOT, 'assets', 'street', 'runner.glb')
 POSTER = os.path.join(ROOT, 'assets', 'street', 'poster.webp')
 
-# allowed material names — mirror of build_street.py's PALETTE/EMISSIVE/mat_tex
-# and build_runner.py's three runner materials. Duplicated as a literal on
-# purpose: the gate failing loudly on palette drift is the point.
-ALLOWED = {
-    'ground', 'sidewalk', 'plasterSand', 'plasterRose', 'plasterOchre',
-    'shutter', 'wood', 'woodLight', 'paper', 'ink', 'awningA', 'awningB',
-    'metal', 'bulb', 'fridge', 'sign', 'signDrinks', 'signKoshk',
-    'asphalt', 'asphaltOld', 'foliage', 'clay', 'shadow',
-    'runnerPaper', 'runnerInk', 'runnerAccent',
-}
+# the street ships vendor-native materials + baked textures now (user call,
+# 2026-09-08) — the palette name-lock is retired for the street and replaced
+# by texture budgets. The RUNNER stays brand-locked: it is the mannequin.
+RUNNER_ALLOWED = {'runnerPaper', 'runnerInk', 'runnerAccent'}
 
 checks = []
 def check(name, ok, val=''):
@@ -44,9 +38,12 @@ bpy.ops.import_scene.gltf(filepath=STREET)
 street_tris = sum(len(p.vertices) - 2 for o in bpy.data.objects
                   if o.type == 'MESH' for p in o.data.polygons)
 check('street tris <= 120k', street_tris <= 120_000, str(street_tris))
-street_mats = {m.name.split('.')[0] for m in bpy.data.materials}
-check('street materials palette-locked', street_mats <= ALLOWED,
-      str(sorted(street_mats - ALLOWED)) if not street_mats <= ALLOWED else '')
+check('street.glb <= 2.9MB', os.path.getsize(STREET) <= 3_040_870,
+      '%d bytes' % os.path.getsize(STREET))
+big = [(i.name, i.size[0], i.size[1]) for i in bpy.data.images if max(i.size) > 512]
+check('street images all <= 512px', not big, str(big))
+n_img = len([i for i in bpy.data.images if i.size[0]])
+check('street carries textures (vendor-native + baked)', n_img >= 8, '%d images' % n_img)
 
 # ── runner ── all checks read the FILE, not a Blender import round-trip
 # (the importer decorates action names and its rig reconstruction distorts
@@ -61,8 +58,8 @@ check('runner clips == [Idle, Run, Walk]', anims == ['Idle', 'Run', 'Walk'],
       str(anims))
 
 runner_mats = {m['name'].split('.')[0] for m in doc.get('materials', [])}
-check('runner materials palette-locked', runner_mats <= ALLOWED,
-      str(sorted(runner_mats - ALLOWED)) if not runner_mats <= ALLOWED else '')
+check('runner materials brand-locked', runner_mats <= RUNNER_ALLOWED,
+      str(sorted(runner_mats - RUNNER_ALLOWED)) if not runner_mats <= RUNNER_ALLOWED else '')
 
 # bind-space POSITION extents == world height, provided no node carries scale
 scaled = [n.get('name') for n in doc.get('nodes', [])

@@ -101,13 +101,6 @@
       "drop": [
         "Object_26"
       ],
-      "tints": {
-        "brick": "plasterRose",
-        "wood": "wood",
-        "metal": "metal",
-        "antenna": "ink",
-        "*": "plasterRose"
-      },
       "tris": 5500
     },
     {
@@ -220,12 +213,12 @@
     },
     {
       "x": [
-        -10.75,
-        -8.75
+        -10.9,
+        -8.95
       ],
       "z": [
-        -0.75,
-        1.55
+        -0.6,
+        1.4
       ]
     },
     {
@@ -305,12 +298,8 @@
       "ref": "vendor:quaternius/can_fridge.glb",
       "x": 8.2,
       "z": -0.65,
-      "ry": 2.62,
+      "ry": -2.0,
       "height": 1.9,
-      "tints": {
-        "glass": "paper",
-        "*": "metal"
-      },
       "tris": 1500
     },
     {
@@ -321,10 +310,6 @@
       "z": -0.7,
       "ry": 2.9,
       "height": 0.5,
-      "tints": {
-        "eye_white": "paper",
-        "*": "ink"
-      },
       "tris": 900
     },
     {
@@ -334,34 +319,24 @@
       "z": -3.5,
       "ry": 1.63,
       "height": 1.8,
-      "tints": {
-        "lambert4": "ink",
-        "*": "awningA"
-      },
       "tris": 2200
     },
     {
       "name": "ahwaChair1",
       "ref": "vendor:sketchfab-chair/chair.glb",
-      "x": -9.6,
-      "z": 1.15,
-      "ry": 0.9,
+      "x": -9.37,
+      "z": 1.02,
+      "ry": -2.39,
       "height": 0.85,
-      "tints": {
-        "*": "paper"
-      },
       "tris": 600
     },
     {
       "name": "ahwaChair2",
       "ref": "vendor:sketchfab-chair/chair.glb",
-      "x": -9.45,
-      "z": -0.35,
-      "ry": -2.35,
+      "x": -9.71,
+      "z": -0.41,
+      "ry": -0.29,
       "height": 0.85,
-      "tints": {
-        "*": "paper"
-      },
       "tris": 600
     },
     {
@@ -371,9 +346,6 @@
       "z": 0.4,
       "ry": 0.0,
       "height": 0.75,
-      "tints": {
-        "*": "woodLight"
-      },
       "tris": 600
     },
     {
@@ -383,12 +355,6 @@
       "z": -4.35,
       "ry": 1.35,
       "height": 1.15,
-      "tints": {
-        "carcass": "awningB",
-        "chrome": "metal",
-        "light": "paper",
-        "*": "ink"
-      },
       "tris": 2000
     },
     {
@@ -398,11 +364,12 @@
       "z": -1.15,
       "ry": 0.6,
       "height": 0.55,
-      "tints": {
-        "grey": "wood",
-        "*": "awningA"
-      },
-      "tris": 400
+      "tris": 400,
+      "recolor": [
+        0.58,
+        0.3,
+        0.18
+      ]
     },
     {
       "name": "potatoCrate",
@@ -412,9 +379,6 @@
       "z": -2.6,
       "ry": 0.5,
       "height": 0.3,
-      "tints": {
-        "*": "woodLight"
-      },
       "tris": 500
     },
     {
@@ -424,24 +388,15 @@
       "z": -0.9,
       "ry": -0.5,
       "height": 2.0,
-      "tints": {
-        "dark wood": "wood",
-        "light wood": "woodLight",
-        "herbs": "awningB",
-        "rocks": "sidewalk"
-      },
       "tris": 750
     },
     {
       "name": "ahwaChair3",
       "ref": "vendor:sketchfab-chair/chair.glb",
-      "x": -9.0,
-      "z": 0.95,
-      "ry": -1.9,
+      "x": -10.8,
+      "z": 0.35,
+      "ry": 1.51,
       "height": 0.85,
-      "tints": {
-        "*": "paper"
-      },
       "tris": 600
     }
   ],
@@ -546,9 +501,6 @@
       "z": -11.0,
       "h": 16.0,
       "ref": "vendor:sketchfab-minaret/minaret.glb",
-      "tints": {
-        "*": "plasterSand"
-      },
       "tris": 2500
     },
     "roadbed": {
@@ -728,33 +680,33 @@
       }
     ],
     "rug": {
-      "x": -9.55,
+      "x": -9.95,
       "z": 0.4,
-      "w": 2.5,
-      "d": 2.1,
+      "w": 2.6,
+      "d": 2.3,
       "ry": 0.06
     },
     "eastCrates": [
       {
-        "x": 10.0,
+        "x": 9.9,
         "y": 0.26,
-        "z": 1.2,
+        "z": 1.0,
         "s": 0.52,
-        "ry": 0.2
+        "ry": -0.5
       },
       {
-        "x": 10.0,
+        "x": 9.9,
         "y": 0.78,
-        "z": 1.22,
+        "z": 1.02,
         "s": 0.5,
-        "ry": -0.15
+        "ry": -0.5
       },
       {
-        "x": 9.95,
+        "x": 9.88,
         "y": 0.25,
-        "z": 2.05,
+        "z": 1.72,
         "s": 0.5,
-        "ry": 0.5
+        "ry": -0.45
       }
     ]
   }

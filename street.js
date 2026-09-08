@@ -94,8 +94,8 @@ async function boot3d() {
   const joyThumb = el('div', 'street-joy__thumb', joyBase);
 
   const [layout, streetGlb, canGlb, runnerGlb] = await Promise.all([
-    fetch('assets/street/layout.json?v=4').then((r) => r.json()),
-    loadGlb('assets/street/street.glb?v=4', true),
+    fetch('assets/street/layout.json?v=5').then((r) => r.json()),
+    loadGlb('assets/street/street.glb?v=5', true),
     loadGlb('assets/tempo-can.glb?v=4', false),
     loadGlb('assets/street/runner.glb?v=2', true),
   ]);
