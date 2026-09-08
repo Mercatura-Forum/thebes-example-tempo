@@ -5,6 +5,11 @@
 # clips in place (the sim owns position) and exports assets/street/runner.glb.
 import bpy, json, math, os, re, sys
 
+# borrowed draco wrapper — same story as build_street.py
+_DRACO = '/opt/blender-4.5.11-linux-x64/4.5/scripts/addons_core/io_scene_gltf2/libextern_draco.so'
+if os.path.isfile(_DRACO):
+    os.environ.setdefault('BLENDER_EXTERN_DRACO_LIBRARY_PATH', _DRACO)
+
 HERE = os.path.dirname(os.path.abspath(__file__))
 ROOT = os.path.abspath(os.path.join(HERE, '..', '..'))
 VENDOR = os.path.join(ROOT, 'src-model', 'vendor')
@@ -80,6 +85,14 @@ def strip_gear(char_objects):
         if o.type == 'MESH' and GEAR.search(o.name):
             o.select_set(True)
     bpy.ops.object.delete()
+    # asset packs ride with junk (the Rogue ships a 2m hidden Icosphere
+    # template): the runner is ONE skinned character — any mesh with no
+    # armature deform is not the runner and would ship as dead weight
+    for o in list(bpy.data.objects):
+        if o.type == 'MESH' and not any(m.type == 'ARMATURE' for m in o.modifiers):
+            print('[runner] junk strip — deleted unskinned mesh:', o.name)
+            kept = [k for k in kept if k != o.name]
+            bpy.data.objects.remove(o)
     return kept
 
 
@@ -418,32 +431,54 @@ def retint_materials(char_mesh_objects):
 
 
 def normalize_height(char_arm):
-    """Scale the armature so character bbox height is 1.75m."""
-    bpy.ops.object.select_all(action='DESELECT')
-    # Gather all mesh children of the armature
+    """Scale the rig so the SKINNED character stands 1.75m.
+
+    Two traps live here (both shipped once, caught by verify_street_glb.py):
+    - raw `v.co` heights lie for skinned meshes — measure through the
+      evaluated depsgraph (the armature deform three.js will render);
+    - `transform_apply(scale)` on an armature shrinks the rest skeleton but
+      leaves the deformed mesh untouched (rest-pose deform is identity), so
+      the factor must STAY on the armature node — glTF exports node TRS, the
+      skinned mesh inherits it, and bone-local clips are unaffected.
+    """
     meshes = [o for o in bpy.data.objects if o.type == 'MESH']
     if not meshes:
         print('[runner] WARNING: no meshes found for height normalization')
         return
-    all_zs = []
-    for o in meshes:
-        mw = o.matrix_world
-        for v in o.data.vertices:
-            all_zs.append((mw @ v.co).z)
-    min_z = min(all_zs)
-    max_z = max(all_zs)
-    current_h = max_z - min_z
-    print(f'[runner] mesh bbox height: {current_h:.3f}m (target 1.75m)')
-    if current_h > 0.01:
-        scale_factor = 1.75 / current_h
-        char_arm.scale = (scale_factor, scale_factor, scale_factor)
-        bpy.ops.object.select_all(action='DESELECT')
-        char_arm.select_set(True)
-        bpy.context.view_layer.objects.active = char_arm
-        bpy.ops.object.transform_apply(scale=True)
-        print(f'[runner] scaled by {scale_factor:.4f} → target 1.75m')
-    else:
+
+    def skinned_height():
+        bpy.context.view_layer.update()
+        dg = bpy.context.evaluated_depsgraph_get()
+        zs = []
+        for o in meshes:
+            ev = o.evaluated_get(dg)
+            me = ev.to_mesh()
+            zs += [(ev.matrix_world @ v.co).z for v in me.vertices]
+            ev.to_mesh_clear()
+        return max(zs) - min(zs)
+
+    current_h = skinned_height()
+    print(f'[runner] skinned bbox height: {current_h:.3f}m (target 1.75m)')
+    if current_h <= 0.01:
         print('[runner] WARNING: degenerate bbox, skipping height normalize')
+        return
+    s = 1.75 / current_h
+    # bake the factor into the DATA (rest bones, verts, location keys), not
+    # object transforms — the glTF exporter drops armature-object scale for
+    # skinned meshes (joints export from armature data)
+    from mathutils import Matrix
+    M = Matrix.Scale(s, 4)
+    char_arm.data.transform(M)
+    for o in meshes:
+        o.data.transform(M)
+    for act in bpy.data.actions:
+        for fc in act.fcurves:
+            if fc.data_path.endswith('.location'):
+                for kp in fc.keyframe_points:
+                    kp.co.y *= s
+                    kp.handle_left.y *= s
+                    kp.handle_right.y *= s
+    print(f'[runner] scaled by {s:.4f} → skinned height now {skinned_height():.3f}m')
 
 
 def finalize_actions(trio, char_arm):
@@ -606,6 +641,14 @@ trio = pick_locomotion_trio()
 bake_in_place(trio)
 
 # ── Step 3: re-tint and normalize height ──────────────────────────────────────
+# final junk sweep: BOTH vendor files ride with template meshes (the
+# animations rig ships its own 2m Icosphere); the runner is one character
+# skinned to char_arm — anything else is dead wire weight
+for o in list(bpy.data.objects):
+    if o.type == 'MESH' and not any(
+            m.type == 'ARMATURE' and m.object == char_arm for m in o.modifiers):
+        print('[runner] junk sweep — deleted non-runner mesh:', o.name)
+        bpy.data.objects.remove(o)
 surviving_meshes = [o for o in bpy.data.objects if o.type == 'MESH']
 print('[runner] surviving mesh objects:', [o.name for o in surviving_meshes])
 retint_materials(surviving_meshes)

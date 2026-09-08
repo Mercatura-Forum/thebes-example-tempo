@@ -9,6 +9,8 @@ blender -b -P build_street.py       # reads street_layout.json + vendor/ + out/s
                                     #   writes assets/street/street.glb + layout.json, renders out/street_poster.png
 blender -b -P build_runner.py       # writes assets/street/runner.glb
 python3 check_vendor.py             # manifest ↔ disk ↔ license gate
+python3 check_attribution.py        # every cast CC-BY source must be credited in NOTICE.md
+blender -b -P verify_street_glb.py  # wire/tri budgets, palette lock, runner clip contract
 node ../../oracle/street.mjs        # sim gates (colliders, spawn/trigger, animFor)
 ```
 

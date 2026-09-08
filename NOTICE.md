@@ -21,6 +21,41 @@ simulation's stand-in body and baked textures were removed, the three splash
 meshes were decimated and rescaled onto the TEMPO can's frame
 (`src-model/tools/build_splash.py`), and materials are replaced at runtime.
 
+## Cairo street (section 05)
+
+The walkable street scene (`assets/street/street.glb`, `runner.glb`,
+`poster.webp`) is kitbashed from license-verified external models. Every asset
+below was re-tinted to the TEMPO palette, decimated, kitbash-placed and
+draco-recompressed by `src-model/tools/build_street.py` /
+`build_runner.py` — these modifications apply to every entry.
+
+CC-BY 4.0 assets ([license](http://creativecommons.org/licenses/by/4.0/)):
+
+- ["Arab House(low poly)"](https://sketchfab.com/3d-models/arab-houselow-poly-a49323aa1e0f450db9ff8b813864379f)
+  by [Legorook](https://sketchfab.com/Legorook) — the hero facade (also: bundled
+  ground plane removed, footprint squeezed to the site slot).
+- ["The Minaret of Samarra, Iraq"](https://sketchfab.com/3d-models/the-minaret-of-samarra-iraq-d8ebe7c756f2414bb70768d936f2d137)
+  by [Chenzoss](https://sketchfab.com/Chenzoss) — the skyline minaret.
+- ["Tuk Tuk Auto Rikshaw Lowpoly"](https://sketchfab.com/3d-models/tuk-tuk-auto-rikshaw-lowpoly-2124df89548644278c6d4d1b1b0ad92a)
+  by [maanzart](https://sketchfab.com/maanzart) — parked on the left curb.
+- ["Low Poly Delivery Electric Scooter"](https://sketchfab.com/3d-models/low-poly-delivery-electric-scooter-16a3330edde14cb7b56626ede007067f)
+  by [ramdom_sp](https://sketchfab.com/spartanmelon) — leaning by the shopfront.
+- ["Monoblok low poly Garden Chair plastic"](https://sketchfab.com/3d-models/monoblok-low-poly-garden-chair-plastic-898f2dc1ef244f1b8785fbb508b6a339)
+  by [The Latest Shit](https://sketchfab.com/thelatestshit) — the ahwa chairs (×2).
+
+CC0 assets (no attribution required — credited with thanks): the runner body
+and gaits from [KayKit Adventurers](https://kaylousberg.itch.io/kaykit-adventurers)
+and [KayKit Character Animations](https://kaylousberg.itch.io/kaykit-character-animations)
+by Kay Lousberg (plus the Crate of Potatoes); the Can Fridge, Cat, Crate and
+Pot by [Quaternius](https://poly.pizza); the Round Table by
+[Kenney](https://poly.pizza/m/AXbvcMDC8j) (the Kenney logo is trademarked and
+is not used); the Wooden Sign by [iPoly3D](https://poly.pizza/m/AsEgIQcQfw).
+
+The Arabic sign lettering is set in [Amiri](https://github.com/aliftype/amiri)
+by Khaled Hosny (Alif Type), licensed under the
+[SIL Open Font License 1.1](https://openfontlicense.org); the font renders to
+baked textures only and is not redistributed as a font file by the site.
+
 **Icons.** The UI icons are from [Tabler Icons](https://tabler.io/icons)
 (MIT), inlined in `index.html`.
 
