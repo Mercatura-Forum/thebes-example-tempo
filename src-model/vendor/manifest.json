@@ -31,7 +31,8 @@
         "can_fridge.glb",
         "cat.glb",
         "crate.glb",
-        "clay_pots.glb"
+        "clay_pots.glb",
+        "ac_unit.glb"
       ],
       "models": {
         "can_fridge.glb": {
@@ -49,6 +50,10 @@
         "clay_pots.glb": {
           "title": "Pot",
           "url": "https://poly.pizza/m/Olu4b0aiiY"
+        },
+        "ac_unit.glb": {
+          "title": "Air Conditioner",
+          "url": "https://poly.pizza/m/amFuyE3IF6"
         }
       }
     },
@@ -141,6 +146,94 @@
       "files": [
         "Amiri-Regular.ttf",
         "OFL.txt"
+      ]
+    },
+    "polypizza-street": {
+      "license": "mixed (per-file: CC0 / CC-BY 3.0)",
+      "title": "poly.pizza street props (Cart, Streetlight, Satellite dish, Canopy)",
+      "author": "Quaternius / Kay Lousberg / Poly by Google",
+      "url": "https://poly.pizza",
+      "licenseUrl": "https://creativecommons.org/licenses/by/3.0/",
+      "files": [
+        "cart.glb",
+        "streetlight.glb",
+        "satdish.glb",
+        "canopy.glb"
+      ],
+      "models": {
+        "cart.glb": {
+          "title": "Cart",
+          "url": "https://poly.pizza/m/l7bDe7ak6j"
+        },
+        "streetlight.glb": {
+          "title": "Streetlight",
+          "url": "https://poly.pizza/m/vPFSLYh6sg"
+        },
+        "satdish.glb": {
+          "title": "Satellite dish",
+          "url": "https://poly.pizza/m/5iVbfDhRnN7"
+        },
+        "canopy.glb": {
+          "title": "Canopy",
+          "url": "https://poly.pizza/m/40tUFNg2fu4"
+        }
+      }
+    },
+    "quaternius-nature": {
+      "license": "CC0",
+      "title": "Quaternius nature (Palm Trees, Bushes)",
+      "author": "Quaternius",
+      "url": "https://poly.pizza",
+      "licenseUrl": "https://creativecommons.org/publicdomain/zero/1.0/",
+      "files": [
+        "palms.glb",
+        "bushes.glb"
+      ],
+      "models": {
+        "palms.glb": {
+          "title": "Palm Trees",
+          "url": "https://poly.pizza/m/VYslw9DEi6"
+        },
+        "bushes.glb": {
+          "title": "Bushes",
+          "url": "https://poly.pizza/m/J2h3HrO356"
+        }
+      }
+    },
+    "quaternius-market": {
+      "license": "CC0",
+      "title": "Quaternius Market Stand",
+      "author": "Quaternius",
+      "url": "https://poly.pizza/m/DGIM5HGISb",
+      "licenseUrl": "https://creativecommons.org/publicdomain/zero/1.0/",
+      "files": [
+        "market_stand.glb"
+      ]
+    },
+    "quaternius-character": {
+      "license": "CC0",
+      "title": "Quaternius Character Animated (the TEMPO runner)",
+      "author": "Quaternius",
+      "url": "https://poly.pizza/m/DgOCW9ZCRJ",
+      "licenseUrl": "https://creativecommons.org/publicdomain/zero/1.0/",
+      "files": [
+        "character_animated.glb"
+      ]
+    },
+    "ambientcg": {
+      "license": "CC0",
+      "title": "ambientCG PBR textures (color maps only)",
+      "author": "ambientCG",
+      "url": "https://ambientcg.com",
+      "licenseUrl": "https://docs.ambientcg.com/license/",
+      "files": [
+        "Asphalt033.zip",
+        "PavingStones138.zip",
+        "WoodFloor043.zip",
+        "Carpet016.zip",
+        "Plaster001.zip",
+        "PaintedPlaster017.zip",
+        "Ground037.zip"
       ]
     }
   }

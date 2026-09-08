@@ -20,7 +20,7 @@ POSTER = os.path.join(ROOT, 'assets', 'street', 'poster.webp')
 # the street ships vendor-native materials + baked textures now (user call,
 # 2026-09-08) — the palette name-lock is retired for the street and replaced
 # by texture budgets. The RUNNER stays brand-locked: it is the mannequin.
-RUNNER_ALLOWED = {'runnerPaper', 'runnerInk', 'runnerAccent'}
+RUNNER_ALLOWED = {'runnerKit', 'runnerPaper', 'runnerInk', 'runnerSkin'}
 
 checks = []
 def check(name, ok, val=''):

@@ -224,6 +224,14 @@ def decimate_to(obj, tris):
 def build_vendor_props():
     for vp in LAYOUT.get('vendorProps', []):
         objs = import_vendor(vp['ref'], drop=vp.get('drop', ()))
+        if vp.get('recolor_slots'):
+            for slot_name, rgb in vp['recolor_slots'].items():
+                col = tuple(rgb) + (1,)
+                for o in objs:
+                    for sl in o.material_slots:
+                        if sl.material and sl.material.name.split('.')[0] == slot_name:
+                            sl.material.node_tree.nodes['Principled BSDF'].inputs['Base Color'].default_value = col
+                            sl.material.diffuse_color = col
         if vp.get('recolor'):
             # a vendor material whose shipped tone doesn't survive daylight
             col = tuple(vp['recolor']) + (1,)
@@ -280,8 +288,6 @@ def build_buildings():
                     wy = 1.5 + j * (h - 2.2) / max(1, rows - 1)
                     parts.append(site_box('w', 'shutter', wx, wy, zf, 0.62, 0.95, 0.06))
                     parts.append(site_box('ws', 'paper', wx, wy + 0.55, zf + 0.02, 0.78, 0.09, 0.1))
-            # a couple of AC units
-            parts.append(site_box('ac', 'metal', x0 + 1.1, h - 1.3, zf + 0.12, 0.7, 0.45, 0.3))
         else:
             xf = x1 + 0.03
             for j in range(3):
@@ -289,36 +295,12 @@ def build_buildings():
                     parts.append(site_box('w', 'shutter', xf, 1.6 + j * 2.1, -6.2 + k * 3.1, 0.06, 0.95, 0.62))
         join(parts, 'bld_' + b['name'])
 
-def build_awnings():
-    for a in LAYOUT['props']['awnings']:
-        parts = []
-        stripes = 6
-        for i in range(stripes):
-            sx = a['w'] / stripes
-            x = a['x'] - a['w'] / 2 + (i + 0.5) * sx
-            m = a['mats'][i % 2]
-            bpy.ops.mesh.primitive_cube_add(size=1, location=P(x, a['y'], a['z'] + a['d'] / 2))
-            o = bpy.context.active_object
-            o.scale = (sx * 0.98, a['d'], 0.04)
-            o.rotation_euler = (0.35, 0, 0)
-            o.data.materials.append(mat(m))
-            parts.append(o)
-        join(parts, 'awning')
 
-def build_mashrabiya():
-    mb = LAYOUT['props']['mashrabiya']
-    parts = [site_box('mb_base', 'wood', mb['x'], mb['y'] - mb['h'] / 2, mb['z'] + mb['d'] / 2, mb['w'], 0.1, mb['d'])]
-    parts.append(site_box('mb_top', 'wood', mb['x'], mb['y'] + mb['h'] / 2, mb['z'] + mb['d'] / 2, mb['w'], 0.1, mb['d']))
-    n = 9
-    for i in range(n):
-        x = mb['x'] - mb['w'] / 2 + (i + 0.5) * mb['w'] / n
-        parts.append(site_box('mb_v', 'woodLight', x, mb['y'], mb['z'] + mb['d'], 0.05, mb['h'], 0.05))
-    for j in range(4):
-        y = mb['y'] - mb['h'] / 2 + (j + 0.5) * mb['h'] / 4
-        parts.append(site_box('mb_h', 'woodLight', mb['x'], y, mb['z'] + mb['d'], mb['w'], 0.05, 0.05))
-    join(parts, 'mashrabiya')
 
 def build_koshk():
+    # the structure is the vendored Market Stand (placed via vendorProps);
+    # what's built here is only the shop fixture set: shelf boards + lips,
+    # the glow panel, the TEMPO sign, and the hand-painted banner.
     K = LAYOUT['koshk']; x, z, ry = K['x'], K['z'], K['ry']
     parts = []
     def kbox(name, m, lx, ly, lz, sx, sy, sz):
@@ -326,40 +308,24 @@ def build_koshk():
         wx = x + lx * c + lz * s
         wz = z - lx * s + lz * c
         parts.append(site_box(name, m, wx, ly, wz, sx, sy, sz, ry=ry))
-    # shell: back, roof, floor, sides; open front (front = local -z)
-    kbox('k_back', 'wood', 0, 1.25, 0.95, 2.9, 2.5, 0.12)
-    kbox('k_roof', 'wood', 0, 2.56, 0.15, 3.3, 0.14, 2.2)
-    kbox('k_floor', 'woodLight', 0, 0.2, 0.15, 3.0, 0.4, 1.9)
-    kbox('k_l', 'wood', -1.45, 1.25, 0.15, 0.12, 2.5, 1.9)
-    kbox('k_r', 'wood', 1.45, 1.25, 0.15, 0.12, 2.5, 1.9)
-    # glow panel behind the shelves + shelf boards
-    kbox('k_glow', 'fridge', 0, 1.35, 0.85, 2.6, 1.9, 0.05)
+    kbox('k_glow', 'fridge', 0, 1.35, 0.55, 2.0, 1.9, 0.05)
     for y in K['shelves']['ys']:
-        kbox('k_shelf', 'woodLight', 0, y + 0.38, K['shelves']['slotZ'], 2.5, 0.05, 0.55)
-    # counter + sign board
-    kbox('k_counter', 'woodLight', 0, 0.55, -0.85, 2.9, 0.5, 0.35)
-    kbox('k_countertop', 'wood', 0, 0.83, -0.85, 3.05, 0.06, 0.5)
-    kbox('k_signboard', 'ink', 0, 2.85, -0.6, 3.2, 0.5, 0.1)
-    # trim: corner posts, fascia, shelf lips — the koshk stops being a raw box
-    kbox('k_post_l', 'wood', -1.55, 1.25, -0.85, 0.12, 2.5, 0.12)
-    kbox('k_post_r', 'wood', 1.55, 1.25, -0.85, 0.12, 2.5, 0.12)
-    kbox('k_fascia', 'woodLight', 0, 2.60, -0.98, 3.35, 0.16, 0.07)
-    for y in K['shelves']['ys']:
-        kbox('k_lip', 'wood', 0, y + 0.43, -0.76, 2.5, 0.06, 0.05)
-    join(parts, 'koshk')
-    # the hand-painted "cold drinks" strip across the counter front
+        kbox('k_shelf', 'woodLight', 0, y + 0.38, K['shelves']['slotZ'], 2.1, 0.05, 0.55)
+        kbox('k_lip', 'wood', 0, y + 0.43, K['shelves']['slotZ'] - 0.28, 2.1, 0.06, 0.05)
+    kbox('k_signboard', 'ink', 0, 2.85, -0.5, 2.9, 0.5, 0.1)
+    join(parts, 'koshk_fixtures')
+    # the hand-painted "cold drinks" strip on the stand's counter front
     c, s = math.cos(ry), math.sin(ry)
-    lx, lz = 0, -1.045
-    sign_plane('k_banner', mat_tex('signDrinks', 'sign_drinks.png'), 2.5, 0.34,
+    lx, lz = 0, -1.02
+    sign_plane('k_banner', mat_tex('signDrinks', 'sign_drinks.png'), 2.2, 0.32,
                x + lx * c + lz * s, 0.60, z - lx * s + lz * c, ry + math.pi)
-    # TEMPO sign text (separate, emissive)
+    # TEMPO sign text (emissive)
     bpy.ops.object.text_add()
     t = bpy.context.active_object
     t.data.body = 'TEMPO'
     t.data.extrude = 0.02
     t.data.align_x = 'CENTER'; t.data.align_y = 'CENTER'
-    c, s = math.cos(ry), math.sin(ry)
-    lx, lz = 0, -0.66
+    lx, lz = 0, -0.56
     t.location = P(x + lx * c + lz * s, 2.85, z - lx * s + lz * c)
     t.rotation_euler = (math.radians(90), 0, ry + math.pi)
     t.scale = (0.55, 0.55, 0.55)
@@ -368,48 +334,6 @@ def build_koshk():
     t.name = 'koshk_sign'
     t.data.materials.append(mat('sign'))
 
-def build_props():
-    for i, cr in enumerate(LAYOUT['props']['crates']):
-        p = [site_box('crate', 'wood', cr['x'], cr['y'], cr['z'], cr['s'], cr['s'], cr['s'], ry=cr['ry'])]
-        p.append(site_box('crate_t', 'woodLight', cr['x'], cr['y'] + cr['s'] * 0.28, cr['z'], cr['s'] * 1.04, cr['s'] * 0.1, cr['s'] * 1.04, ry=cr['ry']))
-        join(p, 'crate_%d' % i)
-    # (the cat is a vendored Quaternius blob now — see vendorProps)
-    for lp in LAYOUT['props']['lampPosts']:
-        p = [site_box('lp', 'ink', lp['x'], 2.2, lp['z'], 0.09, 4.4, 0.09)]
-        p.append(site_box('lp_head', 'ink', lp['x'], 4.45, lp['z'], 0.3, 0.16, 0.3))
-        join(p, 'lamp')
-
-def build_string_lights():
-    for si, sl in enumerate(LAYOUT['props']['stringLights']):
-        ax, ay, az = sl['a']; bx, by, bz = sl['b']
-        pts = []
-        n = 24
-        for i in range(n + 1):
-            t = i / n
-            x = ax + (bx - ax) * t
-            z = az + (bz - az) * t
-            y = ay + (by - ay) * t - sl['sag'] * math.sin(math.pi * t)
-            pts.append((x, y, z))
-        cu = bpy.data.curves.new('wire', 'CURVE')
-        cu.dimensions = '3D'; cu.bevel_depth = 0.012; cu.bevel_resolution = 1
-        sp = cu.splines.new('POLY'); sp.points.add(n)
-        for i, (x, y, z) in enumerate(pts):
-            bx_, by_, bz_ = P(x, y, z)
-            sp.points[i].co = (bx_, by_, bz_, 1)
-        ob = bpy.data.objects.new('wire_%d' % si, cu)
-        bpy.context.collection.objects.link(ob)
-        ob.data.materials.append(mat('ink'))
-        bulbs = []
-        for i in range(sl['bulbs']):
-            t = (i + 1) / (sl['bulbs'] + 1)
-            x = ax + (bx - ax) * t
-            z = az + (bz - az) * t
-            y = ay + (by - ay) * t - sl['sag'] * math.sin(math.pi * t) - 0.09
-            bpy.ops.mesh.primitive_uv_sphere_add(segments=8, ring_count=6, radius=0.05, location=P(x, y, z))
-            o = bpy.context.active_object
-            o.data.materials.append(mat('bulb'))
-            bulbs.append(o)
-        join(bulbs, 'bulbs_%d' % si)
 
 def build_minaret():
     mn = LAYOUT['props']['minaret']
@@ -498,176 +422,31 @@ def build_roadbed():
         o.name = 'manhole_%d' % i
         o.data.materials.append(mat('metal'))
 
-def build_cart():
-    # a wooden fruit cart mid-street — orange blobs under a striped canopy
-    ct = LAYOUT['props']['cart']
-    x, z, ry = ct['x'], ct['z'], ct['ry']
-    W = local_frame(x, z, ry)
-    parts = []
-    def cbox(name, m, lx, ly, lz, sx, sy, sz):
-        wx, wz = W(lx, lz)
-        parts.append(site_box(name, m, wx, ly, wz, sx, sy, sz, ry=ry))
-    cbox('cart_bed', 'wood', 0, 0.60, 0, 1.55, 0.12, 0.95)
-    cbox('cart_lip_f', 'woodLight', 0, 0.74, 0.44, 1.55, 0.16, 0.06)
-    cbox('cart_lip_b', 'woodLight', 0, 0.74, -0.44, 1.55, 0.16, 0.06)
-    cbox('cart_lip_l', 'woodLight', -0.75, 0.74, 0, 0.06, 0.16, 0.85)
-    cbox('cart_lip_r', 'woodLight', 0.75, 0.74, 0, 0.06, 0.16, 0.85)
-    for px in (-0.68, 0.68):
-        for pz in (-0.4, 0.4):
-            cbox('cart_post', 'wood', px, 1.2, pz, 0.06, 1.1, 0.06)
-    cbox('cart_handle1', 'wood', 1.05, 0.52, 0.28, 0.55, 0.05, 0.05)
-    cbox('cart_handle2', 'wood', 1.05, 0.52, -0.28, 0.55, 0.05, 0.05)
-    stripes = 5
-    for i in range(stripes):
-        sx = 1.8 / stripes
-        cbox('cart_canopy', ['awningA', 'paper'][i % 2], -0.9 + (i + 0.5) * sx, 1.82, 0, sx * 0.98, 0.04, 1.15)
-    axle_rot = (math.radians(90), 0, ry)
-    for k in (-1, 1):
-        wx, wz = W(-0.2, k * 0.55)
-        bpy.ops.mesh.primitive_cylinder_add(vertices=10, radius=0.34, depth=0.08, location=P(wx, 0.34, wz), rotation=axle_rot)
-        o = bpy.context.active_object
-        o.data.materials.append(mat('wood'))
-        parts.append(o)
-    join(parts, 'cart')
-    oranges = []
-    for i in range(4):
-        for j in range(2):
-            wx, wz = W(-0.52 + i * 0.34, -0.16 + j * 0.32)
-            bpy.ops.mesh.primitive_uv_sphere_add(segments=8, ring_count=5, radius=0.075, location=P(wx, 0.73, wz))
-            o = bpy.context.active_object
-            o.data.materials.append(mat('awningA'))
-            oranges.append(o)
-    join(oranges, 'cart_oranges')
 
-def build_palms():
-    for pi, pm in enumerate(LAYOUT['props']['palms']):
-        x, z, h, lean, ry = pm['x'], pm['z'], pm['h'], pm['lean'], pm.get('ry', 0)
-        parts = []
-        rings, sides = 7, 8
-        verts, faces = [], []
-        for i in range(rings):
-            t = i / (rings - 1)
-            r = 0.16 - 0.08 * t
-            off = lean * (t ** 2) * 2.2
-            cx = x + off * math.cos(ry); cz = z - off * math.sin(ry)
-            for k in range(sides):
-                a = 2 * math.pi * k / sides
-                verts.append(P(cx + r * math.cos(a), t * h, cz + r * math.sin(a)))
-        for i in range(rings - 1):
-            for k in range(sides):
-                a0 = i * sides + k; a1 = i * sides + (k + 1) % sides
-                faces.append((a0, a1, a1 + sides, a0 + sides))
-        faces.append(tuple(range(sides)))
-        faces.append(tuple(range((rings - 1) * sides, rings * sides))[::-1])
-        me = bpy.data.meshes.new('palm_trunk')
-        me.from_pydata(verts, [], faces)
-        me.update()
-        o = bpy.data.objects.new('palm_trunk', me)
-        bpy.context.collection.objects.link(o)
-        o.data.materials.append(mat('wood'))
-        parts.append(o)
-        top_off = lean * 2.2
-        tx = x + top_off * math.cos(ry); tz = z - top_off * math.sin(ry)
-        bpy.ops.mesh.primitive_ico_sphere_add(subdivisions=1, radius=0.24, location=P(tx, h + 0.05, tz))
-        o = bpy.context.active_object
-        o.data.materials.append(mat('foliage'))
-        parts.append(o)
-        for f in range(8):
-            a = ry + f * math.pi / 4
-            droop = 0.55 + 0.15 * (f % 3)
-            fx = tx + 0.8 * math.cos(a); fz = tz - 0.8 * math.sin(a)
-            bpy.ops.mesh.primitive_plane_add(size=1, location=P(fx, h + 0.1 - 0.25 * droop, fz),
-                                             rotation=(droop * math.cos(a), droop * math.sin(a), a))
-            o = bpy.context.active_object
-            o.scale = (1.7, 0.34, 1)
-            o.data.materials.append(mat('foliage'))
-            parts.append(o)
-        join(parts, 'palm_%d' % pi)
 
-def build_planters_bollards():
-    for i, pl in enumerate(LAYOUT['props']['planters']):
-        parts = [site_box('planter', 'clay', pl['x'], 0.26, pl['z'], 0.6, 0.52, 0.6)]
-        for (dx, dz, r, y) in ((-0.12, 0.1, 0.3, 0.62), (0.14, -0.08, 0.24, 0.58)):
-            bpy.ops.mesh.primitive_ico_sphere_add(subdivisions=1, radius=r, location=P(pl['x'] + dx, y, pl['z'] + dz))
-            o = bpy.context.active_object
-            o.scale = (1, 1, 0.8)
-            o.data.materials.append(mat('foliage'))
-            parts.append(o)
-        join(parts, 'planter_%d' % i)
-    for i, bl in enumerate(LAYOUT['props']['bollards']):
-        bpy.ops.mesh.primitive_cylinder_add(vertices=8, radius=0.07, depth=0.7, location=P(bl['x'], 0.35, bl['z']))
-        o = bpy.context.active_object
-        o.name = 'bollard_%d' % i
-        o.data.materials.append(mat('ink'))
 
-def build_laundry():
-    # washing lines across the NW corner — the alley lives above eye level too
-    for li, ln in enumerate(LAYOUT['props']['laundry']):
-        ax, ay, az = ln['a']; bx, by, bz = ln['b']
-        n = 16
-        cu = bpy.data.curves.new('lwire', 'CURVE')
-        cu.dimensions = '3D'; cu.bevel_depth = 0.008; cu.bevel_resolution = 1
-        sp = cu.splines.new('POLY'); sp.points.add(n)
-        for i in range(n + 1):
-            t = i / n
-            x = ax + (bx - ax) * t; z = az + (bz - az) * t
-            y = ay + (by - ay) * t - ln['sag'] * math.sin(math.pi * t)
-            px, py, pz = P(x, y, z)
-            sp.points[i].co = (px, py, pz, 1)
-        ob = bpy.data.objects.new('laundry_wire_%d' % li, cu)
-        bpy.context.collection.objects.link(ob)
-        ob.data.materials.append(mat('ink'))
-        cloths = ln['cloths']
-        ang = math.atan2(-(bz - az), bx - ax)
-        for ci, cm in enumerate(cloths):
-            t = (ci + 1) / (len(cloths) + 1)
-            x = ax + (bx - ax) * t; z = az + (bz - az) * t
-            y = ay + (by - ay) * t - ln['sag'] * math.sin(math.pi * t)
-            bpy.ops.mesh.primitive_plane_add(size=1, location=P(x, y - 0.29, z),
-                                             rotation=(math.radians(90), 0, ang))
-            o = bpy.context.active_object
-            o.scale = (0.44, 0.54, 1)
-            o.name = 'cloth'
-            o.data.materials.append(mat(cm))
 
-def build_dishes():
-    for i, d in enumerate(LAYOUT['props']['dishes']):
-        parts = []
-        bpy.ops.mesh.primitive_cylinder_add(vertices=12, radius=0.34, depth=0.05,
-                                            location=P(d['x'], d['y'] + 0.3, d['z']),
-                                            rotation=(math.radians(55), 0, d.get('ry', 0)))
-        o = bpy.context.active_object
-        o.data.materials.append(mat('paper'))
-        parts.append(o)
-        parts.append(site_box('dish_mount', 'metal', d['x'], d['y'] + 0.12, d['z'], 0.08, 0.26, 0.08))
-        join(parts, 'dish_%d' % i)
 
 def build_rug():
     r = LAYOUT['props']['rug']
     site_box('rug', 'rug', r['x'], 0.02, r['z'], r['w'], 0.008, r['d'], ry=r.get('ry', 0))
 
-def build_east_crates():
-    for i, cr in enumerate(LAYOUT['props']['eastCrates']):
-        p = [site_box('ecrate', 'wood', cr['x'], cr['y'], cr['z'], cr['s'], cr['s'], cr['s'], ry=cr['ry'])]
-        p.append(site_box('ecrate_t', 'woodLight', cr['x'], cr['y'] + cr['s'] * 0.28, cr['z'], cr['s'] * 1.04, cr['s'] * 0.1, cr['s'] * 1.04, ry=cr['ry']))
-        join(p, 'ecrate_%d' % i)
 
 def build_blob_shadows():
     # baked contact shadows: without them every prop floats on the flat ground.
     # (the runner gets a dynamic one at runtime)
     V = {v['name']: v for v in LAYOUT.get('vendorProps', [])}
-    ct = LAYOUT['props']['cart']; pms = LAYOUT['props']['palms']
     blobs = [
         (V['tuktuk']['x'], V['tuktuk']['z'], 1.75, 0.85, V['tuktuk']['ry']),
         (V['scooter']['x'], V['scooter']['z'], 0.95, 0.5, V['scooter']['ry']),
-        (ct['x'], ct['z'], 1.15, 0.85, ct['ry']),
+        (V['cart']['x'], V['cart']['z'], 1.1, 0.85, V['cart']['ry']),
         (-9.95, 0.4, 1.75, 1.6, 0),                    # ahwa cluster
         (V['canFridge']['x'], V['canFridge']['z'], 0.55, 0.55, 0),
         (6.45, -2.6, 0.78, 0.78, 0),                   # koshk crates
         (V['clayPots']['x'], V['clayPots']['z'], 0.5, 0.5, 0),
         (V['woodenSign']['x'], V['woodenSign']['z'], 0.5, 0.5, 0),
-        (pms[0]['x'], pms[0]['z'], 0.85, 0.85, 0),
-        (pms[1]['x'], pms[1]['z'], 0.75, 0.75, 0),
+        (V['palmA']['x'], V['palmA']['z'], 0.85, 0.85, 0),
+        (V['palmB']['x'], V['palmB']['z'], 0.75, 0.75, 0),
         (9.9, 1.35, 0.85, 1.05, 0),                    # east crate stack
     ]
     for i, (x, z, rx, rz, ry) in enumerate(blobs):
@@ -758,21 +537,11 @@ clean()
 build_ground()
 build_roadbed()
 build_buildings()
-build_awnings()
-build_mashrabiya()
 build_koshk()
-build_props()
 build_vendor_props()
 build_signage()
-build_string_lights()
 build_minaret()
-build_cart()
-build_palms()
-build_planters_bollards()
-build_laundry()
-build_dishes()
 build_rug()
-build_east_crates()
 build_blob_shadows()
 uv_world_project()
 export_glb()

@@ -39,14 +39,14 @@
     },
     "focusCam": {
       "pos": [
-        7.15,
-        1.62,
-        -0.5
+        7.24,
+        1.52,
+        -0.68
       ],
       "look": [
-        8.6,
+        8.62,
         1.42,
-        -2.7
+        -2.8
       ]
     }
   },
@@ -83,7 +83,12 @@
         -4.9
       ],
       "h": 7.4,
-      "mat": "plasterSand"
+      "mat": "plasterSand",
+      "ref": "vendor:sketchfab-arab-house/arab_house.glb",
+      "drop": [
+        "Object_26"
+      ],
+      "tris": 5500
     },
     {
       "name": "b2",
@@ -114,7 +119,12 @@
         -4.9
       ],
       "h": 6.4,
-      "mat": "plasterOchre"
+      "mat": "plasterOchre",
+      "ref": "vendor:sketchfab-arab-house/arab_house.glb",
+      "drop": [
+        "Object_26"
+      ],
+      "tris": 5500
     },
     {
       "name": "left",
@@ -290,6 +300,26 @@
         2.2,
         2.8
       ]
+    },
+    {
+      "x": [
+        -3.9,
+        -1.3
+      ],
+      "z": [
+        -4.85,
+        -3.8
+      ]
+    },
+    {
+      "x": [
+        3.3,
+        5.7
+      ],
+      "z": [
+        -4.85,
+        -3.85
+      ]
     }
   ],
   "vendorProps": [
@@ -375,7 +405,7 @@
       "name": "potatoCrate",
       "ref": "vendor:kaykit-props/crate_of_potatoes.glb",
       "x": 6.45,
-      "y": 1.03,
+      "y": 1.04,
       "z": -2.6,
       "ry": 0.5,
       "height": 0.3,
@@ -398,104 +428,299 @@
       "ry": 1.51,
       "height": 0.85,
       "tris": 600
+    },
+    {
+      "name": "marketStand",
+      "ref": "vendor:quaternius-market/market_stand.glb",
+      "x": 8.6,
+      "z": -2.6,
+      "ry": 4.1908,
+      "height": 2.6,
+      "recolor_slots": {
+        "RoofTiles_Red": [
+          1.0,
+          0.478,
+          0.102
+        ]
+      },
+      "tris": 1600
+    },
+    {
+      "name": "cart",
+      "ref": "vendor:polypizza-street/cart.glb",
+      "x": 0.8,
+      "z": 2.4,
+      "ry": -0.35,
+      "height": 2.0,
+      "tris": 2700
+    },
+    {
+      "name": "palmA",
+      "ref": "vendor:quaternius-nature/palms.glb",
+      "x": 11.4,
+      "z": 4.6,
+      "ry": 0.7,
+      "height": 5.6,
+      "tris": 700,
+      "drop": [
+        "PalmTree_2",
+        "PalmTree_3",
+        "PalmTree_4",
+        "PalmTree_5"
+      ]
+    },
+    {
+      "name": "palmB",
+      "ref": "vendor:quaternius-nature/palms.glb",
+      "x": -10.15,
+      "z": 2.5,
+      "ry": 2.3,
+      "height": 4.6,
+      "tris": 700,
+      "drop": [
+        "PalmTree_1",
+        "PalmTree_2",
+        "PalmTree_3",
+        "PalmTree_5"
+      ]
+    },
+    {
+      "name": "streetlightA",
+      "ref": "vendor:polypizza-street/streetlight.glb",
+      "x": -5.5,
+      "z": -4.5,
+      "ry": 0.0,
+      "height": 4.2,
+      "tris": 200
+    },
+    {
+      "name": "streetlightB",
+      "ref": "vendor:polypizza-street/streetlight.glb",
+      "x": 1.5,
+      "z": -4.5,
+      "ry": 0.0,
+      "height": 4.2,
+      "tris": 200
+    },
+    {
+      "name": "dishA",
+      "ref": "vendor:polypizza-street/satdish.glb",
+      "x": -8.8,
+      "y": 7.42,
+      "z": -6.2,
+      "ry": 0.5,
+      "height": 0.75,
+      "tris": 800
+    },
+    {
+      "name": "dishB",
+      "ref": "vendor:polypizza-street/satdish.glb",
+      "x": 4.4,
+      "y": 6.42,
+      "z": -6.5,
+      "ry": -0.4,
+      "height": 0.75,
+      "tris": 800
+    },
+    {
+      "name": "acA",
+      "ref": "vendor:quaternius/ac_unit.glb",
+      "x": -9.0,
+      "y": 5.2,
+      "z": -4.72,
+      "ry": 0.0,
+      "height": 0.6,
+      "tris": 950
+    },
+    {
+      "name": "acB",
+      "ref": "vendor:quaternius/ac_unit.glb",
+      "x": 5.6,
+      "y": 4.3,
+      "z": -4.72,
+      "ry": 0.0,
+      "height": 0.6,
+      "tris": 950
+    },
+    {
+      "name": "canopyA",
+      "ref": "vendor:polypizza-street/canopy.glb",
+      "x": -2.6,
+      "z": -4.35,
+      "ry": 0.0,
+      "height": 2.3,
+      "tris": 400
+    },
+    {
+      "name": "canopyB",
+      "ref": "vendor:polypizza-street/canopy.glb",
+      "x": 4.5,
+      "z": -4.4,
+      "ry": 0.0,
+      "height": 2.25,
+      "tris": 400
+    },
+    {
+      "name": "rimBush0",
+      "ref": "vendor:quaternius-nature/bushes.glb",
+      "x": -4.5,
+      "z": 6.38,
+      "ry": 0.5,
+      "height": 0.8,
+      "tris": 500,
+      "drop": [
+        "Bush_2",
+        "Bush_3"
+      ]
+    },
+    {
+      "name": "rimBush1",
+      "ref": "vendor:quaternius-nature/bushes.glb",
+      "x": -0.5,
+      "z": 6.38,
+      "ry": 1.5,
+      "height": 0.8,
+      "tris": 500,
+      "drop": [
+        "Bush_1",
+        "Bush_3"
+      ]
+    },
+    {
+      "name": "rimBush2",
+      "ref": "vendor:quaternius-nature/bushes.glb",
+      "x": 7.5,
+      "z": 6.38,
+      "ry": 2.5,
+      "height": 0.8,
+      "tris": 500,
+      "drop": [
+        "Bush_1",
+        "Bush_2"
+      ]
+    },
+    {
+      "name": "rimPot0",
+      "ref": "vendor:quaternius/clay_pots.glb",
+      "x": -8.5,
+      "z": 6.38,
+      "ry": 0.0,
+      "height": 0.55,
+      "tris": 400,
+      "recolor": [
+        0.58,
+        0.3,
+        0.18
+      ]
+    },
+    {
+      "name": "rimPot1",
+      "ref": "vendor:quaternius/clay_pots.glb",
+      "x": 3.5,
+      "z": 6.38,
+      "ry": 0.3,
+      "height": 0.55,
+      "tris": 400,
+      "recolor": [
+        0.58,
+        0.3,
+        0.18
+      ]
+    },
+    {
+      "name": "rimPot2",
+      "ref": "vendor:quaternius/clay_pots.glb",
+      "x": -6.5,
+      "z": 6.34,
+      "ry": 0.6,
+      "height": 0.55,
+      "tris": 400,
+      "recolor": [
+        0.58,
+        0.3,
+        0.18
+      ]
+    },
+    {
+      "name": "rimPot3",
+      "ref": "vendor:quaternius/clay_pots.glb",
+      "x": 1.5,
+      "z": 6.34,
+      "ry": 0.8999999999999999,
+      "height": 0.55,
+      "tris": 400,
+      "recolor": [
+        0.58,
+        0.3,
+        0.18
+      ]
+    },
+    {
+      "name": "rimPot4",
+      "ref": "vendor:quaternius/clay_pots.glb",
+      "x": 5.5,
+      "z": 6.34,
+      "ry": 1.2,
+      "height": 0.55,
+      "tris": 400,
+      "recolor": [
+        0.58,
+        0.3,
+        0.18
+      ]
+    },
+    {
+      "name": "crate0",
+      "ref": "vendor:quaternius/crate.glb",
+      "x": 6.45,
+      "y": 0.0,
+      "z": -2.6,
+      "ry": 0.12,
+      "height": 0.5,
+      "tris": 300
+    },
+    {
+      "name": "crate1",
+      "ref": "vendor:quaternius/crate.glb",
+      "x": 6.45,
+      "y": 0.52,
+      "z": -2.62,
+      "ry": -0.2,
+      "height": 0.5,
+      "tris": 300
+    },
+    {
+      "name": "crate2",
+      "ref": "vendor:quaternius/crate.glb",
+      "x": 9.9,
+      "y": 0.0,
+      "z": 1.0,
+      "ry": -0.5,
+      "height": 0.5,
+      "tris": 300
+    },
+    {
+      "name": "crate3",
+      "ref": "vendor:quaternius/crate.glb",
+      "x": 9.9,
+      "y": 0.52,
+      "z": 1.02,
+      "ry": -0.5,
+      "height": 0.5,
+      "tris": 300
+    },
+    {
+      "name": "crate4",
+      "ref": "vendor:quaternius/crate.glb",
+      "x": 9.88,
+      "y": 0.0,
+      "z": 1.72,
+      "ry": -0.45,
+      "height": 0.5,
+      "tris": 300
     }
   ],
   "props": {
-    "crates": [
-      {
-        "x": 6.45,
-        "y": 0.26,
-        "z": -2.6,
-        "s": 0.52,
-        "ry": 0.12
-      },
-      {
-        "x": 6.45,
-        "y": 0.78,
-        "z": -2.62,
-        "s": 0.5,
-        "ry": -0.2
-      },
-      {
-        "x": 9.2,
-        "y": 0.25,
-        "z": -0.7,
-        "s": 0.5,
-        "ry": 0.35
-      }
-    ],
-    "lampPosts": [
-      {
-        "x": -5.5,
-        "z": -4.5
-      },
-      {
-        "x": 1.5,
-        "z": -4.5
-      }
-    ],
-    "stringLights": [
-      {
-        "a": [
-          -5.5,
-          4.4,
-          -4.5
-        ],
-        "b": [
-          1.5,
-          4.4,
-          -4.5
-        ],
-        "sag": 0.55,
-        "bulbs": 9
-      },
-      {
-        "a": [
-          1.5,
-          4.4,
-          -4.5
-        ],
-        "b": [
-          6.9,
-          3.4,
-          -1.6
-        ],
-        "sag": 0.5,
-        "bulbs": 7
-      }
-    ],
-    "awnings": [
-      {
-        "x": -2.6,
-        "z": -4.82,
-        "w": 2.6,
-        "d": 1.1,
-        "y": 3.0,
-        "mats": [
-          "awningA",
-          "paper"
-        ]
-      },
-      {
-        "x": 4.5,
-        "z": -4.82,
-        "w": 2.4,
-        "d": 1.0,
-        "y": 2.7,
-        "mats": [
-          "awningB",
-          "paper"
-        ]
-      }
-    ],
-    "mashrabiya": {
-      "x": -0.9,
-      "y": 3.6,
-      "z": -4.72,
-      "w": 1.8,
-      "h": 1.6,
-      "d": 0.55
-    },
     "minaret": {
       "x": 12.0,
       "z": -11.0,
@@ -553,161 +778,12 @@
         }
       ]
     },
-    "cart": {
-      "x": 0.8,
-      "z": 2.4,
-      "ry": -0.35
-    },
-    "palms": [
-      {
-        "x": 11.4,
-        "z": 4.6,
-        "h": 5.6,
-        "lean": 0.1,
-        "ry": 0.7
-      },
-      {
-        "x": -10.15,
-        "z": 2.5,
-        "h": 4.8,
-        "lean": -0.14,
-        "ry": 2.3
-      }
-    ],
-    "planters": [
-      {
-        "x": -8.5,
-        "z": 6.38
-      },
-      {
-        "x": -4.5,
-        "z": 6.38
-      },
-      {
-        "x": -0.5,
-        "z": 6.38
-      },
-      {
-        "x": 3.5,
-        "z": 6.38
-      },
-      {
-        "x": 7.5,
-        "z": 6.38
-      },
-      {
-        "x": 10.1,
-        "z": 3.6
-      }
-    ],
-    "bollards": [
-      {
-        "x": -6.5,
-        "z": 6.32
-      },
-      {
-        "x": -2.5,
-        "z": 6.32
-      },
-      {
-        "x": 1.5,
-        "z": 6.32
-      },
-      {
-        "x": 5.5,
-        "z": 6.32
-      }
-    ],
-    "laundry": [
-      {
-        "a": [
-          -10.85,
-          6.9,
-          -1.0
-        ],
-        "b": [
-          -7.0,
-          6.6,
-          -4.85
-        ],
-        "sag": 0.35,
-        "cloths": [
-          "paper",
-          "awningA",
-          "plasterRose",
-          "paper",
-          "awningB"
-        ]
-      },
-      {
-        "a": [
-          -10.85,
-          7.8,
-          1.8
-        ],
-        "b": [
-          -8.2,
-          7.4,
-          -4.85
-        ],
-        "sag": 0.3,
-        "cloths": [
-          "awningB",
-          "paper",
-          "awningA",
-          "paper"
-        ]
-      }
-    ],
-    "dishes": [
-      {
-        "x": -8.8,
-        "y": 7.55,
-        "z": -6.2,
-        "ry": 0.5
-      },
-      {
-        "x": 4.4,
-        "y": 6.55,
-        "z": -6.5,
-        "ry": -0.4
-      },
-      {
-        "x": -11.6,
-        "y": 8.35,
-        "z": 3.0,
-        "ry": 1.2
-      }
-    ],
     "rug": {
       "x": -9.95,
       "z": 0.4,
       "w": 2.6,
       "d": 2.3,
       "ry": 0.06
-    },
-    "eastCrates": [
-      {
-        "x": 9.9,
-        "y": 0.26,
-        "z": 1.0,
-        "s": 0.52,
-        "ry": -0.5
-      },
-      {
-        "x": 9.9,
-        "y": 0.78,
-        "z": 1.02,
-        "s": 0.5,
-        "ry": -0.5
-      },
-      {
-        "x": 9.88,
-        "y": 0.25,
-        "z": 1.72,
-        "s": 0.5,
-        "ry": -0.45
-      }
-    ]
+    }
   }
 }

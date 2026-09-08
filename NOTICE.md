@@ -25,9 +25,10 @@ meshes were decimated and rescaled onto the TEMPO can's frame
 
 The walkable street scene (`assets/street/street.glb`, `runner.glb`,
 `poster.webp`) is kitbashed from license-verified external models. Every asset
-below was re-tinted to the TEMPO palette, decimated, kitbash-placed and
-draco-recompressed by `src-model/tools/build_street.py` /
-`build_runner.py` — these modifications apply to every entry.
+below is kitbash-placed, scaled and draco-recompressed by
+`src-model/tools/build_street.py` / `build_runner.py`; oversized textures are
+downscaled to 512 px. Vendor materials ship as the authors made them (the
+TEMPO runner's kit and the koshk roof are re-colored to TEMPO brand colors).
 
 CC-BY 4.0 assets ([license](http://creativecommons.org/licenses/by/4.0/)):
 
@@ -38,6 +39,19 @@ CC-BY 4.0 assets ([license](http://creativecommons.org/licenses/by/4.0/)):
   by [Chenzoss](https://sketchfab.com/Chenzoss) — the skyline minaret.
 - ["Tuk Tuk Auto Rikshaw Lowpoly"](https://sketchfab.com/3d-models/tuk-tuk-auto-rikshaw-lowpoly-2124df89548644278c6d4d1b1b0ad92a)
   by [maanzart](https://sketchfab.com/maanzart) — parked on the left curb.
+
+CC-BY 3.0 assets ([license](https://creativecommons.org/licenses/by/3.0/)):
+
+- ["Satellite dish"](https://poly.pizza/m/5iVbfDhRnN7) by Poly by Google —
+  rooftop dishes.
+- ["Canopy"](https://poly.pizza/m/40tUFNg2fu4) by Poly by Google — the shop
+  awnings.
+
+CC0 additions (no attribution required; listed as a courtesy): Quaternius —
+Cart, Palm Trees, Bushes, Market Stand (the koshk structure), Air Conditioner,
+and Character Animated (re-dressed as the TEMPO brand runner);
+Kay Lousberg — Streetlight; ambientCG — ground/plaster/asphalt/paving/wood/
+carpet color textures (CC0, ambientcg.com).
 - ["Low Poly Delivery Electric Scooter"](https://sketchfab.com/3d-models/low-poly-delivery-electric-scooter-16a3330edde14cb7b56626ede007067f)
   by [ramdom_sp](https://sketchfab.com/spartanmelon) — leaning by the shopfront.
 - ["Monoblok low poly Garden Chair plastic"](https://sketchfab.com/3d-models/monoblok-low-poly-garden-chair-plastic-898f2dc1ef244f1b8785fbb508b6a339)

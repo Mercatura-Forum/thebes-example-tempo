@@ -101,3 +101,37 @@ turns its glass to the street, the palm trunk is one lofted mesh, the koshk
 grew corner posts, fascia, counter-top and shelf lips. Clay pots recolored
 terracotta (their shipped material was near-black — the one native tone that
 didn't survive daylight).
+
+## Addendum 2 — nothing handmade: the found-asset pass (same day, user call)
+
+Every hand-built model leaves the scene; found, license-verified assets take
+their places (receipts + manifest + NOTICE gates as before, all via
+poly.pizza CDN + ambientCG):
+
+- fruit cart → Quaternius "Cart" (CC0) · palms → Quaternius Palm Trees ·
+  south rim → Quaternius Bushes + clay pots (terracotta recolor) ·
+  lamp posts → Kay Lousberg Streetlight · rooftop dishes → Poly by Google
+  Satellite dish (CC-BY) · shop awnings → Poly by Google Canopy (CC-BY) ·
+  facade ACs → Quaternius Air Conditioner · crates → Quaternius Crate ·
+  koshk shell → Quaternius Market Stand, rotated so its OPEN long side
+  serves the street (the short sides carry arch lattice), roof recolored
+  TEMPO citrus. b1/b3 became arab-house instances. Laundry lines and string
+  lights left the scene (no honest source found: the poly.pizza "washing
+  line" is a rotary dryer; the holiday-lights file ships broken transforms).
+- Pillow-noise textures retired: process_textures.py prepares ambientCG CC0
+  color maps (plaster/asphalt/paving/wood/carpet/ground) — tinted, 512px.
+- The runner is Quaternius "Character Animated" (CC0) in a TEMPO kit:
+  citrus jersey, ink shorts, paper shoes, natural skin, white brand T-crest
+  on chest and back. The jersey texture is painted onto the chest UV islands
+  by mask rasterization; full lettering is impossible on this mesh (left and
+  right halves share mirrored UVs — any text doubles flipped), so the
+  mirror-symmetric T carries the mark; the koshk sign carries the wordmark.
+  Contract preserved: clips exactly Idle/Walk/Run, height 1.82m baked into
+  rest data (the import rides a ×100 armature node scale — cleared before
+  the bake), feet grounded at y=0, materials brand-locked
+  (runnerKit/Paper/Ink/Skin).
+
+What remains built by the pipeline (staging, disclosed): ground/roadbed
+slabs, sidewalks, the two flank-wall boxes behind the arab-house facades'
+row, koshk shop fixtures (shelves, lips, glow, TEMPO sign, banner), the rug
+quad, blob shadows, and Arabic signage — surfaces and fixtures, not props.
