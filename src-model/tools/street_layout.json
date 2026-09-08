@@ -82,8 +82,12 @@
         -8.0,
         -4.9
       ],
-      "h": 9.0,
-      "mat": "plasterRose"
+      "h": 10.0,
+      "mat": "plasterRose",
+      "ref": "vendor:sketchfab-arab-house/arab_house.glb",
+      "drop": ["Object_26"],
+      "tints": { "brick": "plasterRose", "wood": "wood", "metal": "metal", "antenna": "ink", "*": "plasterRose" },
+      "tris": 9000
     },
     {
       "name": "b3",
@@ -192,12 +196,79 @@
         -1.0,
         -0.3
       ]
+    },
+    {
+      "x": [
+        -10.0,
+        -6.6
+      ],
+      "z": [
+        2.55,
+        3.85
+      ]
+    },
+    {
+      "x": [
+        -10.75,
+        -9.05
+      ],
+      "z": [
+        -0.75,
+        1.55
+      ]
+    },
+    {
+      "x": [
+        2.8,
+        4.4
+      ],
+      "z": [
+        -4.75,
+        -4.05
+      ]
+    },
+    {
+      "x": [
+        5.85,
+        6.15
+      ],
+      "z": [
+        -1.05,
+        -0.75
+      ]
     }
   ],
   "vendorProps": [
     { "name": "canFridge", "ref": "vendor:quaternius/can_fridge.glb",
       "x": 8.2, "z": -0.65, "ry": 2.62, "height": 1.9,
-      "tints": { "glass": "paper", "*": "metal" }, "tris": 2800 }
+      "tints": { "glass": "paper", "*": "metal" }, "tris": 2800 },
+    { "name": "cat", "ref": "vendor:quaternius/cat.glb",
+      "x": 9.2, "y": 0.5, "z": -0.7, "ry": 2.9, "height": 0.5,
+      "tints": { "eye_white": "paper", "*": "ink" }, "tris": 1900 },
+    { "name": "tuktuk", "ref": "vendor:sketchfab-tuktuk/tuktuk.glb",
+      "x": -8.3, "z": 3.2, "ry": 1.57, "height": 1.8,
+      "tints": { "lambert4": "ink", "*": "awningA" }, "tris": 3800 },
+    { "name": "ahwaChair1", "ref": "vendor:sketchfab-chair/chair.glb",
+      "x": -9.6, "z": 1.15, "ry": 0.9, "height": 0.85,
+      "tints": { "*": "paper" }, "tris": 600 },
+    { "name": "ahwaChair2", "ref": "vendor:sketchfab-chair/chair.glb",
+      "x": -9.45, "z": -0.35, "ry": -2.35, "height": 0.85,
+      "tints": { "*": "paper" }, "tris": 600 },
+    { "name": "ahwaTable", "ref": "vendor:kenney-food-kit/round_table.glb",
+      "x": -9.95, "z": 0.4, "ry": 0.0, "height": 0.75,
+      "tints": { "*": "woodLight" }, "tris": 600 },
+    { "name": "scooter", "ref": "vendor:sketchfab-scooter/scooter.glb",
+      "x": 3.6, "z": -4.35, "ry": 1.35, "height": 1.15,
+      "tints": { "carcass": "awningB", "chrome": "metal", "light": "paper", "*": "ink" }, "tris": 3600 },
+    { "name": "clayPots", "ref": "vendor:quaternius/clay_pots.glb",
+      "x": 10.1, "z": -1.15, "ry": 0.6, "height": 0.55,
+      "tints": { "grey": "wood", "*": "awningA" }, "tris": 400 },
+    { "name": "potatoCrate", "ref": "vendor:kaykit-props/crate_of_potatoes.glb",
+      "x": 6.45, "y": 1.03, "z": -2.6, "ry": 0.5, "height": 0.3,
+      "tints": { "*": "woodLight" }, "tris": 1100 },
+    { "name": "woodenSign", "ref": "vendor:ipoly3d/wooden_sign.glb",
+      "x": 6.0, "z": -0.9, "ry": -0.5, "height": 2.0,
+      "tints": { "dark wood": "wood", "light wood": "woodLight", "herbs": "awningB", "rocks": "sidewalk" }, "tris": 750 }
   ],
   "props": {
     "crates": [
@@ -223,12 +294,6 @@
         "ry": 0.35
       }
     ],
-    "cat": {
-      "x": 9.2,
-      "y": 0.5,
-      "z": -0.7,
-      "ry": 2.9
-    },
     "lampPosts": [
       {
         "x": -5.5,
@@ -302,9 +367,12 @@
       "d": 0.55
     },
     "minaret": {
-      "x": 12.5,
-      "z": -13.5,
-      "h": 15.0
+      "x": 15.0,
+      "z": -19.0,
+      "h": 16.0,
+      "ref": "vendor:sketchfab-minaret/minaret.glb",
+      "tints": { "*": "plasterSand" },
+      "tris": 6000
     }
   }
 }

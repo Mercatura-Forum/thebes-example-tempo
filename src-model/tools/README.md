@@ -1,3 +1,36 @@
+# Model pipelines
+
+## Street pipeline (section 05)
+
+```sh
+python3 gen_signs.py                # bakes Arabic sign textures → out/signs/ (needs
+                                    #   pip: arabic-reshaper python-bidi; font from vendor/amiri-font)
+blender -b -P build_street.py       # reads street_layout.json + vendor/ + out/signs/,
+                                    #   writes assets/street/street.glb + layout.json, renders out/street_poster.png
+blender -b -P build_runner.py       # writes assets/street/runner.glb
+python3 check_vendor.py             # manifest ↔ disk ↔ license gate
+node ../../oracle/street.mjs        # sim gates (colliders, spawn/trigger, animFor)
+```
+
+Facts learned the hard way (all encoded in `build_street.py`, kept here so
+nobody relearns them):
+
+- **glTF imports arrive with `rotation_mode='QUATERNION'`** — writing
+  `rotation_euler` on them is silently ignored. Set `rotation_mode = 'XYZ'` first.
+- **`mesh.materials.clear()` resets every polygon's `material_index` to 0.**
+  Snapshot the indices before clearing, restore after appending the palette mats.
+- **`matrix_world` is lazy** — after setting location/rotation, call
+  `view_layer.update()` before reading it, or the first reader gets identity.
+- **Draco**: the apt Blender 4.0 lacks `libextern_draco.so`; the build borrows
+  the wrapper from `/opt/blender-4.5.11-linux-x64` via
+  `BLENDER_EXTERN_DRACO_LIBRARY_PATH` (import needs it too). Without it the
+  street exports ~8x fatter but still within gates.
+- **Sketchfab GLBs ride with junk**: ground planes (layout `drop` lists),
+  hidden template meshes (dropped automatically), root empties carrying
+  rotations (flatten preserves world transforms).
+- Workbench poster renders viewport colors — `color_type='TEXTURE'` shows the
+  baked signs, everything else falls back to `diffuse_color`.
+
 # Can model pipeline
 
 The shipped `assets/tempo-can.glb` is produced by script, never hand-edited.

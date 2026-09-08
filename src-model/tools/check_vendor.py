@@ -4,7 +4,7 @@ import json, os, sys
 
 HERE = os.path.dirname(os.path.abspath(__file__))
 VENDOR = os.path.join(HERE, '..', 'vendor')
-ALLOWED = {'CC0', 'CC-BY-4.0', 'CC-BY-3.0'}
+ALLOWED = {'CC0', 'CC-BY-4.0', 'CC-BY-3.0', 'OFL'}
 
 fails = 0
 def check(ok, name):
