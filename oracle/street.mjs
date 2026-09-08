@@ -3,7 +3,7 @@
 import { readFileSync } from 'node:fs'
 import { fileURLToPath } from 'node:url'
 import { dirname, join } from 'node:path'
-import { CONST, followK, joyVec, resolveCollision, stepMover, nextMode, animFor } from '../street-sim.js'
+import { CONST, followK, joyVec, resolveCollision, stepMover, nextMode, animFor, turnStep, swoopTau } from '../street-sim.js'
 
 const root = join(dirname(fileURLToPath(import.meta.url)), '..')
 let failures = 0
@@ -72,5 +72,38 @@ check(animFor('Run', 2.2) === 'Run', 'hysteresis: Run holds between RUN_OUT and 
 check(animFor('Run', 1.8) === 'Walk', 'below RUN_OUT releases to Walk')
 check(animFor('Idle', CONST.SPEED) === 'Run', 'full pace from rest is Run in one call')
 check(animFor('Run', 0) === 'Idle', 'a dead stop from Run is Idle in one call')
+
+
+// ── turnStep: the runner banks, never snaps ──
+const wrap = (a) => Math.atan2(Math.sin(a), Math.cos(a))
+check(Math.abs(turnStep(0, 0, 16, 90)) < 1e-12, 'no turn needed is no turn')
+const t1 = turnStep(0, 1, 16, 90)
+check(t1 > 0 && t1 < 1, 'a step moves toward the target without overshooting')
+let th = 0
+for (let i = 0; i < 200; i++) th = turnStep(th, 2.5, 16, 90)
+check(Math.abs(th - 2.5) < 1e-6, 'repeated steps converge on the target')
+const split = turnStep(turnStep(0.4, -2.9, 16, 90), -2.9, 16, 90)
+const whole = turnStep(0.4, -2.9, 32, 90)
+check(Math.abs(wrap(split - whole)) < 1e-9, 'dt split is exact: 16+16 lands where 32 does (turn)')
+const acrossPi = turnStep(3.0, -3.0, 40, 90)
+check(acrossPi > 3.0 || acrossPi < -3.0, 'crossing ±π takes the short arc through π, not the long way round')
+check(Math.abs(wrap(turnStep(-3.1, 3.1, 4000, 90) - 3.1)) < 1e-6, 'a long dt settles exactly on a wrapped target')
+
+// ── swoopTau: the entrance camera eases from establishing shot to follow ──
+check(swoopTau(0) === CONST.SWOOP.TAU, 'at entry the camera follows on the swoop tau')
+check(swoopTau(CONST.SWOOP.MS) === CONST.CAM_TAU, 'after the swoop the camera follows on the roam tau')
+check(swoopTau(CONST.SWOOP.MS * 9) === CONST.CAM_TAU, 'long after entry nothing drifts')
+let mono = true
+for (let e = 0; e < CONST.SWOOP.MS; e += 100) if (swoopTau(e + 100) > swoopTau(e)) mono = false
+check(mono, 'the swoop tau only ever tightens')
+check(swoopTau(CONST.SWOOP.MS / 2) > CONST.CAM_TAU, 'mid-swoop the camera is still easing')
+
+// ── placement: the spawn has breathing room, not just standing room ──
+const clearance = LAYOUT.colliders.reduce((min, b) => {
+  const cx = Math.max(b.x[0], Math.min(LAYOUT.spawn.x, b.x[1]))
+  const cz = Math.max(b.z[0], Math.min(LAYOUT.spawn.z, b.z[1]))
+  return Math.min(min, Math.hypot(LAYOUT.spawn.x - cx, LAYOUT.spawn.z - cz))
+}, Infinity)
+check(clearance >= 1.0, `spawn stands >= 1m clear of every collider (${clearance.toFixed(2)}m)`)
 
 process.exit(failures ? 1 : 0)

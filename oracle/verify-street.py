@@ -68,6 +68,14 @@ with sync_playwright() as p:
     check(t1 - t0 < 8000, f"enter-to-first-frame under 8s on SwiftShader (took {(t1 - t0) / 1000:.1f}s)")
     check(page.evaluate("() => document.documentElement.classList.contains('street-lock')"), 'page scroll parks behind the stage')
 
+    # the entrance swoop: the camera opens far out and glides in — assert
+    # progress between samples, never an absolute value at an instant
+    cd0 = page.evaluate('() => window.TempoStreet.state.camDist')
+    check(cd0 > 1.0, f"the entrance opens on an establishing shot ({cd0:.1f}m out)")
+    page.wait_for_timeout(700)
+    cd1 = page.evaluate('() => window.TempoStreet.state.camDist')
+    check(cd1 < cd0, f"the swoop glides toward the street ({cd0:.1f} -> {cd1:.1f})")
+
     # walking: progress between samples (stall rule), and fps while moving
     p0 = page.evaluate('() => ({...window.TempoStreet.state.player})')
     page.keyboard.down('KeyW')
@@ -98,6 +106,23 @@ with sync_playwright() as p:
     pts = page.evaluate('() => window.TempoStreet.canScreenPoints()')
     onscreen = [q for q in pts if 0 < q['x'] < 1440 and 0 < q['y'] < 900]
     check(len(onscreen) == 9, f"all nine cans frame on screen at focus ({len(onscreen)}/9)")
+
+    # the koshk cat answers a tap with a hop and a word
+    page.evaluate('() => window.TempoStreet.warp(10.2, 1.6)')
+    check(wait_for(page, "() => window.TempoStreet.state.mode === 'roam'", 5000), 'east corner stands in roam')
+    wait_for(page, '() => window.TempoStreet.state.camDist < 0.05', 10000)
+    cp = page.evaluate('() => window.TempoStreet.catScreenPoint()')
+    check(cp and 0 < cp['x'] < 1440 and 0 < cp['y'] < 900, f"the cat is on screen ({cp})")
+    page.mouse.click(cp['x'], cp['y'])
+    check(wait_for(page, "() => window.TempoStreet.state.catTaps === 1", 3000), 'tapping the cat registers')
+    check(page.evaluate("() => document.querySelector('.street-hint').textContent") == 'مياو!', 'the cat answers in its own tongue')
+    check(wait_for(page, "() => document.querySelector('.street-hint').textContent.includes('WASD')", 3000), 'the hint settles back after the meow')
+    check(page.evaluate("() => !!document.getElementById('streetStage')"), 'the street stays open through the cat tap')
+
+    # back to the shelf for the shop journey
+    page.evaluate('() => window.TempoStreet.warp(6.8, 0.3)')
+    wait_for(page, "() => window.TempoStreet.state.mode === 'focus'", 5000)
+    wait_for(page, '() => window.TempoStreet.state.camDist < 0.03', 15000)
 
     # take a berry can → the shop opens with berry applied, and it SURVIVES
     berry = page.evaluate("() => window.TempoStreet.canScreenPoints().filter(q => q.key === 'berry')[1]")

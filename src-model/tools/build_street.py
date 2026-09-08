@@ -33,6 +33,10 @@ PALETTE = {
     'awningA':     (0.75, 0.30, 0.16, 1),
     'awningB':     (0.25, 0.35, 0.33, 1),
     'metal':       (0.35, 0.34, 0.32, 1),
+    'asphalt':     (0.46, 0.43, 0.39, 1),
+    'asphaltOld':  (0.52, 0.48, 0.43, 1),
+    'foliage':     (0.30, 0.42, 0.32, 1),
+    'clay':        (0.62, 0.38, 0.24, 1),
 }
 EMISSIVE = {
     'bulb':   ((1.0, 0.75, 0.4, 1), 6.0),
@@ -53,6 +57,14 @@ def mat(name):
     m = bpy.data.materials.new(name)
     m.use_nodes = True
     b = m.node_tree.nodes['Principled BSDF']
+    if name == 'shadow':
+        b.inputs['Base Color'].default_value = (0.06, 0.05, 0.05, 1)
+        b.inputs['Alpha'].default_value = 0.28
+        b.inputs['Roughness'].default_value = 1.0
+        m.blend_method = 'BLEND'
+        m.diffuse_color = (0.06, 0.05, 0.05, 0.28)
+        MATS[name] = m
+        return m
     if name in EMISSIVE:
         col, strength = EMISSIVE[name]
         b.inputs['Base Color'].default_value = col
@@ -209,7 +221,7 @@ def build_vendor_props():
               sum(len(p.vertices) - 2 for p in obj.data.polygons), 'tris')
 
 def build_ground():
-    site_box('ground', 'ground', 0, -0.05, -0.25, 27, 0.1, 16.5)
+    site_box('ground', 'ground', 0, -0.05, 1.0, 60, 0.1, 46)
     site_box('sidewalk', 'sidewalk', -2.2, 0.06, -4.55, 17.6, 0.12, 0.9)
     site_box('sidewalk_l', 'sidewalk', -10.75, 0.06, 1.0, 0.9, 0.12, 13.0)
 
@@ -438,6 +450,194 @@ def build_signage():
         o.data.materials.append(m)
     print('[street] sign board face', [round(d, 2) for d in dims], 'plaque', round(w, 2), 'x', round(h, 2))
 
+
+def local_frame(x, z, ry):
+    c, s = math.cos(ry), math.sin(ry)
+    return lambda lx, lz: (x + lx * c + lz * s, z - lx * s + lz * c)
+
+def build_roadbed():
+    # the street stops being a void: an asphalt strip with patch repairs and
+    # manholes; the sand stays as aprons and the sidewalks stand proud as kerbs
+    rb = LAYOUT['props']['roadbed']
+    cx = (rb['x'][0] + rb['x'][1]) / 2; cz = (rb['z'][0] + rb['z'][1]) / 2
+    site_box('roadbed', 'asphalt', cx, -0.015, cz, rb['x'][1] - rb['x'][0], 0.04, rb['z'][1] - rb['z'][0])
+    for i, pa in enumerate(rb['patches']):
+        site_box('patch_%d' % i, 'asphaltOld', pa['x'], 0.008, pa['z'], pa['w'], 0.01, pa['d'], ry=pa.get('ry', 0))
+    for i, mh in enumerate(rb['manholes']):
+        bpy.ops.mesh.primitive_cylinder_add(vertices=12, radius=0.32, depth=0.02, location=P(mh['x'], 0.012, mh['z']))
+        o = bpy.context.active_object
+        o.name = 'manhole_%d' % i
+        o.data.materials.append(mat('metal'))
+
+def build_cart():
+    # a wooden fruit cart mid-street — orange blobs under a striped canopy
+    ct = LAYOUT['props']['cart']
+    x, z, ry = ct['x'], ct['z'], ct['ry']
+    W = local_frame(x, z, ry)
+    parts = []
+    def cbox(name, m, lx, ly, lz, sx, sy, sz):
+        wx, wz = W(lx, lz)
+        parts.append(site_box(name, m, wx, ly, wz, sx, sy, sz, ry=ry))
+    cbox('cart_bed', 'wood', 0, 0.60, 0, 1.55, 0.12, 0.95)
+    cbox('cart_lip_f', 'woodLight', 0, 0.74, 0.44, 1.55, 0.16, 0.06)
+    cbox('cart_lip_b', 'woodLight', 0, 0.74, -0.44, 1.55, 0.16, 0.06)
+    cbox('cart_lip_l', 'woodLight', -0.75, 0.74, 0, 0.06, 0.16, 0.85)
+    cbox('cart_lip_r', 'woodLight', 0.75, 0.74, 0, 0.06, 0.16, 0.85)
+    for px in (-0.68, 0.68):
+        for pz in (-0.4, 0.4):
+            cbox('cart_post', 'wood', px, 1.2, pz, 0.06, 1.1, 0.06)
+    cbox('cart_handle1', 'wood', 1.05, 0.52, 0.28, 0.55, 0.05, 0.05)
+    cbox('cart_handle2', 'wood', 1.05, 0.52, -0.28, 0.55, 0.05, 0.05)
+    stripes = 5
+    for i in range(stripes):
+        sx = 1.8 / stripes
+        cbox('cart_canopy', ['awningA', 'paper'][i % 2], -0.9 + (i + 0.5) * sx, 1.82, 0, sx * 0.98, 0.04, 1.15)
+    axle_rot = (math.radians(90), 0, ry)
+    for k in (-1, 1):
+        wx, wz = W(-0.2, k * 0.55)
+        bpy.ops.mesh.primitive_cylinder_add(vertices=10, radius=0.34, depth=0.08, location=P(wx, 0.34, wz), rotation=axle_rot)
+        o = bpy.context.active_object
+        o.data.materials.append(mat('wood'))
+        parts.append(o)
+    join(parts, 'cart')
+    oranges = []
+    for i in range(4):
+        for j in range(2):
+            wx, wz = W(-0.52 + i * 0.34, -0.16 + j * 0.32)
+            bpy.ops.mesh.primitive_uv_sphere_add(segments=8, ring_count=5, radius=0.075, location=P(wx, 0.73, wz))
+            o = bpy.context.active_object
+            o.data.materials.append(mat('awningA'))
+            oranges.append(o)
+    join(oranges, 'cart_oranges')
+
+def build_palms():
+    for pi, pm in enumerate(LAYOUT['props']['palms']):
+        x, z, h, lean, ry = pm['x'], pm['z'], pm['h'], pm['lean'], pm.get('ry', 0)
+        segs = 6
+        parts = []
+        for i in range(segs):
+            t = i / (segs - 1)
+            r = 0.15 - 0.06 * t
+            off = lean * (t ** 2) * 2.2
+            wx = x + off * math.cos(ry); wz = z - off * math.sin(ry)
+            bpy.ops.mesh.primitive_cylinder_add(vertices=8, radius=r, depth=h / segs + 0.06,
+                                                location=P(wx, (i + 0.5) * h / segs, wz))
+            o = bpy.context.active_object
+            o.data.materials.append(mat('wood'))
+            parts.append(o)
+        top_off = lean * 2.2
+        tx = x + top_off * math.cos(ry); tz = z - top_off * math.sin(ry)
+        bpy.ops.mesh.primitive_ico_sphere_add(subdivisions=1, radius=0.24, location=P(tx, h + 0.05, tz))
+        o = bpy.context.active_object
+        o.data.materials.append(mat('foliage'))
+        parts.append(o)
+        for f in range(8):
+            a = ry + f * math.pi / 4
+            droop = 0.55 + 0.15 * (f % 3)
+            fx = tx + 0.8 * math.cos(a); fz = tz - 0.8 * math.sin(a)
+            bpy.ops.mesh.primitive_plane_add(size=1, location=P(fx, h + 0.1 - 0.25 * droop, fz),
+                                             rotation=(droop * math.cos(a), droop * math.sin(a), a))
+            o = bpy.context.active_object
+            o.scale = (1.7, 0.34, 1)
+            o.data.materials.append(mat('foliage'))
+            parts.append(o)
+        join(parts, 'palm_%d' % pi)
+
+def build_planters_bollards():
+    for i, pl in enumerate(LAYOUT['props']['planters']):
+        parts = [site_box('planter', 'clay', pl['x'], 0.26, pl['z'], 0.6, 0.52, 0.6)]
+        for (dx, dz, r, y) in ((-0.12, 0.1, 0.3, 0.62), (0.14, -0.08, 0.24, 0.58)):
+            bpy.ops.mesh.primitive_ico_sphere_add(subdivisions=1, radius=r, location=P(pl['x'] + dx, y, pl['z'] + dz))
+            o = bpy.context.active_object
+            o.scale = (1, 1, 0.8)
+            o.data.materials.append(mat('foliage'))
+            parts.append(o)
+        join(parts, 'planter_%d' % i)
+    for i, bl in enumerate(LAYOUT['props']['bollards']):
+        bpy.ops.mesh.primitive_cylinder_add(vertices=8, radius=0.07, depth=0.7, location=P(bl['x'], 0.35, bl['z']))
+        o = bpy.context.active_object
+        o.name = 'bollard_%d' % i
+        o.data.materials.append(mat('ink'))
+
+def build_laundry():
+    # washing lines across the NW corner — the alley lives above eye level too
+    for li, ln in enumerate(LAYOUT['props']['laundry']):
+        ax, ay, az = ln['a']; bx, by, bz = ln['b']
+        n = 16
+        cu = bpy.data.curves.new('lwire', 'CURVE')
+        cu.dimensions = '3D'; cu.bevel_depth = 0.008; cu.bevel_resolution = 1
+        sp = cu.splines.new('POLY'); sp.points.add(n)
+        for i in range(n + 1):
+            t = i / n
+            x = ax + (bx - ax) * t; z = az + (bz - az) * t
+            y = ay + (by - ay) * t - ln['sag'] * math.sin(math.pi * t)
+            px, py, pz = P(x, y, z)
+            sp.points[i].co = (px, py, pz, 1)
+        ob = bpy.data.objects.new('laundry_wire_%d' % li, cu)
+        bpy.context.collection.objects.link(ob)
+        ob.data.materials.append(mat('ink'))
+        cloths = ln['cloths']
+        ang = math.atan2(-(bz - az), bx - ax)
+        for ci, cm in enumerate(cloths):
+            t = (ci + 1) / (len(cloths) + 1)
+            x = ax + (bx - ax) * t; z = az + (bz - az) * t
+            y = ay + (by - ay) * t - ln['sag'] * math.sin(math.pi * t)
+            bpy.ops.mesh.primitive_plane_add(size=1, location=P(x, y - 0.29, z),
+                                             rotation=(math.radians(90), 0, ang))
+            o = bpy.context.active_object
+            o.scale = (0.44, 0.54, 1)
+            o.name = 'cloth'
+            o.data.materials.append(mat(cm))
+
+def build_dishes():
+    for i, d in enumerate(LAYOUT['props']['dishes']):
+        parts = []
+        bpy.ops.mesh.primitive_cylinder_add(vertices=12, radius=0.34, depth=0.05,
+                                            location=P(d['x'], d['y'] + 0.3, d['z']),
+                                            rotation=(math.radians(55), 0, d.get('ry', 0)))
+        o = bpy.context.active_object
+        o.data.materials.append(mat('paper'))
+        parts.append(o)
+        parts.append(site_box('dish_mount', 'metal', d['x'], d['y'] + 0.12, d['z'], 0.08, 0.26, 0.08))
+        join(parts, 'dish_%d' % i)
+
+def build_rug():
+    r = LAYOUT['props']['rug']
+    site_box('rug_border', 'paper', r['x'], 0.012, r['z'], r['w'], 0.008, r['d'], ry=r.get('ry', 0))
+    site_box('rug', 'awningB', r['x'], 0.02, r['z'], r['w'] - 0.24, 0.008, r['d'] - 0.24, ry=r.get('ry', 0))
+
+def build_east_crates():
+    for i, cr in enumerate(LAYOUT['props']['eastCrates']):
+        p = [site_box('ecrate', 'wood', cr['x'], cr['y'], cr['z'], cr['s'], cr['s'], cr['s'], ry=cr['ry'])]
+        p.append(site_box('ecrate_t', 'woodLight', cr['x'], cr['y'] + cr['s'] * 0.28, cr['z'], cr['s'] * 1.04, cr['s'] * 0.1, cr['s'] * 1.04, ry=cr['ry']))
+        join(p, 'ecrate_%d' % i)
+
+def build_blob_shadows():
+    # baked contact shadows: without them every prop floats on the flat ground.
+    # (the runner gets a dynamic one at runtime)
+    V = {v['name']: v for v in LAYOUT.get('vendorProps', [])}
+    ct = LAYOUT['props']['cart']; pms = LAYOUT['props']['palms']
+    blobs = [
+        (V['tuktuk']['x'], V['tuktuk']['z'], 1.75, 0.85, V['tuktuk']['ry']),
+        (V['scooter']['x'], V['scooter']['z'], 0.95, 0.5, V['scooter']['ry']),
+        (ct['x'], ct['z'], 1.15, 0.85, ct['ry']),
+        (-9.55, 0.4, 1.7, 1.5, 0),                     # ahwa cluster
+        (V['canFridge']['x'], V['canFridge']['z'], 0.55, 0.55, 0),
+        (6.45, -2.6, 0.78, 0.78, 0),                   # koshk crates
+        (V['clayPots']['x'], V['clayPots']['z'], 0.5, 0.5, 0),
+        (V['woodenSign']['x'], V['woodenSign']['z'], 0.5, 0.5, 0),
+        (pms[0]['x'], pms[0]['z'], 0.85, 0.85, 0),
+        (pms[1]['x'], pms[1]['z'], 0.75, 0.75, 0),
+        (10.0, 1.6, 0.85, 1.1, 0),                     # east crate stack
+    ]
+    for i, (x, z, rx, rz, ry) in enumerate(blobs):
+        bpy.ops.mesh.primitive_circle_add(vertices=16, radius=1, fill_type='TRIFAN',
+                                          location=P(x, 0.028, z), rotation=(0, 0, ry))
+        o = bpy.context.active_object
+        o.scale = (rx, rz, 1)
+        o.name = 'blob_%d' % i
+        o.data.materials.append(mat('shadow'))
+
 def export_glb():
     os.makedirs(os.path.dirname(OUT_GLB), exist_ok=True)
     # the runtime fetches the same layout the sim and this build were made from
@@ -490,6 +690,7 @@ def render_poster():
 
 clean()
 build_ground()
+build_roadbed()
 build_buildings()
 build_awnings()
 build_mashrabiya()
@@ -499,6 +700,14 @@ build_vendor_props()
 build_signage()
 build_string_lights()
 build_minaret()
+build_cart()
+build_palms()
+build_planters_bollards()
+build_laundry()
+build_dishes()
+build_rug()
+build_east_crates()
+build_blob_shadows()
 export_glb()
 render_poster()
 print('[street] done')

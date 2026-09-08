@@ -24,6 +24,7 @@ ALLOWED = {
     'ground', 'sidewalk', 'plasterSand', 'plasterRose', 'plasterOchre',
     'shutter', 'wood', 'woodLight', 'paper', 'ink', 'awningA', 'awningB',
     'metal', 'bulb', 'fridge', 'sign', 'signDrinks', 'signKoshk',
+    'asphalt', 'asphaltOld', 'foliage', 'clay', 'shadow',
     'runnerPaper', 'runnerInk', 'runnerAccent',
 }
 

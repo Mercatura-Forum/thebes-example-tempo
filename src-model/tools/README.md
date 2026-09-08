@@ -7,6 +7,8 @@ python3 gen_signs.py                # bakes Arabic sign textures → out/signs/ 
                                     #   pip: arabic-reshaper python-bidi; font from vendor/amiri-font)
 blender -b -P build_street.py       # reads street_layout.json + vendor/ + out/signs/,
                                     #   writes assets/street/street.glb + layout.json, renders out/street_poster.png
+python3 -c "from PIL import Image; Image.open('out/street_poster.png').convert('RGB').save('../../assets/street/poster.webp','WEBP',quality=82,method=6)"
+                                    # cwebp isn't installed on this box — Pillow does the poster
 blender -b -P build_runner.py       # writes assets/street/runner.glb
 python3 check_vendor.py             # manifest ↔ disk ↔ license gate
 python3 check_attribution.py        # every cast CC-BY source must be credited in NOTICE.md

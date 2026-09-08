@@ -14,6 +14,8 @@ export const CONST = {
   DEADZONE: 0.16,    // joystick: fraction of max throw that counts as rest
   FOCUS_EXIT: 1.25,  // hysteresis — leave focus only past trigger.r * this
   SUB_H: 8,          // ms — fixed integration quantum (no tunneling, exact dt-splits)
+  TURN_TAU: 90,      // ms — heading approach; the runner banks, never snaps
+  SWOOP: { TAU: 1100, MS: 2400, OFFSET: [16, 13, 18] }, // entrance establishing shot -> roam follow
   ANIM: { WALK_IN: 0.25, WALK_OUT: 0.15, RUN_IN: 2.4, RUN_OUT: 2.0 },
 };
 
@@ -76,6 +78,24 @@ export function stepMover(pos, vel, input, dt, colliders, bounds) {
     p.z = clamp(p.z, bounds.z[0] + CONST.RADIUS, bounds.z[1] - CONST.RADIUS);
   }
   return { pos: p, vel: v };
+}
+
+
+// Heading smoothing on the shortest arc. Exponential like followK, so any
+// split of dt lands identically; the wrap keeps every result in (-π, π].
+export function turnStep(cur, target, dt, tau) {
+  const d = Math.atan2(Math.sin(target - cur), Math.cos(target - cur));
+  const next = cur + d * followK(dt, tau);
+  return Math.atan2(Math.sin(next), Math.cos(next));
+}
+
+// The entrance swoop: the camera opens on an establishing shot and its follow
+// tau tightens linearly into the roam tau. Pure of any clock — the runtime
+// feeds elapsed ms since entry.
+export function swoopTau(elapsed) {
+  const S = CONST.SWOOP;
+  if (elapsed >= S.MS) return CONST.CAM_TAU;
+  return CONST.CAM_TAU + (S.TAU - CONST.CAM_TAU) * (1 - elapsed / S.MS);
 }
 
 // roam → focus when inside the koshk trigger; focus → roam only on an

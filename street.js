@@ -11,7 +11,7 @@
 import * as THREE from 'three';
 import { GLTFLoader } from 'three/addons/loaders/GLTFLoader.js';
 import { DRACOLoader } from 'three/addons/loaders/DRACOLoader.js';
-import { CONST, followK, joyVec, stepMover, nextMode, animFor } from './street-sim.js';
+import { CONST, followK, joyVec, stepMover, nextMode, animFor, turnStep, swoopTau } from './street-sim.js?v=4';
 
 const DRACO_PATH = 'https://cdn.jsdelivr.net/npm/three@0.169.0/examples/jsm/libs/draco/gltf/';
 const FLAVOR_BY_SHELF = ['lime', 'berry', 'citrus']; // bottom → top
@@ -94,8 +94,8 @@ async function boot3d() {
   const joyThumb = el('div', 'street-joy__thumb', joyBase);
 
   const [layout, streetGlb, canGlb, runnerGlb] = await Promise.all([
-    fetch('assets/street/layout.json?v=3').then((r) => r.json()),
-    loadGlb('assets/street/street.glb?v=3', true),
+    fetch('assets/street/layout.json?v=4').then((r) => r.json()),
+    loadGlb('assets/street/street.glb?v=4', true),
     loadGlb('assets/tempo-can.glb?v=4', false),
     loadGlb('assets/street/runner.glb?v=2', true),
   ]);
@@ -106,7 +106,7 @@ async function boot3d() {
   renderer.outputColorSpace = THREE.SRGBColorSpace;
   const scene = new THREE.Scene();
   scene.background = new THREE.Color(0xead7b7);
-  scene.fog = new THREE.Fog(0xead7b7, 20, 44);
+  scene.fog = new THREE.Fog(0xead7b7, 24, 58);
 
   const camera = new THREE.PerspectiveCamera(layout.camera.fov, 1, 0.1, 120);
   const resize = () => {
@@ -178,6 +178,45 @@ async function boot3d() {
   if (!actions.Idle || !actions.Walk || !actions.Run) throw new Error('runner.glb missing a gait clip: ' + Object.keys(actions).join(','));
   actions.Idle.play();
   state.anim = 'Idle';
+  state.heading = layout.spawn.face || 0;
+  runner.rotation.y = state.heading;
+
+  // a soft contact shadow rides under the runner (the street's props carry
+  // baked ones; without this the runner floats)
+  const shadowCanvas = document.createElement('canvas');
+  shadowCanvas.width = shadowCanvas.height = 64;
+  const sctx = shadowCanvas.getContext('2d');
+  const grad = sctx.createRadialGradient(32, 32, 4, 32, 32, 32);
+  grad.addColorStop(0, 'rgba(15,13,12,0.42)');
+  grad.addColorStop(0.7, 'rgba(15,13,12,0.18)');
+  grad.addColorStop(1, 'rgba(15,13,12,0)');
+  sctx.fillStyle = grad;
+  sctx.fillRect(0, 0, 64, 64);
+  const shadowTex = new THREE.CanvasTexture(shadowCanvas);
+  const runnerShadow = new THREE.Mesh(
+    new THREE.PlaneGeometry(1.15, 1.15),
+    new THREE.MeshBasicMaterial({ map: shadowTex, transparent: true, depthWrite: false })
+  );
+  runnerShadow.rotation.x = -Math.PI / 2;
+  runnerShadow.position.y = 0.035;
+  scene.add(runnerShadow);
+
+  // the koshk cat answers a tap with a hop and a word
+  const cat = streetGlb.scene.getObjectByName('cat') ||
+    (() => { let c = null; streetGlb.scene.traverse((o) => { if (!c && o.name && o.name.startsWith('cat')) c = o; }); return c; })();
+  const catBaseY = cat ? cat.position.y : 0;
+  state.catTaps = 0;
+  let catHopT0 = -1, hintTimer = 0;
+  const roamHint = 'WASD / arrows — find the koshk';
+  const focusHint = 'Take a can — tap it to carry the flavor into the shop';
+  function tapCat() {
+    state.catTaps++;
+    catHopT0 = performance.now();
+    hint.textContent = 'مياو!';
+    clearTimeout(hintTimer);
+    hintTimer = setTimeout(() => { hint.textContent = state.mode === 'focus' ? focusHint : roamHint; }, 900);
+  }
+  cleanup.push(() => clearTimeout(hintTimer));
 
   // input: keys + touch joystick, mapped through the fixed camera basis
   const off = layout.camera.roamOffset;
@@ -213,7 +252,7 @@ async function boot3d() {
   const onPU = (e) => {
     if (!joy || e.pointerId !== joy.id) return;
     state.lastTap = { x: e.clientX, y: e.clientY, moved: joy.moved, mode: state.mode };
-    if (joy.moved < 6 && state.mode === 'focus') pickAt(e.clientX, e.clientY);
+    if (joy.moved < 6) tapAt(e.clientX, e.clientY);
     joy = null;
     joyBase.classList.remove('on');
     joyThumb.style.transform = '';
@@ -232,10 +271,22 @@ async function boot3d() {
     while (o && !o.userData.flavor) o = o.parent;
     return o ? o.userData.flavor : null;
   }
-  function pickAt(cx, cy) {
-    const k = castFlavor(cx, cy);
-    if (k) pickFlavor(k);
+  function tapAt(cx, cy) {
+    if (state.mode === 'focus') {
+      const k = castFlavor(cx, cy);
+      if (k) { pickFlavor(k); return; }
+    }
+    if (!cat) return;
+    raycaster.setFromCamera(new THREE.Vector2((cx / window.innerWidth) * 2 - 1, -(cy / window.innerHeight) * 2 + 1), camera);
+    if (raycaster.intersectObject(cat, true).length) tapCat();
   }
+  window.TempoStreet.catScreenPoint = () => {
+    if (!cat) return null;
+    const v = new THREE.Vector3();
+    cat.getWorldPosition(v); v.y += 0.15;
+    v.project(camera);
+    return { x: (v.x + 1) / 2 * window.innerWidth, y: (1 - v.y) / 2 * window.innerHeight };
+  };
   window.TempoStreet.__probe = (cx, cy) => {
     raycaster.setFromCamera(new THREE.Vector2((cx / window.innerWidth) * 2 - 1, -(cy / window.innerHeight) * 2 + 1), camera);
     return raycaster.intersectObjects(cans.children, true).slice(0, 6).map((h) => {
@@ -248,8 +299,11 @@ async function boot3d() {
   // sim state
   let pos = { x: layout.spawn.x, z: layout.spawn.z };
   let vel = { x: 0, z: 0 };
-  let camPos = new THREE.Vector3(pos.x + off[0], off[1], pos.z + off[2]);
-  let camLook = new THREE.Vector3(pos.x, 1.0, pos.z);
+  const lookY = layout.camera.lookY || 1.0;
+  const swoop = layout.camera.swoopCam;
+  let camPos = swoop ? new THREE.Vector3(...swoop.pos) : new THREE.Vector3(pos.x + off[0], off[1], pos.z + off[2]);
+  let camLook = swoop ? new THREE.Vector3(...swoop.look) : new THREE.Vector3(pos.x, lookY, pos.z);
+  let enteredAt = -1;
   let prev = 0;
   window.TempoStreet.warp = (x, z) => { pos.x = x; pos.z = z; };
   window.TempoStreet.canScreenPoints = () => cans.children.map((can) => {
@@ -279,7 +333,14 @@ async function boot3d() {
     state.player.x = pos.x; state.player.z = pos.z;
     const speed = Math.hypot(vel.x, vel.z);
     runner.position.set(pos.x, 0, pos.z);
-    if (speed > 0.3) runner.rotation.y = Math.atan2(vel.x, vel.z);
+    runnerShadow.position.x = pos.x; runnerShadow.position.z = pos.z;
+    if (speed > 0.3) state.heading = turnStep(state.heading, Math.atan2(vel.x, vel.z), dt, CONST.TURN_TAU);
+    runner.rotation.y = state.heading;
+    if (cat && catHopT0 >= 0) {
+      const ht = (now - catHopT0) / 500;
+      if (ht >= 1) { cat.position.y = catBaseY; catHopT0 = -1; }
+      else cat.position.y = catBaseY + 0.34 * 4 * ht * (1 - ht);
+    }
     const want = animFor(state.anim, speed);
     if (want !== state.anim) {
       actions[state.anim].fadeOut(0.2);
@@ -293,18 +354,19 @@ async function boot3d() {
     const wasMode = state.mode;
     state.mode = nextMode(state.mode, pos, K.trigger, false);
     if (state.mode !== wasMode) {
-      hint.textContent = state.mode === 'focus'
-        ? 'Take a can — tap it to carry the flavor into the shop'
-        : 'WASD / arrows — find the koshk';
+      clearTimeout(hintTimer);
+      hint.textContent = state.mode === 'focus' ? focusHint : roamHint;
       stage.classList.toggle('street-stage--focus', state.mode === 'focus');
     }
 
-    const k = followK(dt, CONST.CAM_TAU);
+    if (enteredAt < 0) enteredAt = now;
+    const tau = state.mode === 'focus' ? CONST.CAM_TAU : swoopTau(now - enteredAt);
+    const k = followK(dt, tau);
     const camTarget = state.mode === 'focus'
       ? new THREE.Vector3(...K.focusCam.pos)
       : new THREE.Vector3(pos.x + off[0], off[1], pos.z + off[2]);
     camPos.lerp(camTarget, k);
-    camLook.lerp(state.mode === 'focus' ? new THREE.Vector3(...K.focusCam.look) : new THREE.Vector3(pos.x, 1.0, pos.z), k);
+    camLook.lerp(state.mode === 'focus' ? new THREE.Vector3(...K.focusCam.look) : new THREE.Vector3(pos.x, lookY, pos.z), k);
     camera.position.copy(camPos);
     camera.lookAt(camLook);
     state.camDist = camPos.distanceTo(camTarget); // 0 ≈ settled (battery waits on this, not wall-clock)
