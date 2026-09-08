@@ -158,8 +158,23 @@ with sync_playwright() as p:
         g3 = page.evaluate('() => window.scrollY')
         if g3 == prev_y: break
         prev_y = g3
-    tgt = page.evaluate(f'() => Math.min({y0} + 4000 * {C2["WHEEL_GAIN"]}, document.documentElement.scrollHeight - innerHeight)')
-    check(abs(g3 - tgt) < 60, f"glide settles at the damped target ({g3:.0f} ≈ {tgt:.0f})")
+    # the lead bound: a monster flick lands about a screen away, never pages —
+    # the page can't owe more than MAX_LEAD viewports of self-scrolling
+    tgt = page.evaluate(f'() => Math.min({y0} + {C2["MAX_LEAD"]} * innerHeight, document.documentElement.scrollHeight - innerHeight)')
+    check(abs(g3 - tgt) < 60, f"flick lands a bounded screen away ({g3:.0f} ≈ {tgt:.0f})")
+
+    # reversal drops the backlog: an opposing notch acts NOW, mid-glide
+    page.mouse.wheel(0, 4000)
+    page.wait_for_timeout(300)
+    y_mid = page.evaluate('() => window.scrollY')
+    page.mouse.wheel(0, -120)
+    reversed_now = False
+    for _ in range(20):
+        page.wait_for_timeout(100)
+        if page.evaluate('() => window.scrollY') < y_mid:
+            reversed_now = True
+            break
+    check(reversed_now, f"an opposing notch reverses the glide immediately (from {y_mid:.0f})")
     page.close()
 
     # ── reduced motion: exits by itself, no interaction ──

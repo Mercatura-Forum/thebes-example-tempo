@@ -14,6 +14,8 @@
 
   const CONST = {
     WHEEL_GAIN: 0.9, // wheel notch → target distance (1 = native)
+    MAX_LEAD: 0.9,   // viewports the target may run AHEAD of the page — the
+                     // page never owes more than a screen of self-scrolling
     MAX_V: 1.4,      // viewports per second — the speed of appreciation
     TAU: 150,        // ms smoothing toward the target
     SETTLE: 0.5,     // px — snap-and-stop threshold on the exponential tail
@@ -30,7 +32,20 @@
     return Math.abs(target - next) < CONST.SETTLE ? target : next;
   }
 
-  window.TempoScroll = { CONST, glideStep };
+  // Pure: wheel input feeds the target. An opposing notch drops the queued
+  // backlog (reversals act NOW), and the target never leads the page by more
+  // than MAX_LEAD viewports — a monster flick lands about a screen away
+  // instead of pages later, and the glide can never run off on its own.
+  function retarget(target, current, dy, vh) {
+    if (target !== current && (dy > 0) !== (target > current)) target = current;
+    target += dy * CONST.WHEEL_GAIN;
+    const lead = CONST.MAX_LEAD * vh;
+    if (target > current + lead) target = current + lead;
+    else if (target < current - lead) target = current - lead;
+    return target;
+  }
+
+  window.TempoScroll = { CONST, glideStep, retarget };
 
   function boot() {
     if (window.matchMedia('(prefers-reduced-motion: reduce)').matches) return;
@@ -88,7 +103,7 @@
         current = target = window.scrollY;
         requestAnimationFrame(frame);
       }
-      target = Math.max(0, Math.min(target + dy * CONST.WHEEL_GAIN, limit()));
+      target = Math.max(0, Math.min(retarget(target, current, dy, window.innerHeight), limit()));
     }, { passive: false });
   }
 
